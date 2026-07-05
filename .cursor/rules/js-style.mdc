@@ -1,0 +1,81 @@
+---
+description: Стиль кода кастомных правил markdownlint (симметрия имён, конвейер, условия)
+globs: **/*.{js,mjs,cjs}
+alwaysApply: false
+---
+
+# Стиль кода правил markdownlint
+
+Симметрия имён, однострочные условия, конвейер. Проект — [markdownlint-project.mdc](markdownlint-project.mdc); проектирование — [js-dev.mdc](js-dev.mdc).
+
+## Формат файла
+
+- JSDoc: `/** @type {import("markdownlint").Rule[]} */`; `module.exports = [ ... ];`
+- Поля правила: `names` → `description` → `tags` → `parser` → `function`
+- Отступ **4 пробела**; одна пустая строка между правилами; без лишних пустых строк внутри `function`
+- `description` / `detail` — на русском; `parser: "none"`
+- **Не выравнивать** ключи, отступы и **пробелы перед `=`**
+
+## Симметрия имён
+
+- Ровность **длин соседей** в блоке, не padding перед `=`
+- Смотри длину ряда (3, 5, 6, 9…); **сокращай только выбивающихся** — не словарь ко всем подряд
+- Имя уже вписывается (`getIndent` = 9) — **оставь читаемую форму**
+- **Составные имена** — сокращай **все части**: `fstBeg`/`lstEnd`, не `fstStart`/`lstEnd`; `nxtBeg`, не `nextStart`; `boundBefIdx`/`boundAftIdx`, не `boundBeforeIx`/`boundAfterIx`
+- **Пары направления** — единый словарь: `Bef`/`Aft` (не `Before`/`After`), `Fwd`/`Bck`, `beg`/`end`, `prev`/`next`
+- **Суффиксы:** `Ind` — отступ (`currInd`, `prevInd`); `Idx` — индекс строки в составном имени (`befIdx`, `boundBefIdx`); параметр цикла/колбэка — короткий `ix` или `idx`
+- **Диапазон строк** — симметричная пара: `beg`/`end`, `f`/`t` или `from`/`dest`; не `from`/`to` (4 vs 2)
+- **Не вводи лишнюю ступень:** соседи 3 и 5 — не ставь 4 (`ind`, не `indt`); пара `beg`/`end` — обе по 3
+- Серия `item1`, `item2` — целиком; не смешивать `item` и `item2`
+
+**Проверка блока:** (1) длины соседних `const`/`let`; (2) **каждая часть** составного имени — словарное сокращение (`Bef`/`Aft`, `Beg`/`End`, `Brk`, `Ind`/`Idx`); (3) пары одной длины (`beg`/`end`, `ind`/`jInd`, `fstBeg`/`lstEnd`, `befIdx`/`aftIdx`).
+
+**Словарь (при необходимости):** `cont`, `rx`, `ix`, `idx`, `prev`/`next`, `curr`, `beg`/`end`/`nxtBeg`, `f`/`t`, `from`/`dest`, `ind` (локально; хелпер `getIndent`), `currInd`/`prevInd`/`lineInd`, `befIdx`/`aftIdx`, `fst`/`lst`, `Bef`/`Aft`, `folcod`, `inCodeB`, `sep`, `incl`, `proc`, `tok`, `lstItemRx`, `isLstItem`, `isNumItem`, `isBulItem`, `isNestedLstItem`, `hasBlankGap`, `boundBefIdx`/`boundAftIdx`, `shouldBrk`.
+
+**Исключения:** `params`, `onError`, сигнатуры markdownlint, внешние API.
+
+## Константы-функции
+
+Те же правила симметрии, что у переменных. Алгоритм: сгруппировать соседей → целевая длина → укоротить только длиннее цели.
+
+```javascript
+const lstItemRx = /^([-+*]\s|\d+(?:\.\d+)+\s|\d+\.\s)/;
+const trimStart = (line) => line.replace(/^\s*/, "");
+const isLstItem = (line) => lstItemRx.test(trimStart(line));
+const isNumItem = (line) => /^\s*\d+(?:\.\d+)+\s+/.test(line) || /^\s*\d+\.\s+/.test(line);
+const getIndent = (line) => line.match(/^(\s*)/)[1].length;
+const hasBlankGap = (lines, beg, end) => { ... };
+const findNumItemEnd = (beg) => { ... };
+const fstBeg = items[0];
+const ind = getIndent(lines[beg]);
+let end = beg;
+```
+
+- Плохо: `fstStart`/`lstEnd`; `boundBeforeIx`/`boundAfterIx`; `befIx`/`aftIx` (суффикс `Ix`); `from`/`to` (4 vs 2); `indt` (4) рядом с `end`/`idx` (3)
+
+## Конвейер, возвраты, условия
+
+- **Конвейер:** наращивать через переменные (`trim` → `cont`), не вкладывать вызовы
+- **Возврат:** именованная переменная после шагов; guard-`return` без `{}`
+- **Условие в одну строку**; guard без вызова — без `{}`; **вызов в теле — обязательно `{}`**
+
+```javascript
+let cont = trim.replace(regex, "");
+cont = cont.trim();
+const endsOk = folcod ? /:$/.test(cont) : /;$/.test(cont);
+if (!cont || !endsOk) {
+    onError({ lineNumber: ix + 1, detail, context: trim || "Пустой пункт списка" });
+}
+```
+
+## Markdownlint
+
+- Начало `function`: `const lines = params.lines;`, regex/хелперы
+- `inCodeB` + toggle на `` ``` ``; `onError({ lineNumber, detail, context? })`, `lineNumber` с 1
+- JSDoc-тип на экспорте; без очевидных комментариев
+- Custom rules для VS Code — **только CommonJS** (`require` / `module.exports`); ESM не поддерживается загрузчиком markdownlint
+
+## Чего не делать
+
+- Padding перед `=`; переносы тернарников/условий; `if (...) onError(...)` без `{}`
+- Сокращать «на всякий случай»; рефакторить ради правила без задачи

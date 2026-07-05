@@ -1,0 +1,141 @@
+---
+description: Кастомные правила markdownlint — структура проекта, каталог правил, workflow
+alwaysApply: true
+---
+
+# Проект markdownlint custom rules
+
+Кастомные правила [markdownlint](https://github.com/DavidAnson/markdownlint) для VS Code (расширение **Markdown All in One**). Загрузка через `markdownlint.customRules`.
+
+## Структура репозитория
+
+| Файл / каталог | Назначение |
+|----------------|------------|
+| [`markdownlint-rules.js`](../markdownlint-rules.js) | Массив правил (`module.exports = [...]`) |
+| [`markdownlint-hlprs.js`](../markdownlint-hlprs.js) | Общие хелперы (≥3 повтора между правилами) |
+| [`markdownlint-examples/`](../markdownlint-examples/) | Пары `_err.md` / `_suc.md` на каждое правило |
+| [`test-rules.cjs`](../test-rules.cjs) | Прогон примеров и inline-кейсов через markdownlint CLI |
+| [`AGENTS.md`](../AGENTS.md) | Руководство для AI-агента |
+| [`.cursor/rules/js-style.mdc`](js-style.mdc) | Оформление кода правил |
+| [`.cursor/rules/js-dev.mdc`](js-dev.mdc) | SRP, DRY, проектирование |
+
+## Каталог правил
+
+| `names` | Что проверяет | Примеры |
+|---------|---------------|---------|
+| `minimum-h2-heading` | Минимум один заголовок H2 (`##`) вне code fence | `markdownlint-examples/minimum-h2-heading/` |
+| `list-items-end-with-semicolon-or-colon` | Пункт списка: `;`, перед блоком кода — `:` | `markdownlint-examples/list-items-end-with-semicolon-or-colon/` |
+| `list-blank-line-spacing` | Numbered: blank до/после и единообразно между соседними num-пунктами блока (включая поднумерацию); bulleted: blank до/после блока (между пунктами не проверяется) | `markdownlint-examples/list-blank-line-spacing/` |
+| `list-preceded-by-colon` | Обычный текст (не пункт списка) перед первым пунктом блока верхнего уровня (num/bul) заканчивается `:`; вложенные не проверяются | `markdownlint-examples/list-preceded-by-colon/` |
+| `codeblock-preceded-by-colon` | Открывающая `` ``` ``: строка перед ней заканчивается `:` (не пункт списка — те проверяет `list-items-*`) | `markdownlint-examples/codeblock-preceded-by-colon/` |
+| `no-leading-spaces` | Нет отступа у обычного текста и пунктов списка верхнего уровня | `markdownlint-examples/no-leading-spaces/` |
+| `sentences-end-with-mark` | Обычный текст заканчивается `.`, `!`, `?`, `:` или `;` | `markdownlint-examples/sentences-end-with-mark/` |
+
+## Конвенция примеров
+
+- Каталог = имя правила в `names`.
+- `_err.md` — нарушает **только** целевое правило (`npm test` проверяет exclusivity).
+- `_err.md` (кроме `minimum-h2-heading`) содержит `##`, чтобы не срабатывал `minimum-h2-heading`; прочий текст и списки оформлены под остальные правила.
+- `_suc.md` — проходит все custom rules.
+- **`_err.md` и `_suc.md` — один и тот же текст:** в `_suc` исправлены только нарушения целевого правила (и минимальные правки для exclusivity в `_err`, например `;` / `:` у пунктов списка). Не менять порядок блоков, не подменять сценарии «успешным» вариантом. Исключение: `list-blank-line-spacing` — непустые строки идентичны, отличаются только пустые строки (сама правка — blank lines). `test-rules.cjs`: `checkExamplePair`, допустимые отличия строк — `allowedLineDiff`.
+- **`minimum-h2-heading`:** в `_suc` добавляется строка `## …` **в конце** документа (не между блоками), чтобы строки 1…N совпадали с `_err`; `npm test` проверяет это (`checkExamplePair`).
+- **Code fence в примерах:** открывающая `` ``` `` с идентификатором языка (`js`, `pr`, …); голый `` ``` `` допустим только в inline-кейсах `test-rules.cjs`.
+- Вложенные нумерованные пункты: поднумерация с отступом — `1.1`, `1.1.1`, `1.1.1.1` и глубже (не повторный маркер `1.`).
+
+### `minimum-h2-heading` — политика
+
+- **Scope:** строки вне code fence (`eachLineOutsideCode`).
+- **Проверка:** хотя бы одна строка с `##` (не `###+`), пробелом и непустым текстом после (`/^##(?!\#)\s+\S/` на trim).
+- **Ошибка:** строка 1, если заголовка H2 нет.
+
+### `list-items-end-with-semicolon-or-colon` — политика
+
+- **Scope:** все пункты списка (num/bul, вложенные), вне code fence.
+- **Проверка:** текст пункта заканчивается `;`; если следующая непустая строка — открывающая `` ``` ``, то `:`.
+- **Пустой пункт** (только маркер) — ошибка.
+
+### `list-blank-line-spacing` — политика
+
+- **Numbered** (`isNumItem`: `1.`, `1.1`, …): blank перед первым и после последнего пункта блока; единообразные blank между **каждой парой** соседних numbered-пунктов в блоке (включая поднумерацию `1.1`, `1.1.1` на любом отступе — `findNumItemEnd` останавливается на следующем num-маркере). Если хотя бы один переход с blank — все должны иметь; если ни у одного нет — OK.
+- **Bulleted** (`isBulItem`: `-`, `*`, `+`): только blank до первого и после последнего пункта блока; между пунктами **не проверяется**.
+- **Границы (bounds):** blank до/после проверяется только при реальной границе блока — перед контентом **другого типа** (не same-kind); after не проверяется в EOF; blank после `##` перед списком **обязателен**.
+- **Блок numbered:** все numbered-пункты подряд до абзаца на уровне первого пункта, заголовка или code fence.
+- **Блок bulleted:** все bullet-пункты подряд до numbered-пункта, абзаца на `baseInd`, заголовка или code fence.
+
+### `list-preceded-by-colon` — политика
+
+- **Scope:** нумерованные и маркированные списки.
+- **Проверка:** только строка перед **первым пунктом блока** верхнего уровня (не перед каждым вложенным).
+- **Skip вложенные:** пункт с отступом (`indent > 0`) или поднумерация (`1.1`, `1.1.1`) — `:` не требуется (`isNestedLstItem`).
+- **Skip prev:** заголовок, пункт списка, code fence, пустая prev-строка (`checkPrecededByColon`).
+
+### `no-leading-spaces` — политика
+
+- **Scope:** строки вне code fence.
+- **Skip:** заголовки (`#`).
+- **Пункт списка:** отступ 0; вложенный допустим, если `indent` больше отступа предыдущего пункта списка (`findPrevListInd`); при поиске предыдущего пункта пропускаются блоки code fence (как тело пункта в `findNumItemEnd`).
+- **Обычный текст:** отступ 0.
+
+### `sentences-end-with-mark` — политика
+
+- **Scope:** непустые строки вне code fence.
+- **Skip:** заголовки, любые пункты списка (`isLstItem`).
+- **Проверка:** строка заканчивается `.`, `!`, `?`, `:` или `;`.
+
+### `codeblock-preceded-by-colon` — политика
+
+- **Scope:** только **открывающие** `` ``` `` (не закрывающие).
+- **Проверка:** строка перед fence должна заканчиваться `:`.
+- **Skip prev:** заголовок, **любой** пункт списка (`isLstItem` / `lstItemRx`), code fence, пустая prev-строка (`checkPrecededByColon`).
+- **Обход fence:** правило использует собственный цикл `inCodeB` (не `walkOutsideCode`, который пропускает строки `` ``` ``).
+
+### Публичный API хелперов (`markdownlint-hlprs.js`)
+
+Экспорт для `markdownlint-rules.js` и `test-rules.cjs`:
+
+| Экспорт | Назначение |
+|---------|------------|
+| `lstItemRx` | Regex пункта списка (num/bul) на `trim` |
+| `isLstItem` | Пункт списка по строке |
+| `getIndent` | Длина ведущих пробелов |
+| `skipBlankFwd` | Индекс следующей непустой строки |
+| `eachLineOutsideCode` | Колбэк по строкам вне code fence |
+| `findPrevListInd` | Отступ предыдущего пункта списка |
+| `checkPrecededByColon` | `:` у обычного текста перед строкой `ix` |
+| `checkListBlankSpacing` | Политика `list-blank-line-spacing` |
+| `checkListPrecededByColon` | Политика `list-preceded-by-colon` (третий аргумент — `colDet`) |
+
+Внутренние (не экспортируются): `isNumItem`, `isBulItem`, `isNestedLstItem`, `skipBlankBck`, `hasBlankGap`, `boundBefIdx`, `boundAftIdx`, `walkOutsideCode`, `walkListBlocks`, `createListBlockHelpers` (`collectNumBlock`, `collectBulBlock`, `findNumItemEnd`, `findBulItemEnd`).
+
+## Подключение в VS Code
+
+Фрагмент для `.vscode/settings.json` (не коммитить без запроса):
+
+```json
+{
+  "markdownlint.customRules": ["./markdownlint-rules.js"],
+  "markdownlint.config": {
+    "default": false,
+    "minimum-h2-heading": true,
+    "list-items-end-with-semicolon-or-colon": true,
+    "list-blank-line-spacing": true,
+    "list-preceded-by-colon": true,
+    "codeblock-preceded-by-colon": true,
+    "no-leading-spaces": true,
+    "sentences-end-with-mark": true
+  }
+}
+```
+
+## Workflow: новое или изменённое правило
+
+1. Добавить или обновить `_err.md` / `_suc.md` в `markdownlint-examples/<rule-name>/`.
+2. Реализовать правило в `markdownlint-rules.js` (`parser: "none"`, русские `description` / `detail`).
+3. При ≥3 повторах алгоритма — вынести в `markdownlint-hlprs.js`.
+4. Верификация: `npm run check` и `npm test`.
+
+## Контракты
+
+- **CommonJS only** — ESM не поддерживается загрузчиком custom rules.
+- **onError:** `{ lineNumber, detail, context? }`, `lineNumber` с 1.
+- Не менять built-in правила markdownlint; только custom rules в этом репозитории.

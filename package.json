@@ -1,0 +1,11 @@
+{
+  "name": "markdownlint-custom-rules",
+  "private": true,
+  "scripts": {
+    "test": "node test-rules.cjs",
+    "check": "node --check markdownlint-rules.js && node --check markdownlint-hlprs.js && node --check test-rules.cjs"
+  },
+  "devDependencies": {
+    "markdownlint": "^0.38.0"
+  }
+}
