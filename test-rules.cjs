@@ -527,6 +527,21 @@ if (getFiredRules(noLeadingNestedOkRes.t || []).size > 0) {
     console.log("OK   nested list indent → clean");
 }
 
+const noLeadingBulSiblingsOk = `## T
+
+- parent;
+
+  - key;
+
+  - paths;
+`;
+const noLeadingBulSiblingsOkRes = lintStrings({ t: noLeadingBulSiblingsOk }, ["no-leading-spaces", "minimum-h2-heading", "list-items-end-with-semicolon-or-colon", "list-blank-line-spacing"]);
+if (getFiredRules(noLeadingBulSiblingsOkRes.t || []).size > 0) {
+    assert(false, "nested bullet siblings ok: " + [...getFiredRules(noLeadingBulSiblingsOkRes.t || [])].join(", "));
+} else {
+    console.log("OK   nested bullet siblings → clean");
+}
+
 const noLeadingFenceNestedOk = `## T
 
 1. parent:

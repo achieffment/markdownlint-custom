@@ -128,7 +128,7 @@ module.exports = [
                 if (isLstItem(line)) {
                     if (currInd > 0) {
                         const prevInd = findPrevListInd(lines, ix);
-                        if (prevInd < 0 || currInd <= prevInd) {
+                        if (prevInd < 0 || currInd < prevInd) {
                             onError({ lineNumber: ix + 1, detail: noLeadingSpacesDet, context: line });
                         }
                     }
