@@ -105,7 +105,7 @@ alwaysApply: true
 | `checkListBlankSpacing` | Политика `list-blank-line-spacing` |
 | `checkListPrecededByColon` | Политика `list-preceded-by-colon` (третий аргумент — `colDet`) |
 
-Внутренние (не экспортируются): `isNumItem`, `isBulItem`, `isNestedLstItem`, `skipBlankBck`, `hasBlankGap`, `boundBefIdx`, `boundAftIdx`, `walkOutsideCode`, `walkListBlocks`, `createListBlockHelpers` (`collectNumBlock`, `collectBulBlock`, `findNumItemEnd`, `findBulItemEnd`).
+Внутренние (не экспортируются): `trimStart`, `isNumItem`, `isBulItem`, `isNestedLstItem`, `skipBlankBck`, `hasBlankGap`, `boundBefIdx`, `boundAftIdx`, `walkOutsideCode`, `walkListBlocks`, `createListBlockHelpers` (`findItemEnd`, `collectBlock`, `findNumItemEnd`, `findBulItemEnd`, `collectNumBlock`, `collectBulBlock`).
 
 ## Подключение в VS Code
 
