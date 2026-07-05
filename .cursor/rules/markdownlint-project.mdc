@@ -28,7 +28,7 @@ alwaysApply: true
 | `list-blank-line-spacing` | Numbered: blank до/после и единообразно между соседними num-пунктами блока (включая поднумерацию); bulleted: blank до/после блока (между пунктами не проверяется) | `markdownlint-examples/list-blank-line-spacing/` |
 | `list-preceded-by-colon` | Обычный текст (не пункт списка) перед первым пунктом блока верхнего уровня (num/bul) заканчивается `:`; вложенные не проверяются | `markdownlint-examples/list-preceded-by-colon/` |
 | `codeblock-preceded-by-colon` | Открывающая `` ``` ``: строка перед ней заканчивается `:` (не пункт списка — те проверяет `list-items-*`) | `markdownlint-examples/codeblock-preceded-by-colon/` |
-| `no-leading-spaces` | Нет отступа у обычного текста и пунктов списка верхнего уровня | `markdownlint-examples/no-leading-spaces/` |
+| `no-leading-spaces` | Нет отступа у обычного текста, пунктов списка верхнего уровня и обозначений блока кода (`` ``` ``) | `markdownlint-examples/no-leading-spaces/` |
 | `sentences-end-with-mark` | Обычный текст заканчивается `.`, `!`, `?`, `:` или `;` | `markdownlint-examples/sentences-end-with-mark/` |
 
 ## Конвенция примеров
@@ -71,8 +71,10 @@ alwaysApply: true
 
 ### `no-leading-spaces` — политика
 
-- **Scope:** строки вне code fence.
-- **Skip:** заголовки (`#`).
+- **Scope:** строки вне code fence и строки-обозначения блока (opening/closing `` ``` ``).
+- **Обход:** собственный цикл `inCodeB` (не `eachLineOutsideCode` — тот пропускает fence-строки).
+- **Skip:** заголовки (`#`); содержимое между fence не проверяется.
+- **Fence:** отступ 0 у opening/closing `` ``` ``.
 - **Пункт списка:** отступ 0; вложенный допустим, если `indent` больше отступа предыдущего пункта списка (`findPrevListInd`); при поиске предыдущего пункта пропускаются блоки code fence (как тело пункта в `findNumItemEnd`).
 - **Обычный текст:** отступ 0.
 

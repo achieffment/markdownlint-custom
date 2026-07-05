@@ -556,6 +556,37 @@ if (!noLeadingTopErrFired.has("no-leading-spaces") || noLeadingTopErrFired.size 
     console.log("OK   top-level indent → no-leading-spaces");
 }
 
+const noLeadingFenceIndentErr = `## T
+
+Строка перед кодом:
+
+    \`\`\`js
+    const x = 1;
+    \`\`\`
+`;
+const noLeadingFenceIndentErrRes = lintStrings({ t: noLeadingFenceIndentErr }, ruleNames);
+const noLeadingFenceIndentErrFired = getFiredRules(noLeadingFenceIndentErrRes.t || []);
+if (!noLeadingFenceIndentErrFired.has("no-leading-spaces") || noLeadingFenceIndentErrFired.size !== 1) {
+    assert(false, "indented fence err: expected no-leading-spaces only, got " + [...noLeadingFenceIndentErrFired].join(", "));
+} else {
+    console.log("OK   indented fence → no-leading-spaces");
+}
+
+const noLeadingFenceIndentOk = `## T
+
+Строка перед кодом:
+
+\`\`\`js
+    const x = 1;
+\`\`\`
+`;
+const noLeadingFenceIndentOkRes = lintStrings({ t: noLeadingFenceIndentOk }, ruleNames);
+if (getFiredRules(noLeadingFenceIndentOkRes.t || []).size > 0) {
+    assert(false, "indented code inside fence ok: " + [...getFiredRules(noLeadingFenceIndentOkRes.t || [])].join(", "));
+} else {
+    console.log("OK   indented code inside fence → clean");
+}
+
 const sentencesSkipOk = `## T
 
 - пункт;

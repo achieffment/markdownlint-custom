@@ -17,7 +17,7 @@ const listItemsEndDet = "Пункт списка должен заканчива
 const listBlankSpacingDet = "Нумерованные списки: blank до/после и единообразно между пунктами; маркированные: blank до/после блока (между пунктами не проверяется)";
 const listPrecededByColonDet = "Обычный текст (не пункт списка) перед первым пунктом блока верхнего уровня должен заканчиваться :, вложенные пункты не проверяются";
 const codeblockColonDet = "Обычный текст (не пункт списка) перед блоком кода должен заканчиваться :";
-const noLeadingSpacesDet = "Обычный текст и пункты списка верхнего уровня не должны иметь отступ в начале строки";
+const noLeadingSpacesDet = "Обычный текст, пункты списка верхнего уровня и обозначения блока кода (```) не должны иметь отступ в начале строки";
 const sentencesEndMarkDet = "Обычный текст должен заканчиваться . ! ? : или ;";
 
 module.exports = [
@@ -110,8 +110,20 @@ module.exports = [
         parser: "none",
         function: (params, onError) => {
             const lines = params.lines;
-            eachLineOutsideCode(lines, (line, ix, trim) => {
-                if (trim.startsWith("#")) return;
+            let inCodeB = false;
+            for (let ix = 0; ix < lines.length; ix++) {
+                const line = lines[ix];
+                const trim = line.trim();
+                if (trim.startsWith("```")) {
+                    const currInd = getIndent(line);
+                    if (currInd > 0) {
+                        onError({ lineNumber: ix + 1, detail: noLeadingSpacesDet, context: line });
+                    }
+                    inCodeB = !inCodeB;
+                    continue;
+                }
+                if (inCodeB) continue;
+                if (trim.startsWith("#")) continue;
                 const currInd = getIndent(line);
                 if (isLstItem(line)) {
                     if (currInd > 0) {
@@ -120,12 +132,12 @@ module.exports = [
                             onError({ lineNumber: ix + 1, detail: noLeadingSpacesDet, context: line });
                         }
                     }
-                    return;
+                    continue;
                 }
                 if (currInd > 0) {
                     onError({ lineNumber: ix + 1, detail: noLeadingSpacesDet, context: line });
                 }
-            });
+            }
         }
     },
 
