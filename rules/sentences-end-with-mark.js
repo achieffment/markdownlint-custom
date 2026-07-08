@@ -3,7 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.SentencesEndMarkRule = void 0;
 const base_rule_1 = require("../core/base-rule");
 const details_1 = require("../details");
-const markdown_document_1 = require("../domain/markdown-document");
 const regex_1 = require("../regex");
 class SentencesEndMarkRule extends base_rule_1.BaseRule {
     constructor(codeWalker, lineParser) {
@@ -15,11 +14,17 @@ class SentencesEndMarkRule extends base_rule_1.BaseRule {
         this.tags = ["formatting"];
     }
     check(lines, onError) {
-        const doc = new markdown_document_1.MarkdownDocument(lines, this.codeWalker, this.lineParser);
-        doc.eachLineOutsideCode((line, ix, trim) => {
-            if (!trim)
+        let inQuote = false;
+        this.codeWalker.eachLineOutsideCode(lines, (line, ix, trim) => {
+            if (!trim) {
+                inQuote = false;
                 return;
-            if (trim.startsWith("#") || trim.startsWith(">") || regex_1.hrRx.test(trim))
+            }
+            if (trim.startsWith("#") || trim.startsWith(">") || regex_1.hrRx.test(trim)) {
+                inQuote = trim.startsWith(">");
+                return;
+            }
+            if (inQuote)
                 return;
             if (this.lineParser.isLstItem(line))
                 return;

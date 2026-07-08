@@ -15,7 +15,7 @@ SRP/DRY — те же принципы, что в [js-dev.mdc](js-dev.mdc) (дл
 | Каталог | SRP |
 |---------|-----|
 | [`core/`](../src/core/) | `ICustomRule`, `abstract BaseRule` (Template Method `toRule()`) |
-| [`domain/`](../src/domain/) | `ListLineParser`, `CodeWalker`, `MarkdownDocument`, `ListBlockAnalyzer`, `ListSpacingChecker`, `ColonChecker` |
+| [`domain/`](../src/domain/) | `ListLineParser`, `CodeWalker`, `ListBlockAnalyzer`, `ListSpacingChecker`, `ColonChecker` |
 | [`composition/`](../src/composition/) | `AppContext` — wiring singleton-ов |
 | [`rules/`](../src/rules/) | Класс `XxxRule extends BaseRule` — одна политика |
 | `regex.ts`, `details.ts` | Константы (не классы) |
@@ -29,7 +29,7 @@ SRP/DRY — те же принципы, что в [js-dev.mdc](js-dev.mdc) (дл
 - **Composition:** правила получают checker/parser/walker через `constructor(private readonly ...)`
 - **Domain-классы** не наследуют друг друга; делегируют через поля
 - **`onError`** — на границе `check()` / методов checker-ов
-- **Composition root** — `app-context.ts`, barrels; не создавать `new` в domain вне root (кроме `MarkdownDocument` в `check`)
+- **Composition root** — `app-context.ts`, barrels; не создавать `new` в domain вне root
 
 ## Порядок функций
 

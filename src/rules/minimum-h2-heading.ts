@@ -15,8 +15,12 @@ export class MinimumH2Rule extends BaseRule {
 
     check(lines: readonly string[], onError: RuleOnError): void {
         let hasH2 = false;
-        this.codeWalker.eachLineOutsideCode(lines, (_line, _ix, trim) => {
-            if (h2Rx.test(trim)) hasH2 = true;
+        this.codeWalker.walkOutsideCode(lines, (_ix, trim) => {
+            if (h2Rx.test(trim)) {
+                hasH2 = true;
+                return lines.length;
+            }
+            return undefined;
         });
         if (!hasH2) {
             onError({ lineNumber: 1, detail: this.description });

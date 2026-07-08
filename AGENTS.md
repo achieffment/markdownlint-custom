@@ -46,7 +46,7 @@
 | `list-preceded-by-colon` | Обычный текст (не пункт списка) перед первым пунктом блока верхнего уровня (num/bul) заканчивается `:`; skip prev: заголовок, пункт списка, code fence; вложенные не проверяются |
 | `codeblock-preceded-by-colon` | Открывающая `` ``` ``: строка перед ней заканчивается `:` (обычный текст, не пункт списка); skip prev: заголовок, пункт списка, code fence |
 | `no-leading-spaces` | Нет отступа у обычного текста, пунктов списка верхнего уровня и обозначений блока кода (`` ``` ``); вложенные пункты — при `indent >=` предыдущего |
-| `sentences-end-with-mark` | Обычный текст (не заголовок, blockquote, HR, не пункт списка) заканчивается `.`, `!`, `?`, `:` или `;` |
+| `sentences-end-with-mark` | Обычный текст (не заголовок, blockquote и продолжения, HR, не пункт списка) заканчивается `.`, `!`, `?`, `:` или `;` |
 
 Подробности и пути к примерам — в [markdownlint-project.mdc](.cursor/rules/markdownlint-project.mdc).
 
@@ -61,11 +61,11 @@
 7. **Test** — `npm test` (pretest → build; test-rules + test-cli2-config + check-function-order)
 8. **Sync docs** — по [docs-consistency.mdc](.cursor/rules/docs-consistency.mdc): `.mdc` (по матрице) → AGENTS → README
 
-Локальная проверка **папки с документацией** (не meta-файлов репо): `npm run lint:md -- <path>` или `./bin/lint-markdown.sh <path>`. `README.md`, `AGENTS.md`, `.cursor/**` в `ignores` cli2.
+Локальная проверка **папки или файла** (не meta-файлов репо): `npm run lint:md -- <path>`, `./bin/lint-markdown.sh <path>` (см. [platform-scripts.mdc](.cursor/rules/platform-scripts.mdc) для `.bat`/`.command`); **без пути** — `usage` и `exit 1`.
 
 ## Верификация
 
-См. шаг 7 workflow. Дополнительно — `npm run check`, `npm run lint:md`, `npm run sync:cli2-config` (через `presync:cli2-config` → build: schema + overrides + custom keys из `markdownlint-rules.js`, `ignores`).
+См. шаг 7 workflow. Дополнительно — `npm run check` (`precheck` → build), `npm run lint:md -- <path>`, `npm run sync:cli2-config` (через `presync:cli2-config` → build: schema + overrides + custom keys из `markdownlint-rules.js`, `ignores`).
 
 После правки примеров — `_err` срабатывает **только** на целевое custom-правило (полный конфиг); inline-кейсы в `test-rules.cjs` обязаны проходить.
 

@@ -3,7 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.NoLeadingSpacesRule = void 0;
 const base_rule_1 = require("../core/base-rule");
 const details_1 = require("../details");
-const markdown_document_1 = require("../domain/markdown-document");
 class NoLeadingSpacesRule extends base_rule_1.BaseRule {
     constructor(codeWalker, lineParser) {
         super();
@@ -14,8 +13,7 @@ class NoLeadingSpacesRule extends base_rule_1.BaseRule {
         this.tags = ["formatting"];
     }
     check(lines, onError) {
-        const doc = new markdown_document_1.MarkdownDocument(lines, this.codeWalker, this.lineParser);
-        doc.walkCodeFenceAware({
+        this.codeWalker.walkCodeFenceAware(lines, {
             onFence: (line, ix) => {
                 const currInd = this.lineParser.getIndent(line);
                 if (currInd > 0) {
@@ -28,7 +26,7 @@ class NoLeadingSpacesRule extends base_rule_1.BaseRule {
                 const currInd = this.lineParser.getIndent(line);
                 if (this.lineParser.isLstItem(line)) {
                     if (currInd > 0) {
-                        const prevInd = doc.findPrevListInd(ix);
+                        const prevInd = this.lineParser.findPrevListInd(lines, ix);
                         if (prevInd < 0 || currInd < prevInd) {
                             onError({ lineNumber: ix + 1, detail: this.description, context: line });
                         }

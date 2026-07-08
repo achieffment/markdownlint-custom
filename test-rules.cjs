@@ -4,8 +4,9 @@ const markdownlint = require("markdownlint/sync");
 const customRules = require("./markdownlint-rules.js");
 const { loadLintConfig } = require("./load-cli2-config.cjs");
 const hlprs = require("./markdownlint-hlprs");
+const { details } = require("./details.js");
 const { h2Rx } = require("./regex.js");
-const { lstItemRx, isLstItem } = hlprs;
+const { lstItemRx, isLstItem, eachLineOutsideCode } = hlprs;
 
 const { config: lintConfig } = loadLintConfig();
 
@@ -58,6 +59,15 @@ const getFiredRules = (violations) => {
     return fired;
 };
 
+const hasH2OutsideCode = (text) => {
+    const lines = text.split("\n");
+    let found = false;
+    eachLineOutsideCode(lines, (_line, _ix, trim) => {
+        if (h2Rx.test(trim)) found = true;
+    });
+    return found;
+};
+
 let failed = 0;
 
 const assert = (ok, msg) => {
@@ -90,12 +100,12 @@ if (failed === 0 && exampleRuleNames.length > 0) {
 
 exampleRuleNames.forEach(name => {
     const errPath = path.join(examplesDir, name, "_err.md");
-    const errLines = fs.readFileSync(errPath, "utf8").split("\n");
-    const hasH2 = errLines.some(line => h2Rx.test(line.trim()));
+    const errText = fs.readFileSync(errPath, "utf8");
+    const hasH2 = hasH2OutsideCode(errText);
     if (name === "minimum-h2-heading") {
-        assert(!hasH2, `${name}/_err.md must not contain ## (target violation)`);
+        assert(!hasH2, `${name}/_err.md must not contain ## outside code fence (target violation)`);
     } else {
-        assert(hasH2, `${name}/_err.md must contain ## for exclusivity with minimum-h2-heading`);
+        assert(hasH2, `${name}/_err.md must contain ## outside code fence for exclusivity with minimum-h2-heading`);
     }
 });
 if (failed === 0) {
@@ -111,6 +121,8 @@ const allowedLineDiff = (errLine, sucLine) => {
     if (errLine.endsWith(".") && sucLine === errLine.slice(0, -1) + ":") return true;
     if (errLine.endsWith(";") && sucLine === errLine.slice(0, -1) + ":") return true;
     if (sucLine === errLine.trimStart() && errLine.length > sucLine.length) return true;
+    if (/^-\s*$/.test(errLine.trim()) && /^- .+;/.test(sucLine)) return true;
+    if (/^\d+\.\s{2,}$/.test(errLine) && /^\d+\. .+;/.test(sucLine)) return true;
     return false;
 };
 
@@ -330,7 +342,12 @@ const colonSiblingFired = getFiredRules(colonSiblingErrRes.t || []);
 if (!colonSiblingFired.has("list-items-end-with-semicolon-or-colon") || colonSiblingFired.size !== 1) {
     assert(false, "colon sibling err: expected list-items-end-with-semicolon-or-colon only, got " + [...colonSiblingFired].join(", "));
 } else {
-    console.log("OK   colon before sibling → list-items-end-with-semicolon-or-colon");
+    const colonSiblingDet = (colonSiblingErrRes.t || [])[0]?.errorDetail;
+    if (colonSiblingDet !== details.listItemsSemi) {
+        assert(false, `colon sibling detail: expected listItemsSemi got "${colonSiblingDet || "none"}"`);
+    } else {
+        console.log("OK   colon before sibling → list-items-end-with-semicolon-or-colon");
+    }
 }
 
 const semiChildErr = `## T
@@ -348,7 +365,12 @@ if (!semiChildFired.has("list-items-end-with-semicolon-or-colon") || semiChildFi
 } else if (semiChildLines.join() !== "3") {
     assert(false, `semicolon before child err lines: expected 3 got ${semiChildLines.join() || "none"}`);
 } else {
-    console.log("OK   semicolon before child → list-items on line 3");
+    const semiChildDet = semiChildViol[0]?.errorDetail;
+    if (semiChildDet !== details.listItemsColon) {
+        assert(false, `semicolon before child detail: expected listItemsColon got "${semiChildDet || "none"}"`);
+    } else {
+        console.log("OK   semicolon before child → list-items on line 3");
+    }
 }
 
 const subNumSiblingOk = `## T
@@ -423,7 +445,12 @@ if (!unorderedBoundariesFired.has("list-blank-line-spacing")) {
     if (extra.length > 0) {
         assert(false, "unordered boundaries err: extra rules " + extra.join(", "));
     } else {
-        console.log("OK   unordered boundaries err → list-blank-line-spacing");
+        const aftDet = unorderedBoundariesViol.find(v => v.errorDetail === details.listBlankAft);
+        if (!aftDet) {
+            assert(false, "unordered boundaries err: expected listBlankAft detail");
+        } else {
+            console.log("OK   unordered boundaries err → list-blank-line-spacing");
+        }
     }
 }
 
@@ -494,7 +521,12 @@ if (!tightThenBlankFired.has("list-blank-line-spacing") || tightThenBlankFired.s
     if (spacingLines.join() !== "4") {
         assert(false, `tight then blank err lines: expected 4 got ${spacingLines.join() || "none"}`);
     } else {
-        console.log("OK   tight then blank err → list-blank-line-spacing on line 4");
+        const gapDet = tightThenBlankViol.find(v => v.errorDetail === details.listBlankGap);
+        if (!gapDet) {
+            assert(false, "tight then blank err: expected listBlankGap detail");
+        } else {
+            console.log("OK   tight then blank err → list-blank-line-spacing on line 4");
+        }
     }
 }
 
@@ -688,7 +720,12 @@ const listAfterHeadingFired = getFiredRules(listAfterHeadingRes.t || []);
 if (!listAfterHeadingFired.has("list-blank-line-spacing") || listAfterHeadingFired.size !== 1) {
     assert(false, "list after heading without blank: expected list-blank-line-spacing only, got " + [...listAfterHeadingFired].join(", "));
 } else {
-    console.log("OK   list after heading no blank → list-blank-line-spacing");
+    const befDet = (listAfterHeadingRes.t || []).find(v => v.errorDetail === details.listBlankBef);
+    if (!befDet || befDet.lineNumber !== 2) {
+        assert(false, `list after heading detail: expected listBlankBef on line 2 got ${befDet?.lineNumber || "none"}`);
+    } else {
+        console.log("OK   list after heading no blank → list-blank-line-spacing");
+    }
 }
 
 const numThenBulNoBlankErr = `## T
@@ -1032,6 +1069,7 @@ if (getFiredRules(sentencesMarksOkRes.t || []).size > 0) {
 const sentencesSkipQuoteHrOk = `## T
 
 > цитата без знака
+продолжение без маркера
 
 ---
 

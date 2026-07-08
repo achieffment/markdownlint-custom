@@ -8,7 +8,7 @@ alwaysApply: false
 
 Исходники правил и domain — [ts-dev.mdc](ts-dev.mdc). Оформление inline-кейсов — [js-style.mdc](js-style.mdc). Проект — [markdownlint-project.mdc](markdownlint-project.mdc). При изменении конвенций test — [docs-consistency.mdc](docs-consistency.mdc).
 
-**База:** минимальный diff; SRP/DRY не повод для рефактора без запроса; не менять сигнатуры hlprs, формат `onError({ lineNumber, detail, context? })`. Примеры lintятся через полный конфиг [`.markdownlint-cli2.jsonc`](../.markdownlint-cli2.jsonc) ([`load-cli2-config.cjs`](../load-cli2-config.cjs)); inline-кейсы — `{ default: false }`. CLI/bin — [platform-scripts.mdc](platform-scripts.mdc).
+**База:** минимальный diff; SRP/DRY не повод для рефактора без запроса; не менять сигнатуры hlprs, формат `onError({ lineNumber, detail, context? })`. Примеры lintятся через `config` из [`.markdownlint-cli2.jsonc`](../.markdownlint-cli2.jsonc) ([`load-cli2-config.cjs`](../load-cli2-config.cjs)) + `customRules` отдельно; inline-кейсы — `{ default: false }`. CLI/bin — [platform-scripts.mdc](platform-scripts.mdc).
 
 ## SRP
 

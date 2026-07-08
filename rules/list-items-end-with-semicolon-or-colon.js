@@ -3,7 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ListItemsEndRule = void 0;
 const base_rule_1 = require("../core/base-rule");
 const details_1 = require("../details");
-const markdown_document_1 = require("../domain/markdown-document");
 const regex_1 = require("../regex");
 class ListItemsEndRule extends base_rule_1.BaseRule {
     constructor(codeWalker, lineParser) {
@@ -15,14 +14,13 @@ class ListItemsEndRule extends base_rule_1.BaseRule {
         this.tags = ["lists"];
     }
     check(lines, onError) {
-        const doc = new markdown_document_1.MarkdownDocument(lines, this.codeWalker, this.lineParser);
-        doc.eachLineOutsideCode((line, ix, trim) => {
+        this.codeWalker.eachLineOutsideCode(lines, (line, ix, trim) => {
             if (!this.lineParser.isLstItem(line))
                 return;
             const lineStart = this.lineParser.trimStart(line);
             let cont = lineStart.replace(regex_1.lstItemRx, "");
             cont = cont.trim();
-            const next = doc.skipBlankFwd(ix);
+            const next = this.lineParser.skipBlankFwd(lines, ix);
             const folcod = next < lines.length && regex_1.codeFenceRx.test(lines[next].trim());
             const folsub = next < lines.length && this.lineParser.isChildLstItem(line, lines[next]);
             const needsColon = folcod || folsub;

@@ -34,7 +34,7 @@ alwaysApply: true
 | **Константы regex** | [`regex.ts`](../src/regex.ts), потребители в `src/` и [`test-rules.cjs`](../test-rules.cjs) (`h2Rx` exclusivity) | Политика в `markdownlint-project.mdc` при смене семантики; `npm test` |
 | **Публичный экспорт hlprs** | [`markdownlint-hlprs.ts`](../src/markdownlint-hlprs.ts), `npm test` | Таблица API в `markdownlint-project.mdc` |
 | **Архитектура / новый domain-модуль** | `src/domain/`, `AppContext`, `npm test` | Таблицы модулей в `ts-dev.mdc`, структура в `markdownlint-project.mdc`, scope в `AGENTS.md`, «Структура» / mermaid в README |
-| **Изменение BaseRule / контракта `onError`** | `src/core/` | `ts-style.mdc`, «Контракты» в `markdownlint-project.mdc`, шаги 4–5 в `AGENTS.md` |
+| **Изменение BaseRule / контракта `onError`** | `src/core/` | `ts-style.mdc`, «Контракты» в `markdownlint-project.mdc`, шаги 5–6 в `AGENTS.md` |
 | **Конвенции стиля TS** | `src/**/*.ts` | `ts-style.mdc`; перекрёстные ссылки в `ts-dev.mdc` при необходимости |
 | **Конвенции test-rules** | [`test-rules.cjs`](../test-rules.cjs) | `js-style.mdc`, `js-dev.mdc`; конвенции примеров в `markdownlint-project.mdc` при пересечении |
 | **Порядок функций / check-function-order** | `src/`, `test-rules.cjs`, [`check-function-order.cjs`](../check-function-order.cjs) | `ts-dev.mdc`, `js-dev.mdc` |

@@ -1,7 +1,6 @@
 import type { RuleOnError } from "markdownlint";
 import { BaseRule } from "../core/base-rule";
 import { details } from "../details";
-import { MarkdownDocument } from "../domain/markdown-document";
 import type { CodeWalker } from "../domain/code-walker";
 import type { ListLineParser } from "../domain/list-line-parser";
 
@@ -18,8 +17,7 @@ export class NoLeadingSpacesRule extends BaseRule {
     }
 
     check(lines: readonly string[], onError: RuleOnError): void {
-        const doc = new MarkdownDocument(lines, this.codeWalker, this.lineParser);
-        doc.walkCodeFenceAware({
+        this.codeWalker.walkCodeFenceAware(lines, {
             onFence: (line, ix) => {
                 const currInd = this.lineParser.getIndent(line);
                 if (currInd > 0) {
@@ -31,7 +29,7 @@ export class NoLeadingSpacesRule extends BaseRule {
                 const currInd = this.lineParser.getIndent(line);
                 if (this.lineParser.isLstItem(line)) {
                     if (currInd > 0) {
-                        const prevInd = doc.findPrevListInd(ix);
+                        const prevInd = this.lineParser.findPrevListInd(lines, ix);
                         if (prevInd < 0 || currInd < prevInd) {
                             onError({ lineNumber: ix + 1, detail: this.description, context: line });
                         }

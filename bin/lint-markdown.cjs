@@ -14,8 +14,9 @@ const cli2Bin = path.join(
 );
 
 const usage = () => {
-    console.log("Usage: lint-markdown [targetPath] [-- extra cli2 args]");
-    console.log("  targetPath — file or directory (default: .)");
+    console.log("Usage: lint-markdown <targetPath> [-- extra cli2 args]");
+    console.log("  targetPath — обязательный: файл или папка с markdown");
+    console.log("  --help, -h — справка");
 };
 
 const runNpm = (args) => {
@@ -96,10 +97,24 @@ const targetToGlobs = (target) => {
     ];
 };
 
+const hasExplicitTarget = (argv) => {
+    const args = argv.slice(2);
+    for (let ix = 0; ix < args.length; ix++) {
+        const arg = args[ix];
+        if (arg === "--help" || arg === "-h") return false;
+        if (arg === "--") {
+            return args.slice(ix + 1).some(a => !a.startsWith("-"));
+        }
+        if (!arg.startsWith("-")) return true;
+    }
+    return false;
+};
+
 const main = () => {
     const { target, passthrough } = parseArgs(process.argv);
-    if (target === ".") {
-        console.error("Hint: укажите папку с документацией, например ./docs или ./markdownlint-examples");
+    if (!hasExplicitTarget(process.argv)) {
+        usage();
+        process.exit(1);
     }
     ensureNodeModules();
     ensureBuild();

@@ -91,13 +91,13 @@ export class ListBlockAnalyzer {
         this.codeWalker.walkOutsideCode(lines, (ix) => {
             if (this.lineParser.isNumItem(lines[ix])) {
                 const items = collectNumBlock(ix);
-                if (items.length === 0) return ix;
+                if (items.length === 0) return ix + 1;
                 onBlock(items, findNumItemEnd, (line) => this.lineParser.isNumItem(line), true);
                 return findNumItemEnd(items[items.length - 1]);
             }
             if (this.lineParser.isBulItem(lines[ix])) {
                 const items = collectBulBlock(ix);
-                if (items.length === 0) return ix;
+                if (items.length === 0) return ix + 1;
                 onBlock(items, findBulItemEnd, (line) => this.lineParser.isBulItem(line), false);
                 return findBulItemEnd(items[items.length - 1]);
             }

@@ -27,36 +27,25 @@ npm test        # pretest → build, test-rules + test-cli2-config + check-funct
 
 ## Локальная проверка без IDE
 
-Bootstrap в [`bin/lint-markdown.cjs`](bin/lint-markdown.cjs) — см. [`.cursor/rules/platform-scripts.mdc`](.cursor/rules/platform-scripts.mdc). Через `npm run lint:md` дополнительно срабатывает `prelint:md`.
+Точки входа, bootstrap, guard без пути — [`.cursor/rules/platform-scripts.mdc`](.cursor/rules/platform-scripts.mdc).
 
 ```bash
 npm run lint:md -- ./path/to/docs
+./bin/lint-markdown.sh ./path/to/docs   # Linux / WSL / macOS
+bin\lint-markdown.bat .\path\to\docs    # Windows CMD
 ```
 
-Правила для **папок с пользовательской документацией**. Meta-файлы репозитория (`README.md`, `AGENTS.md`, `.cursor/**`) исключены через `ignores` в [`.markdownlint-cli2.jsonc`](.markdownlint-cli2.jsonc).
-
-```bash
-# Linux / WSL / macOS
-./bin/lint-markdown.sh /path/to/docs
-
-# Windows CMD
-bin\lint-markdown.bat C:\path\to\docs
-
-# macOS (Finder)
-open bin/lint-markdown.command
-```
+Meta-файлы репозитория (`README.md`, `AGENTS.md`, `.cursor/**`) исключены через `ignores` в [`.markdownlint-cli2.jsonc`](.markdownlint-cli2.jsonc). macOS Finder: drag-and-drop на `bin/lint-markdown.command`.
 
 Конфиг — [`.markdownlint-cli2.jsonc`](.markdownlint-cli2.jsonc). Built-in: `default: true`; намеренные overrides — таблица в [`.cursor/rules/markdownlint-project.mdc`](.cursor/rules/markdownlint-project.mdc) (`MD013`, `MD007`, `MD029`, `MD032`, `MD043`, `MD046`).
 
 ### VS Code для markdown
 
-Рекомендуемые настройки `[markdown]` — в [`.cursor/rules/markdownlint-project.mdc`](.cursor/rules/markdownlint-project.mdc) (раздел IDE и EditorConfig): `tabSize: 4`, `wordWrap`, `insertFinalNewline`, `trimTrailingWhitespace: false`.
+Рекомендуемые настройки `[markdown]` — в [`.cursor/rules/markdownlint-project.mdc`](.cursor/rules/markdownlint-project.mdc) (раздел IDE и EditorConfig).
 
 ## Подключение в VS Code
 
-Достаточно [`.markdownlint-cli2.jsonc`](.markdownlint-cli2.jsonc) в корне workspace — расширение подхватит его автоматически. Ручной `markdownlint.config` и `markdownlint.customRules` в settings **не нужны**, если файл в корне.
-
-Опционально (файл не в корне): `"markdownlint.configFile": "./.markdownlint-cli2.jsonc"`.
+См. [`.cursor/rules/markdownlint-project.mdc`](.cursor/rules/markdownlint-project.mdc) (раздел «Подключение в VS Code»).
 
 ## Правила проверки
 
@@ -70,7 +59,7 @@ open bin/lint-markdown.command
 | `list-preceded-by-colon` | Обычный текст (не пункт списка) перед первым пунктом блока верхнего уровня (num/bul) заканчивается `:`; skip prev: заголовок, пункт списка, code fence; вложенные не проверяются |
 | `codeblock-preceded-by-colon` | Строка перед открывающей `` ``` `` (не пункт списка) заканчивается `:`; skip prev: заголовок, пункт списка, code fence |
 | `no-leading-spaces` | Нет ведущих пробелов у обычного текста, пунктов списка верхнего уровня и строк `` ``` ``; у вложенных пунктов отступ допустим, если не меньше отступа предыдущего пункта |
-| `sentences-end-with-mark` | Обычный текст (не заголовок, blockquote, HR, не пункт списка) заканчивается `.`, `!`, `?`, `:` или `;` |
+| `sentences-end-with-mark` | Обычный текст (не заголовок, blockquote и продолжения, HR, не пункт списка) заканчивается `.`, `!`, `?`, `:` или `;` |
 
 Проверки выполняются вне содержимого code fence, кроме строк-обозначений `` ``` `` (для `no-leading-spaces`).
 
@@ -112,7 +101,7 @@ flowchart LR
   Rules --> AppCtx
   AppCtx --> Domain
   Rules --> RulesJs[markdownlint-rules.js]
-  Domain --> HlprsJs[markdownlint-hlprs.js]
+  AppCtx --> HlprsJs["markdownlint-hlprs.js (функции)"]
   RulesJs --> VSCode[VS Code / cli2]
   RulesJs --> Tests[test-rules.cjs]
   RulesJs --> CLI[bin/lint-markdown]
@@ -125,9 +114,9 @@ flowchart LR
 |--------|----------|
 | `npm run build` | `tsc`: `src/` → корень |
 | `npm test` | `pretest` (build) + `test-rules.cjs` + `test-cli2-config.cjs` + `check-function-order.cjs` |
-| `npm run lint:md` | Локальный lint папки/файла (`prelint:md` → build) |
+| `npm run lint:md` | Локальный lint папки/файла (bootstrap в runner) |
 | `npm run sync:cli2-config` | Регенерация `.markdownlint-cli2.jsonc` из schema + overrides + custom keys из `markdownlint-rules.js` + `ignores` (`presync:cli2-config` → build) |
-| `npm run check` | `tsc --noEmit`, `node --check` артефактов, порядок функций (**без** пересборки) |
+| `npm run check` | `precheck` (build) + `tsc --noEmit` + `node --check` (см. `package.json`) + порядок функций |
 | `npm run check:order` | Только проверка порядка функций |
 
 ## Разработка и тестирование
@@ -140,4 +129,5 @@ Runtime — CommonJS `.js`, не `.ts` и не ESM.
 
 - [`.cursor/rules/markdownlint-project.mdc`](.cursor/rules/markdownlint-project.mdc) — полные политики lint-правил, `.markdownlint-cli2.jsonc`, CLI
 - [`.cursor/rules/platform-scripts.mdc`](.cursor/rules/platform-scripts.mdc) — bin-скрипты и bootstrap `node_modules`
+- [`.cursor/rules/docs-consistency.mdc`](.cursor/rules/docs-consistency.mdc) — синхронизация кода и документации
 - [markdownlint: Custom Rules](https://github.com/DavidAnson/markdownlint/blob/main/doc/CustomRules.md) — официальная документация
