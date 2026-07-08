@@ -1,5 +1,7 @@
 const fs = require("fs");
+const os = require("os");
 const path = require("path");
+const { spawnSync } = require("child_process");
 const { parse } = require("jsonc-parser");
 
 const repoRoot = __dirname;
@@ -71,6 +73,16 @@ ruleNames.forEach(name => {
     assert(cfg[name] === true, `rule ${name} must be enabled in cli2 config`);
 });
 
+const cfgCustomKeys = Object.keys(cfg).filter(key => key !== "default" && !isMdKey(key));
+assert(cfgCustomKeys.length === ruleNames.length,
+    `custom key count mismatch: cli2 has ${cfgCustomKeys.length}, rules has ${ruleNames.length}`);
+cfgCustomKeys.forEach(key => {
+    assert(ruleNames.includes(key), `unexpected custom config key ${key}`);
+});
+ruleNames.forEach(name => {
+    assert(cfgCustomKeys.includes(name), `custom rule ${name} missing from cli2 config keys`);
+});
+
 Object.keys(schema).forEach(key => {
     if (key === "extends" || key === "default") return;
     if (!isMdKey(key)) return;
@@ -86,9 +98,27 @@ Object.keys(cfg).forEach(key => {
     }
 });
 
+const tmpCli2 = path.join(os.tmpdir(), `markdownlint-cli2-sync-${process.pid}.jsonc`);
+const syncScript = path.join(repoRoot, "scripts", "sync-cli2-config.cjs");
+const syncRes = spawnSync(process.execPath, [syncScript, schemaPath, tmpCli2], {
+    cwd: repoRoot,
+    encoding: "utf8"
+});
+assert(syncRes.status === 0, `sync-cli2-config failed: ${syncRes.stderr || syncRes.stdout || "unknown"}`);
+const synced = loadJsonc(tmpCli2);
+assert(deepEq(synced.config, cli2.config), "synced config must match committed cli2.config");
+assert(deepEq(synced.ignores, cli2.ignores), "synced ignores must match committed cli2.ignores");
+assert(deepEq(synced.globs, cli2.globs), "synced globs must match committed cli2.globs");
+assert(deepEq(synced.customRules, cli2.customRules), "synced customRules must match committed cli2.customRules");
+try {
+    fs.unlinkSync(tmpCli2);
+} catch (_) {
+    /* ignore */
+}
+
 if (failed > 0) {
     console.error(`\n${failed} cli2 config check(s) failed`);
     process.exit(1);
 }
 
-console.log("OK   cli2 config (schema parity, custom rules, ignores)");
+console.log("OK   cli2 config (schema parity, custom rules, ignores, sync round-trip)");

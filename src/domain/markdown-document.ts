@@ -17,10 +17,6 @@ export class MarkdownDocument {
         this.codeWalker.walkCodeFenceAware(this.lines, handlers);
     }
 
-    eachOpeningCodeFence(fn: (ix: number) => void): void {
-        this.codeWalker.eachOpeningCodeFence(this.lines, fn);
-    }
-
     skipBlankFwd(ix: number): number {
         return this.lineParser.skipBlankFwd(this.lines, ix);
     }

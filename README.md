@@ -2,11 +2,11 @@
 
 Кастомные правила [markdownlint](https://github.com/DavidAnson/markdownlint) для VS Code (**vscode-markdownlint**) и локального CLI (**markdownlint-cli2**). Единый конфиг — [`.markdownlint-cli2.jsonc`](.markdownlint-cli2.jsonc) (built-in MD001–MD060 + custom rules).
 
-Исходники — TypeScript в [`src/`](src/); runtime для markdownlint — CommonJS [`.js`](markdownlint-rules.js) в корне репозитория. Entry point: [`markdownlint-rules.js`](markdownlint-rules.js).
+Исходники — TypeScript в [`src/`](src/); runtime для markdownlint — CommonJS [`.js`](markdownlint-rules.js) в корне репозитория. Entry points: [`markdownlint-rules.js`](markdownlint-rules.js) (правила), [`markdownlint-hlprs.js`](markdownlint-hlprs.js) (compat для тестов).
 
 ## Требования
 
-- Node.js ≥ 20 (рекомендуется 22 LTS; версия в [`.nvmrc`](.nvmrc)) и npm
+- Node.js ≥ 22 ([`.nvmrc`](.nvmrc), `engines` в [`package.json`](package.json)); [`.npmrc`](.npmrc) — `engine-strict=true`
 - VS Code + расширение **vscode-markdownlint** (или другое с поддержкой `.markdownlint-cli2.jsonc`)
 - [`.editorconfig`](.editorconfig) — единый LF и отступ 4 пробела в редакторах с поддержкой EditorConfig
 
@@ -27,7 +27,7 @@ npm test        # pretest → build, test-rules + test-cli2-config + check-funct
 
 ## Локальная проверка без IDE
 
-Bootstrap в [`bin/lint-markdown.cjs`](bin/lint-markdown.cjs): `node_modules` → `npm ci`/`install`; нет `markdownlint-rules.js` → `npm run build`. Через `npm run lint:md` дополнительно срабатывает `prelint:md`.
+Bootstrap в [`bin/lint-markdown.cjs`](bin/lint-markdown.cjs) — см. [`.cursor/rules/platform-scripts.mdc`](.cursor/rules/platform-scripts.mdc). Через `npm run lint:md` дополнительно срабатывает `prelint:md`.
 
 ```bash
 npm run lint:md -- ./path/to/docs
@@ -50,21 +50,11 @@ open bin/lint-markdown.command
 
 ### VS Code для markdown
 
-```json
-"[markdown]": {
-  "editor.tabSize": 4,
-  "editor.wordWrap": "on",
-  "editor.wrappingIndent": "same",
-  "files.insertFinalNewline": true,
-  "files.trimTrailingWhitespace": false
-}
-```
-
-`trimTrailingWhitespace: false` — как [`[*.md]`](.editorconfig) в EditorConfig (hard break / `MD009`). Подробнее — `.mdc`.
+Рекомендуемые настройки `[markdown]` — в [`.cursor/rules/markdownlint-project.mdc`](.cursor/rules/markdownlint-project.mdc) (раздел IDE и EditorConfig): `tabSize: 4`, `wordWrap`, `insertFinalNewline`, `trimTrailingWhitespace: false`.
 
 ## Подключение в VS Code
 
-Достаточно [`.markdownlint-cli2.jsonc`](.markdownlint-cli2.jsonc) в корне workspace — расширение подхватит его автоматически. Ручной `markdownlint.config` в settings не нужен.
+Достаточно [`.markdownlint-cli2.jsonc`](.markdownlint-cli2.jsonc) в корне workspace — расширение подхватит его автоматически. Ручной `markdownlint.config` и `markdownlint.customRules` в settings **не нужны**, если файл в корне.
 
 Опционально (файл не в корне): `"markdownlint.configFile": "./.markdownlint-cli2.jsonc"`.
 
@@ -76,8 +66,8 @@ open bin/lint-markdown.command
 |---------|---------------|
 | `minimum-h2-heading` | В документе есть хотя бы один заголовок H2 (`##`) вне code fence |
 | `list-items-end-with-semicolon-or-colon` | Пункт списка (num/bul, вложенные) заканчивается `;`; перед блоком кода или прямым дочерним пунктом — `:` |
-| `list-blank-line-spacing` | Нумерованные списки: пустая строка до первого и после последнего пункта блока, единообразно между соседними num-пунктами (включая поднумерацию `1.1`, `1.1.1`); маркированные: пустая строка только до/после блока |
-| `list-preceded-by-colon` | Обычный текст (не пункт списка) перед первым пунктом блока верхнего уровня заканчивается `:`; skip prev: заголовок, пункт списка, code fence; вложенные не проверяются |
+| `list-blank-line-spacing` | Нумерованные списки: пустая строка до первого и после последнего пункта блока (EOF skip, same-kind skip), единообразно между соседними num-пунктами (включая поднумерацию `1.1`, `1.1.1`); маркированные: пустая строка только до/после блока |
+| `list-preceded-by-colon` | Обычный текст (не пункт списка) перед первым пунктом блока верхнего уровня (num/bul) заканчивается `:`; skip prev: заголовок, пункт списка, code fence; вложенные не проверяются |
 | `codeblock-preceded-by-colon` | Строка перед открывающей `` ``` `` (не пункт списка) заканчивается `:`; skip prev: заголовок, пункт списка, code fence |
 | `no-leading-spaces` | Нет ведущих пробелов у обычного текста, пунктов списка верхнего уровня и строк `` ``` ``; у вложенных пунктов отступ допустим, если не меньше отступа предыдущего пункта |
 | `sentences-end-with-mark` | Обычный текст (не заголовок, blockquote, HR, не пункт списка) заканчивается `.`, `!`, `?`, `:` или `;` |
@@ -92,10 +82,12 @@ open bin/lint-markdown.command
 | Корневые `*.js`, `core/`, `domain/`, `composition/`, `rules/` | **Артефакты tsc** — коммитить вместе с `src/` |
 | [`markdownlint-examples/`](markdownlint-examples/) | Пары `_err.md` / `_suc.md` на каждое правило |
 | [`test-rules.cjs`](test-rules.cjs), [`test-cli2-config.cjs`](test-cli2-config.cjs), [`check-function-order.cjs`](check-function-order.cjs) | Тесты, проверка cli2-конфига, порядок функций |
+| [`markdownlint-hlprs.js`](markdownlint-hlprs.js) | Compat API для `test-rules.cjs` |
+| [`package.json`](package.json), [`tsconfig.json`](tsconfig.json) | npm-скрипты, сборка tsc |
 | [`.markdownlint-cli2.jsonc`](.markdownlint-cli2.jsonc), [`load-cli2-config.cjs`](load-cli2-config.cjs) | Единый конфиг lint; загрузчик для test |
 | [`bin/`](bin/) | CLI: `lint-markdown.cjs`, `.sh` / `.bat` / `.command` |
 | [`schema/`](schema/) | Snapshot [official schema](https://github.com/DavidAnson/markdownlint/blob/main/schema/.markdownlint.jsonc) для `test-cli2-config.cjs` |
-| [`scripts/`](scripts/) | `sync-cli2-config.cjs` — регенерация cli2 из schema |
+| [`scripts/`](scripts/) | `sync-cli2-config.cjs` — регенерация cli2 из schema + custom keys из `markdownlint-rules.js` |
 | [`.cursor/rules/`](.cursor/rules/) | Правила Cursor; каталог — [`AGENTS.md`](AGENTS.md) |
 | `.gitignore`, `.gitattributes`, `.editorconfig`, `.nvmrc`, `.npmrc` | Git, EditorConfig, Node/npm (подробнее в `.mdc`) |
 | [`AGENTS.md`](AGENTS.md) | Краткий справочник для AI-агента |
@@ -134,7 +126,7 @@ flowchart LR
 | `npm run build` | `tsc`: `src/` → корень |
 | `npm test` | `pretest` (build) + `test-rules.cjs` + `test-cli2-config.cjs` + `check-function-order.cjs` |
 | `npm run lint:md` | Локальный lint папки/файла (`prelint:md` → build) |
-| `npm run sync:cli2-config` | Регенерация `.markdownlint-cli2.jsonc` из `schema/.markdownlint.jsonc` |
+| `npm run sync:cli2-config` | Регенерация `.markdownlint-cli2.jsonc` из schema + overrides + custom keys из `markdownlint-rules.js` + `ignores` (перед sync — `npm run build`) |
 | `npm run check` | `tsc --noEmit`, `node --check` артефактов, порядок функций (**без** пересборки) |
 | `npm run check:order` | Только проверка порядка функций |
 

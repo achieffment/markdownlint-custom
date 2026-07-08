@@ -30,7 +30,7 @@ alwaysApply: true
 | Проверка | Действие |
 |----------|----------|
 | нет `node_modules` | `npm ci` (lock) / `npm install` |
-| нет `markdownlint-rules.js` | `npm run build` |
+| нет `markdownlint-rules.js` или `markdownlint-hlprs.js` | `npm run build` |
 
 Оболочки (`.sh` / `.bat` / `.command`) — только `cd` + `node bin/lint-markdown.cjs`. `.sh` — `set -euo pipefail`; `.command` (Finder) — без strict-mode.
 

@@ -13,9 +13,6 @@ class MarkdownDocument {
     walkCodeFenceAware(handlers) {
         this.codeWalker.walkCodeFenceAware(this.lines, handlers);
     }
-    eachOpeningCodeFence(fn) {
-        this.codeWalker.eachOpeningCodeFence(this.lines, fn);
-    }
     skipBlankFwd(ix) {
         return this.lineParser.skipBlankFwd(this.lines, ix);
     }

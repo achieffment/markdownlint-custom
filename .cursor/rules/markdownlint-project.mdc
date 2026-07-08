@@ -20,7 +20,7 @@ alwaysApply: true
 | [`.markdownlint-cli2.jsonc`](../.markdownlint-cli2.jsonc) | **Единый конфиг:** built-in MD001–MD060 + custom rules + `customRules`; IDE и CLI |
 | [`load-cli2-config.cjs`](../load-cli2-config.cjs) | Загрузка `config` из cli2 для [`test-rules.cjs`](../test-rules.cjs) |
 | [`test-cli2-config.cjs`](../test-cli2-config.cjs) | Parity cli2 `config` ↔ [`schema/.markdownlint.jsonc`](../schema/.markdownlint.jsonc) |
-| [`scripts/sync-cli2-config.cjs`](../scripts/sync-cli2-config.cjs) | Регенерация `.markdownlint-cli2.jsonc` из schema (`npm run sync:cli2-config`) |
+| [`scripts/sync-cli2-config.cjs`](../scripts/sync-cli2-config.cjs) | Регенерация `.markdownlint-cli2.jsonc` из schema + custom keys из `markdownlint-rules.js` (`npm run build` перед sync) |
 | [`schema/.markdownlint.jsonc`](../schema/.markdownlint.jsonc) | Snapshot official schema для тестов |
 | [`bin/`](../bin/) | `lint-markdown.cjs`; `.sh` / `.bat` / `.command` |
 | [`markdownlint-hlprs.js`](../markdownlint-hlprs.js) | **Артефакт tsc:** публичный API для `test-rules.cjs` (compat); правила — DI через `AppContext` |
@@ -32,7 +32,7 @@ alwaysApply: true
 | `.gitignore`, `.gitattributes` | Git: ignore-паттерны; LF в index и working tree (Windows: `core.autocrlf=false`) |
 | `.editorconfig` | LF, отступ 4 пробела (EditorConfig) |
 | `.nvmrc`, `.npmrc` | Node 22 (nvm), `engine-strict` для `engines` |
-| [`package.json`](../package.json) | npm-скрипты, `engines.node >= 20`, `type: commonjs` |
+| [`package.json`](../package.json) | npm-скрипты, `engines.node >= 22`, `type: commonjs` |
 | [`AGENTS.md`](../AGENTS.md) | Краткий справочник для AI-агента |
 | [`README.md`](../README.md) | Документация для людей (onboarding, правила проверки кратко) |
 | [`.cursor/rules/`](../.cursor/rules/) | Правила Cursor; каталог — [AGENTS.md](../AGENTS.md) |
@@ -44,7 +44,7 @@ alwaysApply: true
 | `minimum-h2-heading` | Минимум один заголовок H2 (`##`) вне code fence | `markdownlint-examples/minimum-h2-heading/` |
 | `list-items-end-with-semicolon-or-colon` | Пункт списка: `;`, перед блоком кода или **прямым дочерним** пунктом — `:` | `markdownlint-examples/list-items-end-with-semicolon-or-colon/` |
 | `list-blank-line-spacing` | Numbered: blank до/после и единообразно между соседними num-пунктами блока (включая поднумерацию); bulleted: blank до/после блока (между пунктами не проверяется) | `markdownlint-examples/list-blank-line-spacing/` |
-| `list-preceded-by-colon` | Обычный текст (не пункт списка) перед первым пунктом блока верхнего уровня (num/bul) заканчивается `:`; вложенные не проверяются | `markdownlint-examples/list-preceded-by-colon/` |
+| `list-preceded-by-colon` | Обычный текст (не пункт списка) перед первым пунктом блока верхнего уровня (num/bul) заканчивается `:`; skip prev: заголовок, пункт списка, code fence; вложенные не проверяются | `markdownlint-examples/list-preceded-by-colon/` |
 | `codeblock-preceded-by-colon` | Открывающая `` ``` ``: строка перед ней заканчивается `:` (не пункт списка — те проверяет `list-items-*`) | `markdownlint-examples/codeblock-preceded-by-colon/` |
 | `no-leading-spaces` | Нет отступа у обычного текста, пунктов списка верхнего уровня и обозначений блока кода (`` ``` ``); вложенные пункты — при `indent >=` предыдущего | `markdownlint-examples/no-leading-spaces/` |
 | `sentences-end-with-mark` | Обычный текст заканчивается `.`, `!`, `?`, `:` или `;`; skip: заголовки, blockquote, HR, списки | `markdownlint-examples/sentences-end-with-mark/` |
@@ -89,21 +89,6 @@ alwaysApply: true
 - **Пустые строки:** между целью и prev пропускаются (`skipBlankBck`); `:` ищется на первой непустой строке выше.
 - **Тело пункта:** текст после code fence внутри пункта не считается отдельным блоком (`findNumItemEnd` / `findBulItemEnd`).
 
-### `no-leading-spaces` — политика
-
-- **Scope:** строки вне code fence и строки-обозначения блока (opening/closing `` ``` ``).
-- **Обход:** `CodeWalker.walkCodeFenceAware` из [`src/domain/code-walker.ts`](../src/domain/code-walker.ts) (строки fence не пропускаются; не `eachLineOutsideCode`).
-- **Skip:** заголовки (`#`); содержимое между fence не проверяется.
-- **Fence:** отступ 0 у opening/closing `` ``` ``.
-- **Пункт списка:** отступ 0; вложенный допустим при `indent > 0` и `indent >=` отступа предыдущего пункта списка (`findPrevListInd`; соседи на одном уровне — с тем же отступом); при поиске предыдущего пункта пропускаются блоки code fence (как тело пункта в `findNumItemEnd`).
-- **Обычный текст:** отступ 0.
-
-### `sentences-end-with-mark` — политика
-
-- **Scope:** непустые строки вне code fence.
-- **Skip:** заголовки, blockquote (`>`), HR (`---` / `***` / `___`), любые пункты списка (`isLstItem`).
-- **Проверка:** строка заканчивается `.`, `!`, `?`, `:` или `;`.
-
 ### `codeblock-preceded-by-colon` — политика
 
 - **Scope:** только **открывающие** `` ``` `` (не закрывающие).
@@ -111,6 +96,21 @@ alwaysApply: true
 - **Skip prev:** заголовок, **любой** пункт списка (`isLstItem` / `lstItemRx`), code fence (`checkPrecededByColon`); нет непустой строки выше — skip.
 - **Пустые строки:** между fence и prev пропускаются (`skipBlankBck`); `:` ищется на первой непустой строке выше.
 - **Обход fence:** `CodeWalker.eachOpeningCodeFence` из [`src/domain/code-walker.ts`](../src/domain/code-walker.ts) (не `walkOutsideCode`, который пропускает строки `` ``` ``).
+
+### `no-leading-spaces` — политика
+
+- **Scope:** строки вне code fence и строки-обозначения блока (opening/closing `` ``` ``).
+- **Обход:** `CodeWalker.walkCodeFenceAware` из [`src/domain/code-walker.ts`](../src/domain/code-walker.ts) (строки fence не пропускаются; не `eachLineOutsideCode`).
+- **Skip:** заголовки (`#`); содержимое между fence не проверяется.
+- **Fence:** отступ 0 у opening/closing `` ``` ``.
+- **Пункт списка:** отступ 0; вложенный допустим при `indent > 0` и `indent >=` отступа предыдущего пункта списка (`findPrevListInd`; соседи на одном уровне — с тем же отступом); при поиске предыдущего пункта пропускаются блоки code fence (как тело пункта в `findNumItemEnd`). При `indent > 0` ошибка на **первом** пункте блока (`prevInd < 0`); siblings с тем же отступом (`currInd >= prevInd`) допустимы — осознанная ленивость.
+- **Обычный текст:** отступ 0.
+
+### `sentences-end-with-mark` — политика
+
+- **Scope:** непустые строки вне code fence.
+- **Skip:** заголовки, blockquote (`>`), HR (`---` / `***` / `___`), любые пункты списка (`isLstItem`).
+- **Проверка:** строка заканчивается `.`, `!`, `?`, `:` или `;`.
 
 ### Публичный API хелперов (`markdownlint-hlprs.js`)
 
@@ -150,7 +150,9 @@ alwaysApply: true
 
 `customRules`: `["./markdownlint-rules.js"]`.
 
-Синхронизация config с upstream schema: `npm run sync:cli2-config` (сохраняет overrides, custom keys, `ignores`).
+`globs`: `["**/*.{md,markdown}", "!node_modules"]` — workspace/IDE; в [`bin/lint-markdown.cjs`](../bin/lint-markdown.cjs) для папок — `#node_modules`.
+
+Синхронизация config с upstream schema: `npm run sync:cli2-config` (сохраняет overrides, custom keys из `markdownlint-rules.js`, `ignores`).
 
 ## Scope lint
 
@@ -193,7 +195,7 @@ alwaysApply: true
 | Windows CMD | `bin\lint-markdown.bat <путь>` |
 | macOS Finder | `bin/lint-markdown.command` |
 
-Bootstrap ([`bin/lint-markdown.cjs`](../bin/lint-markdown.cjs)): `node_modules` → `npm ci`/`install`; нет `markdownlint-rules.js` → `npm run build`. Оболочки — thin. Подробнее — [platform-scripts.mdc](platform-scripts.mdc).
+Bootstrap ([`bin/lint-markdown.cjs`](../bin/lint-markdown.cjs)): `node_modules` → `npm ci`/`install`; нет `markdownlint-rules.js` или `markdownlint-hlprs.js` → `npm run build`. Оболочки — thin. Подробнее — [platform-scripts.mdc](platform-scripts.mdc).
 
 ## Подключение в VS Code
 
@@ -209,7 +211,7 @@ Bootstrap ([`bin/lint-markdown.cjs`](../bin/lint-markdown.cjs)): `node_modules` 
 
 1. `_err.md` / `_suc.md` в `markdownlint-examples/<rule-name>/`
 2. Класс в `src/rules/<rule-name>.ts`; ключи — [`details.ts`](../src/details.ts), regex — [`regex.ts`](../src/regex.ts); domain — при необходимости
-3. `new XxxRule(deps).toRule()` в [`markdownlint-rules.ts`](../src/markdownlint-rules.ts); ключ `"<name>": true` в [`.markdownlint-cli2.jsonc`](../.markdownlint-cli2.jsonc) и блок custom в [`scripts/sync-cli2-config.cjs`](../scripts/sync-cli2-config.cjs); новый checker — [`AppContext`](../src/composition/app-context.ts)
+3. `new XxxRule(deps).toRule()` в [`markdownlint-rules.ts`](../src/markdownlint-rules.ts); `npm run build && npm run sync:cli2-config` для [`.markdownlint-cli2.jsonc`](../.markdownlint-cli2.jsonc) (custom keys из `markdownlint-rules.js`); новый checker — [`AppContext`](../src/composition/app-context.ts)
 4. При ≥3 повторах алгоритма — domain-класс (не barrel)
 
 ## Контракты

@@ -31,7 +31,7 @@ export class ListItemsEndRule extends BaseRule {
             const endsOk = needsColon ? endsWithColonRx.test(cont) : endsWithSemiRx.test(cont);
             const lstDet = needsColon ? details.listItemsColon : details.listItemsSemi;
             if (!cont || !endsOk) {
-                onError({ lineNumber: ix + 1, detail: lstDet, context: trim || "Пустой пункт списка" });
+                onError({ lineNumber: ix + 1, detail: lstDet, context: trim || details.listItemsEmpty });
             }
         });
     }

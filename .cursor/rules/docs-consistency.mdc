@@ -28,7 +28,7 @@ alwaysApply: true
 
 | Тип изменения | Код / тесты | Правила и docs |
 |---------------|-------------|----------------|
-| **Новое lint-правило** | `src/rules/`, [`markdownlint-rules.ts`](../src/markdownlint-rules.ts), [`details.ts`](../src/details.ts), [`AppContext`](../src/composition/app-context.ts), `markdownlint-examples/<name>/`, [`test-rules.cjs`](../test-rules.cjs), `npm test` | Каталог + политика в `markdownlint-project.mdc`; ключ custom в [`.markdownlint-cli2.jsonc`](../.markdownlint-cli2.jsonc) и блок custom в [`scripts/sync-cli2-config.cjs`](../scripts/sync-cli2-config.cjs); строки в `AGENTS.md`, README |
+| **Новое lint-правило** | `src/rules/`, [`markdownlint-rules.ts`](../src/markdownlint-rules.ts), [`details.ts`](../src/details.ts), [`AppContext`](../src/composition/app-context.ts), `markdownlint-examples/<name>/`, [`test-rules.cjs`](../test-rules.cjs), `npm test` | Каталог + политика в `markdownlint-project.mdc`; обновить [`.markdownlint-cli2.jsonc`](../.markdownlint-cli2.jsonc): `npm run build && npm run sync:cli2-config` (custom keys из `markdownlint-rules.js`); строки в `AGENTS.md`, README |
 | **Изменение политики lint-правила** | `src/` (+ domain), примеры, inline в `test-rules.cjs`, `npm test` | Политика в `markdownlint-project.mdc`; `AGENTS.md` / README — если изменилась суть для пользователя |
 | **Изменение `description` / `detail`** | [`details.ts`](../src/details.ts), класс правила | Политика в `.mdc`; краткие строки в `AGENTS.md` / README при расхождении |
 | **Константы regex** | [`regex.ts`](../src/regex.ts), потребители в `src/` и [`test-rules.cjs`](../test-rules.cjs) (`h2Rx` exclusivity) | Политика в `markdownlint-project.mdc` при смене семантики; `npm test` |
@@ -41,11 +41,11 @@ alwaysApply: true
 | **Структура репозитория** | — | `markdownlint-project.mdc`, `AGENTS.md` scope; README «Структура» (кратко + ссылка на `.mdc`) |
 | **npm-скрипты** | [`package.json`](../package.json) | README «npm-скрипты»; «Верификация» в `AGENTS.md` |
 | **CLI / bin / конфиг lint** | [`.markdownlint-cli2.jsonc`](../.markdownlint-cli2.jsonc), [`load-cli2-config.cjs`](../load-cli2-config.cjs), [`test-cli2-config.cjs`](../test-cli2-config.cjs), [`bin/`](../bin/), `package.json` `lint:md` | `platform-scripts.mdc`, `markdownlint-project.mdc`, `AGENTS.md`, README; `ignores`/overrides → examples + test-rules |
-| **Schema / sync cli2** | [`schema/.markdownlint.jsonc`](../schema/.markdownlint.jsonc), [`scripts/sync-cli2-config.cjs`](../scripts/sync-cli2-config.cjs), `.markdownlint-cli2.jsonc`, [`test-cli2-config.cjs`](../test-cli2-config.cjs) | `markdownlint-project.mdc` (overrides, sync); `npm test` |
+| **Schema / sync cli2** | [`schema/.markdownlint.jsonc`](../schema/.markdownlint.jsonc), [`scripts/sync-cli2-config.cjs`](../scripts/sync-cli2-config.cjs), `.markdownlint-cli2.jsonc`, [`test-cli2-config.cjs`](../test-cli2-config.cjs) | `markdownlint-project.mdc` (overrides, sync); перед sync — `npm run build`; `npm test` |
 | **Новое/удаление `.mdc`** | — | Каталог в [AGENTS.md](../AGENTS.md); строка «`.cursor/rules/`» в `markdownlint-project.mdc`; роли в этом файле |
-| **Удаление lint-правила** | `src/`, examples, `test-rules.cjs` | Обратный чеклист: все docs + `.markdownlint-cli2.jsonc` + [`scripts/sync-cli2-config.cjs`](../scripts/sync-cli2-config.cjs) |
+| **Удаление lint-правила** | `src/`, examples, `test-rules.cjs` | Обратный чеклист: все docs + `npm run build && npm run sync:cli2-config` для `.markdownlint-cli2.jsonc` |
 
-Список `names` custom lint-правил — одинаковый в [`markdownlint-rules.ts`](../src/markdownlint-rules.ts), [`.markdownlint-cli2.jsonc`](../.markdownlint-cli2.jsonc), [`scripts/sync-cli2-config.cjs`](../scripts/sync-cli2-config.cjs), каталогах docs.
+Список `names` custom lint-правил — одинаковый в [`markdownlint-rules.ts`](../src/markdownlint-rules.ts) / [`markdownlint-rules.js`](../markdownlint-rules.js), [`.markdownlint-cli2.jsonc`](../.markdownlint-cli2.jsonc) и каталогах docs; [`scripts/sync-cli2-config.cjs`](../scripts/sync-cli2-config.cjs) генерирует custom keys из runtime rules (не хранит список).
 
 ## Порядок работы
 
@@ -63,11 +63,11 @@ Workflow — канон в [AGENTS.md](../AGENTS.md); `.mdc` не дублиру
 - Развести расхождения в `names` между кодом и документами
 - Дублировать полные политики в README или AGENTS.md
 - Менять workflow в `.mdc`, не сверившись с [AGENTS.md](../AGENTS.md)
-- Забыть `.markdownlint-cli2.jsonc` или [`scripts/sync-cli2-config.cjs`](../scripts/sync-cli2-config.cjs) при добавлении/удалении custom lint-правила
+- Забыть `npm run build && npm run sync:cli2-config` (обновить `.markdownlint-cli2.jsonc`) при добавлении/удалении custom lint-правила
 
 ## Финальный чеклист
 
-- [ ] Каталоги custom `names` совпадают в коде, `.markdownlint-cli2.jsonc`, `scripts/sync-cli2-config.cjs`, `.mdc`, `AGENTS.md`, README
+- [ ] Каталоги custom `names` совпадают в коде (`markdownlint-rules.js`), `.markdownlint-cli2.jsonc`, `.mdc`, `AGENTS.md`, README; sync round-trip проходит (`test-cli2-config.cjs`)
 - [ ] Политики и конвенции примеров актуальны в `markdownlint-project.mdc`
 - [ ] Модули актуальны в `ts-dev.mdc`, конвенции — в `ts-style.mdc` (если менялся TS)
 - [ ] Конвенции test актуальны в `js-dev.mdc`, `js-style.mdc` (если менялся test)

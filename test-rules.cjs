@@ -324,6 +324,21 @@ if (!colonSiblingFired.has("list-items-end-with-semicolon-or-colon") || colonSib
     console.log("OK   colon before sibling → list-items-end-with-semicolon-or-colon");
 }
 
+const semiChildErr = `## T
+
+1. root;
+
+   1.1 child;
+`;
+const semiChildErrRes = lintStrings({ t: semiChildErr }, ["list-items-end-with-semicolon-or-colon", "minimum-h2-heading"]);
+const semiChildViol = semiChildErrRes.t || [];
+const semiChildLines = semiChildViol.map(v => v.lineNumber).sort((a, b) => a - b);
+if (semiChildLines.join() !== "3") {
+    assert(false, `semicolon before child err lines: expected 3 got ${semiChildLines.join() || "none"}`);
+} else {
+    console.log("OK   semicolon before child → list-items on line 3");
+}
+
 const subNumSiblingOk = `## T
 
 1. root:
@@ -442,6 +457,21 @@ if (!tightThenBlankFired.has("list-blank-line-spacing")) {
     }
 }
 
+const numSameKindBoundOk = `## T
+
+Текст:
+
+1. one;
+2. two;
+1. three;
+`;
+const numSameKindBoundOkRes = lintStrings({ t: numSameKindBoundOk }, ["list-blank-line-spacing", "minimum-h2-heading", "list-preceded-by-colon", "list-items-end-with-semicolon-or-colon"]);
+if (getFiredRules(numSameKindBoundOkRes.t || []).size > 0) {
+    assert(false, "num same-kind bound skip: " + [...getFiredRules(numSameKindBoundOkRes.t || [])].join(", "));
+} else {
+    console.log("OK   num same-kind bound skip → clean");
+}
+
 const listColonErr = `## T
 
 Текст перед списком.
@@ -500,6 +530,20 @@ if (listColonNestedFired.has("list-preceded-by-colon")) {
     assert(false, "nested list must not trigger list-preceded-by-colon");
 } else {
     console.log("OK   nested list skips list-preceded-by-colon");
+}
+
+const listColonBulNestedOk = `## T
+
+Текст без двоеточия.
+
+   - вложенный;
+`;
+const listColonBulNestedOkRes = lintStrings({ t: listColonBulNestedOk }, ["list-preceded-by-colon", "minimum-h2-heading", "list-items-end-with-semicolon-or-colon"]);
+const listColonBulNestedFired = getFiredRules(listColonBulNestedOkRes.t || []);
+if (listColonBulNestedFired.has("list-preceded-by-colon")) {
+    assert(false, "indented bullet must not trigger list-preceded-by-colon");
+} else {
+    console.log("OK   indented bullet skips list-preceded-by-colon");
 }
 
 const listColonSkipHeadingOk = `## T
@@ -759,6 +803,26 @@ if (getFiredRules(noLeadingNestedOkRes.t || []).size > 0) {
     assert(false, "nested list indent ok: " + [...getFiredRules(noLeadingNestedOkRes.t || [])].join(", "));
 } else {
     console.log("OK   nested list indent → clean");
+}
+
+const noLeadingDedntErr = `## T
+
+1. parent:
+   1.1 ok;
+ 1.2 bad;
+`;
+const noLeadingDedntErrRes = lintStrings({ t: noLeadingDedntErr }, ["no-leading-spaces", "minimum-h2-heading", "list-items-end-with-semicolon-or-colon", "list-blank-line-spacing"]);
+const noLeadingDedntViol = noLeadingDedntErrRes.t || [];
+const noLeadingDedntFired = getFiredRules(noLeadingDedntViol);
+if (!noLeadingDedntFired.has("no-leading-spaces") || noLeadingDedntFired.size !== 1) {
+    assert(false, "list dedent err: expected no-leading-spaces only, got " + [...noLeadingDedntFired].join(", "));
+} else {
+    const dedntLine = noLeadingDedntViol.find(v => v.ruleNames.includes("no-leading-spaces"))?.lineNumber;
+    if (dedntLine !== 5) {
+        assert(false, `list dedent err line: expected 5 got ${dedntLine ?? "none"}`);
+    } else {
+        console.log("OK   list dedent → no-leading-spaces on line 5");
+    }
 }
 
 const noLeadingBulSiblingsOk = `## T

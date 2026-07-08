@@ -6,6 +6,7 @@ const repoRoot = path.join(__dirname, "..");
 const nodeModules = path.join(repoRoot, "node_modules");
 const lockPath = path.join(repoRoot, "package-lock.json");
 const rulesJs = path.join(repoRoot, "markdownlint-rules.js");
+const hlprsJs = path.join(repoRoot, "markdownlint-hlprs.js");
 const cli2Bin = path.join(
     nodeModules,
     ".bin",
@@ -44,7 +45,7 @@ const ensureNodeModules = () => {
 };
 
 const ensureBuild = () => {
-    if (fs.existsSync(rulesJs)) return;
+    if (fs.existsSync(rulesJs) && fs.existsSync(hlprsJs)) return;
     console.log("Building custom rules (npm run build)…");
     runNpm(["run", "build"]);
 };

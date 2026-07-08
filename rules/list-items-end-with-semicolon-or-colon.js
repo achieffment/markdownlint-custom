@@ -28,7 +28,7 @@ class ListItemsEndRule extends base_rule_1.BaseRule {
             const endsOk = needsColon ? regex_1.endsWithColonRx.test(cont) : regex_1.endsWithSemiRx.test(cont);
             const lstDet = needsColon ? details_1.details.listItemsColon : details_1.details.listItemsSemi;
             if (!cont || !endsOk) {
-                onError({ lineNumber: ix + 1, detail: lstDet, context: trim || "Пустой пункт списка" });
+                onError({ lineNumber: ix + 1, detail: lstDet, context: trim || details_1.details.listItemsEmpty });
             }
         });
     }

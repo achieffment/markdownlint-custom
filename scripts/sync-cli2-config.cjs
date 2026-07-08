@@ -40,16 +40,13 @@ body = body.replace(
     `  // MD043/required-headings — дефолт schema с "headings": [] некорректно срабатывает; отключено
   "MD043": false,`
 );
+const customRules = require(path.join(repoRoot, "markdownlint-rules.js"));
+const customKeys = customRules.flatMap(rule => rule.names);
+const customBlock = customKeys.map(name => `  "${name}": true`).join(",\n");
 body = body.replace(/\n\}$/, `,
 
   // Custom rules (markdownlint-custom)
-  "minimum-h2-heading": true,
-  "list-items-end-with-semicolon-or-colon": true,
-  "list-blank-line-spacing": true,
-  "list-preceded-by-colon": true,
-  "codeblock-preceded-by-colon": true,
-  "no-leading-spaces": true,
-  "sentences-end-with-mark": true`);
+${customBlock}`);
 const indented = body.split("\n").map(line => line ? "  " + line : line).join("\n");
 const out = `// markdownlint-cli2 — единый конфиг для IDE, CLI и bin-скриптов
 // Scope: правила для пользовательских папок с документацией; meta-файлы репозитория — в ignores
