@@ -10,11 +10,11 @@
 
 | Область | Файлы |
 |---------|-------|
-| Правила | `src/rules/*.ts` (`extends BaseRule`), barrel `src/markdownlint-rules.ts` |
+| Правила | `src/rules/*.ts` (`extends BaseRule`), barrel `src/markdownlint-rules.ts`, `src/details.ts`, `src/regex.ts` |
 | Domain / core | `src/core/`, `src/domain/`, `src/composition/app-context.ts` |
 | Barrels | `src/markdownlint-rules.ts`, `src/markdownlint-hlprs.ts` |
 | Runtime | корневые `*.js`, `core/`, `domain/`, `composition/`, `rules/` (артефакты tsc; entry points: `markdownlint-rules.js`, `markdownlint-hlprs.js`) |
-| Конфиг lint | `.markdownlint-cli2.jsonc`, `load-cli2-config.cjs`, `schema/.markdownlint.jsonc`, `scripts/sync-cli2-config.cjs` |
+| Конфиг lint | `.markdownlint-cli2.jsonc`, `load-cli2-config.cjs`, `schema/`, `scripts/sync-cli2-config.cjs` |
 | CLI / bin | `bin/lint-markdown.cjs`, `bin/lint-markdown.{sh,bat,command}` |
 | Примеры | `markdownlint-examples/**/*.md` |
 | Тесты | `test-rules.cjs`, `test-cli2-config.cjs`, `check-function-order.cjs` |
@@ -57,7 +57,7 @@
 3. **Minimal diff** — без drive-by refactor
 4. **Match conventions** — `extends BaseRule`, `AppContext`, [`src/details.ts`](src/details.ts), стиль как в файле
 5. **Preserve contracts** — `onError({ lineNumber, detail, context? })`, публичный API hlprs, runtime CommonJS
-6. **Register** — `new XxxRule(deps).toRule()` в [`src/markdownlint-rules.ts`](src/markdownlint-rules.ts); новый checker → [`src/composition/app-context.ts`](src/composition/app-context.ts); обновить cli2: `npm run build && npm run sync:cli2-config` (custom keys из `markdownlint-rules.js`)
+6. **Register** — `new XxxRule(deps).toRule()` в [`src/markdownlint-rules.ts`](src/markdownlint-rules.ts); новый checker → [`src/composition/app-context.ts`](src/composition/app-context.ts); обновить cli2: `npm run sync:cli2-config` (через `presync:cli2-config` → build; custom keys из `markdownlint-rules.js`)
 7. **Test** — `npm test` (pretest → build; test-rules + test-cli2-config + check-function-order)
 8. **Sync docs** — по [docs-consistency.mdc](.cursor/rules/docs-consistency.mdc): `.mdc` (по матрице) → AGENTS → README
 
@@ -65,7 +65,7 @@
 
 ## Верификация
 
-См. шаг 7 workflow. Дополнительно — `npm run check`, `npm run lint:md`, `npm run sync:cli2-config` (после `npm run build`: schema + overrides + custom keys из `markdownlint-rules.js`, `ignores`).
+См. шаг 7 workflow. Дополнительно — `npm run check`, `npm run lint:md`, `npm run sync:cli2-config` (через `presync:cli2-config` → build: schema + overrides + custom keys из `markdownlint-rules.js`, `ignores`).
 
 После правки примеров — `_err` срабатывает **только** на целевое custom-правило (полный конфиг); inline-кейсы в `test-rules.cjs` обязаны проходить.
 

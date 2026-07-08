@@ -20,7 +20,7 @@ alwaysApply: true
 | [`.markdownlint-cli2.jsonc`](../.markdownlint-cli2.jsonc) | **Единый конфиг:** built-in MD001–MD060 + custom rules + `customRules`; IDE и CLI |
 | [`load-cli2-config.cjs`](../load-cli2-config.cjs) | Загрузка `config` из cli2 для [`test-rules.cjs`](../test-rules.cjs) |
 | [`test-cli2-config.cjs`](../test-cli2-config.cjs) | Parity cli2 `config` ↔ [`schema/.markdownlint.jsonc`](../schema/.markdownlint.jsonc) |
-| [`scripts/sync-cli2-config.cjs`](../scripts/sync-cli2-config.cjs) | Регенерация `.markdownlint-cli2.jsonc` из schema + custom keys из `markdownlint-rules.js` (`npm run build` перед sync) |
+| [`scripts/sync-cli2-config.cjs`](../scripts/sync-cli2-config.cjs) | Регенерация `.markdownlint-cli2.jsonc` из schema + custom keys из `markdownlint-rules.js` (`presync:cli2-config` → build) |
 | [`schema/.markdownlint.jsonc`](../schema/.markdownlint.jsonc) | Snapshot official schema для тестов |
 | [`bin/`](../bin/) | `lint-markdown.cjs`; `.sh` / `.bat` / `.command` |
 | [`markdownlint-hlprs.js`](../markdownlint-hlprs.js) | **Артефакт tsc:** публичный API для `test-rules.cjs` (compat); правила — DI через `AppContext` |
@@ -43,7 +43,7 @@ alwaysApply: true
 |---------|---------------|---------|
 | `minimum-h2-heading` | Минимум один заголовок H2 (`##`) вне code fence | `markdownlint-examples/minimum-h2-heading/` |
 | `list-items-end-with-semicolon-or-colon` | Пункт списка: `;`, перед блоком кода или **прямым дочерним** пунктом — `:` | `markdownlint-examples/list-items-end-with-semicolon-or-colon/` |
-| `list-blank-line-spacing` | Numbered: blank до/после и единообразно между соседними num-пунктами блока (включая поднумерацию); bulleted: blank до/после блока (между пунктами не проверяется) | `markdownlint-examples/list-blank-line-spacing/` |
+| `list-blank-line-spacing` | Numbered: blank до/после (EOF skip, same-kind skip) и единообразно между соседними num-пунктами блока (включая поднумерацию); bulleted: blank до/после блока (между пунктами не проверяется) | `markdownlint-examples/list-blank-line-spacing/` |
 | `list-preceded-by-colon` | Обычный текст (не пункт списка) перед первым пунктом блока верхнего уровня (num/bul) заканчивается `:`; skip prev: заголовок, пункт списка, code fence; вложенные не проверяются | `markdownlint-examples/list-preceded-by-colon/` |
 | `codeblock-preceded-by-colon` | Открывающая `` ``` ``: строка перед ней заканчивается `:` (не пункт списка — те проверяет `list-items-*`) | `markdownlint-examples/codeblock-preceded-by-colon/` |
 | `no-leading-spaces` | Нет отступа у обычного текста, пунктов списка верхнего уровня и обозначений блока кода (`` ``` ``); вложенные пункты — при `indent >=` предыдущего | `markdownlint-examples/no-leading-spaces/` |
@@ -55,7 +55,7 @@ alwaysApply: true
 - `_err.md` — нарушает **только** целевое custom-правило (`npm test` проверяет exclusivity при полном конфиге из `.markdownlint-cli2.jsonc`).
 - `_err.md` (кроме `minimum-h2-heading`) содержит `##`, чтобы не срабатывал `minimum-h2-heading`; прочий текст и списки оформлены под остальные правила.
 - `_suc.md` — проходит все custom rules.
-- **`_err.md` и `_suc.md` — один и тот же текст:** в `_suc` исправлены только нарушения целевого правила (и минимальные правки для exclusivity в `_err`, например `;` / `:` у пунктов списка). Не менять порядок блоков, не подменять сценарии «успешным» вариантом. Исключение: `list-blank-line-spacing` — непустые строки идентичны, отличаются только пустые строки (сама правка — blank lines). `test-rules.cjs`: `checkExamplePair`, допустимые отличия строк — `allowedLineDiff`.
+- **`_err.md` и `_suc.md` — один и тот же текст:** в `_suc` исправлены только нарушения целевого правила (и минимальные правки для exclusivity в `_err`, например `;` / `:` у пунктов списка). Не менять порядок блоков, не подменять сценарии «успешным» вариантом. Исключение: `list-blank-line-spacing` — непустые строки идентичны, отличаются только пустые строки (сама правка — blank lines). `test-rules.cjs`: `checkExamplePair`, допустимые отличия строк — `allowedLineDiff` (например `.`→`:` у пунктов списка, `trimStart` для `no-leading-spaces`).
 - **`minimum-h2-heading`:** в `_suc` добавляется строка `## …` **в конце** документа (не между блоками), чтобы строки 1…N совпадали с `_err`; `npm test` проверяет это (`checkExamplePair`).
 - **Code fence в примерах:** открывающая `` ``` `` с идентификатором языка (`js`, `pr`, …); голый `` ``` `` допустим только в inline-кейсах `test-rules.cjs`.
 - Вложенные нумерованные пункты: поднумерация с отступом — `1.1`, `1.1.1`, `1.1.1.1` и глубже (не повторный маркер `1.`).
@@ -70,7 +70,7 @@ alwaysApply: true
 
 - **Scope:** все пункты списка (num/bul, вложенные), вне code fence.
 - **Проверка:** текст пункта заканчивается `;`; если следующая непустая строка — открывающая `` ``` `` или **прямой** дочерний пункт (больший отступ; поднумерация `1.` → `1.1`, `1.1` → `1.1.1`, не sibling `1.1` → `1.2`), то `:`.
-- **Пустой пункт** (только маркер) — ошибка.
+- **Пустой пункт** (только маркер) — ошибка с `detail: listItemsEmpty`; контент после маркера — через `ListLineParser.trimStart`, не `line.trim()` (иначе `- ` теряет пробел маркера).
 
 ### `list-blank-line-spacing` — политика
 
@@ -118,7 +118,7 @@ alwaysApply: true
 
 | Экспорт | Назначение |
 |---------|------------|
-| `lstItemRx` | Regex пункта списка (num/bul) на `trim` |
+| `lstItemRx` | Regex пункта списка (num/bul) на `trimStart` строки |
 | `isLstItem` | Пункт списка по строке |
 | `isChildLstItem` | Следующий пункт — прямой дочерний (отступ или поднумерация `1.` → `1.1`) |
 | `getIndent` | Длина ведущих пробелов |
@@ -211,7 +211,7 @@ Bootstrap ([`bin/lint-markdown.cjs`](../bin/lint-markdown.cjs)): `node_modules` 
 
 1. `_err.md` / `_suc.md` в `markdownlint-examples/<rule-name>/`
 2. Класс в `src/rules/<rule-name>.ts`; ключи — [`details.ts`](../src/details.ts), regex — [`regex.ts`](../src/regex.ts); domain — при необходимости
-3. `new XxxRule(deps).toRule()` в [`markdownlint-rules.ts`](../src/markdownlint-rules.ts); `npm run build && npm run sync:cli2-config` для [`.markdownlint-cli2.jsonc`](../.markdownlint-cli2.jsonc) (custom keys из `markdownlint-rules.js`); новый checker — [`AppContext`](../src/composition/app-context.ts)
+3. `new XxxRule(deps).toRule()` в [`src/markdownlint-rules.ts`](../src/markdownlint-rules.ts); `npm run sync:cli2-config` для [`.markdownlint-cli2.jsonc`](../.markdownlint-cli2.jsonc) (custom keys из `markdownlint-rules.js`); новый checker — [`AppContext`](../src/composition/app-context.ts)
 4. При ≥3 повторах алгоритма — domain-класс (не barrel)
 
 ## Контракты

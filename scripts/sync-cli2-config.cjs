@@ -5,6 +5,11 @@ const repoRoot = path.join(__dirname, "..");
 const schemaPath = process.argv[2] || path.join(repoRoot, "schema", ".markdownlint.jsonc");
 const outPath = process.argv[3] || path.join(repoRoot, ".markdownlint-cli2.jsonc");
 
+if (!fs.existsSync(schemaPath)) {
+    console.error(`Schema not found: ${schemaPath}`);
+    process.exit(1);
+}
+
 let body = fs.readFileSync(schemaPath, "utf8");
 body = body.replace(/^\/\/ Example[^\n]*\n{\n\n/, "");
 body = body.replace(/  \/\/ Path to configuration[^\n]*\n  "extends": null,\n\n/, "");
@@ -63,5 +68,5 @@ ${indented}
   "globs": ["**/*.{md,markdown}", "!node_modules"]
 }
 `;
-fs.writeFileSync(outPath, out);
+fs.writeFileSync(outPath, out.endsWith("\n") ? out : out + "\n");
 console.log("written", outPath);

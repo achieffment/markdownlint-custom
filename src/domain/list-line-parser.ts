@@ -5,7 +5,7 @@ export class ListLineParser {
         return lstItemRx;
     }
 
-    private trimStart(line: string): string {
+    trimStart(line: string): string {
         return line.replace(/^\s*/, "");
     }
 

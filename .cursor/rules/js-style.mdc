@@ -60,14 +60,19 @@ let end = beg;
 - **Условие в одну строку**; guard без вызова — без `{}`; **вызов в теле — обязательно `{}`**
 
 ```javascript
-let cont = trim.replace(regex, "");
+const lineStart = lineParser.trimStart(line);
+let cont = lineStart.replace(regex, "");
 cont = cont.trim();
 const folcod = next < lines.length && /^```/.test(lines[next].trim());
 const folsub = next < lines.length && isChildLstItem(line, lines[next]);
 const needsColon = folcod || folsub;
 const endsOk = needsColon ? /:$/.test(cont) : /;$/.test(cont);
-if (!cont || !endsOk) {
-    onError({ lineNumber: ix + 1, detail, context: trim || "Пустой пункт списка" });
+if (!cont) {
+    onError({ lineNumber: ix + 1, detail: details.listItemsEmpty, context: trim });
+    return;
+}
+if (!endsOk) {
+    onError({ lineNumber: ix + 1, detail, context: trim });
 }
 ```
 

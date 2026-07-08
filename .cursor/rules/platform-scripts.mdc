@@ -17,6 +17,8 @@ alwaysApply: true
 | macOS (Finder) | bash | [`bin/lint-markdown.command`](../bin/lint-markdown.command) |
 | Любая (npm) | — | `npm run lint:md` |
 
+`npm run sync:cli2-config` — `presync:cli2-config` → `npm run build` (custom keys из `markdownlint-rules.js`).
+
 ## Архитектура
 
 - **Lint-runner** — [`bin/lint-markdown.cjs`](../bin/lint-markdown.cjs)
@@ -32,7 +34,7 @@ alwaysApply: true
 | нет `node_modules` | `npm ci` (lock) / `npm install` |
 | нет `markdownlint-rules.js` или `markdownlint-hlprs.js` | `npm run build` |
 
-Оболочки (`.sh` / `.bat` / `.command`) — только `cd` + `node bin/lint-markdown.cjs`. `.sh` — `set -euo pipefail`; `.command` (Finder) — без strict-mode.
+Оболочки (`.sh` / `.bat` / `.command`) — только `cd` + `node bin/lint-markdown.cjs`. `.sh` — `set -euo pipefail`; `.command` (Finder) — без strict-mode; без аргументов — usage и `exit 1` (не lint всего репо).
 
 Windows CMD: пути с пробелами передавать в кавычках (`bin\lint-markdown.bat ".\my docs"`).
 

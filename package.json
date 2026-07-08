@@ -11,6 +11,7 @@
         "check:order": "node check-function-order.cjs",
         "prelint:md": "npm run build",
         "lint:md": "node bin/lint-markdown.cjs",
+        "presync:cli2-config": "npm run build",
         "sync:cli2-config": "node scripts/sync-cli2-config.cjs",
         "pretest": "npm run build",
         "test": "node test-rules.cjs && node test-cli2-config.cjs && node check-function-order.cjs"

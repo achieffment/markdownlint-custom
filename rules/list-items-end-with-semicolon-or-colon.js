@@ -19,7 +19,8 @@ class ListItemsEndRule extends base_rule_1.BaseRule {
         doc.eachLineOutsideCode((line, ix, trim) => {
             if (!this.lineParser.isLstItem(line))
                 return;
-            let cont = trim.replace(this.lineParser.lstItemRx, "");
+            const lineStart = this.lineParser.trimStart(line);
+            let cont = lineStart.replace(regex_1.lstItemRx, "");
             cont = cont.trim();
             const next = doc.skipBlankFwd(ix);
             const folcod = next < lines.length && regex_1.codeFenceRx.test(lines[next].trim());
@@ -27,8 +28,12 @@ class ListItemsEndRule extends base_rule_1.BaseRule {
             const needsColon = folcod || folsub;
             const endsOk = needsColon ? regex_1.endsWithColonRx.test(cont) : regex_1.endsWithSemiRx.test(cont);
             const lstDet = needsColon ? details_1.details.listItemsColon : details_1.details.listItemsSemi;
-            if (!cont || !endsOk) {
-                onError({ lineNumber: ix + 1, detail: lstDet, context: trim || details_1.details.listItemsEmpty });
+            if (!cont) {
+                onError({ lineNumber: ix + 1, detail: details_1.details.listItemsEmpty, context: trim });
+                return;
+            }
+            if (!endsOk) {
+                onError({ lineNumber: ix + 1, detail: lstDet, context: trim });
             }
         });
     }

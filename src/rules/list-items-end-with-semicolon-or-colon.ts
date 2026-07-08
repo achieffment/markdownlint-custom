@@ -4,7 +4,7 @@ import { details } from "../details";
 import { MarkdownDocument } from "../domain/markdown-document";
 import type { CodeWalker } from "../domain/code-walker";
 import type { ListLineParser } from "../domain/list-line-parser";
-import { codeFenceRx, endsWithColonRx, endsWithSemiRx } from "../regex";
+import { codeFenceRx, endsWithColonRx, endsWithSemiRx, lstItemRx } from "../regex";
 
 export class ListItemsEndRule extends BaseRule {
     readonly names = ["list-items-end-with-semicolon-or-colon"];
@@ -22,7 +22,8 @@ export class ListItemsEndRule extends BaseRule {
         const doc = new MarkdownDocument(lines, this.codeWalker, this.lineParser);
         doc.eachLineOutsideCode((line, ix, trim) => {
             if (!this.lineParser.isLstItem(line)) return;
-            let cont = trim.replace(this.lineParser.lstItemRx, "");
+            const lineStart = this.lineParser.trimStart(line);
+            let cont = lineStart.replace(lstItemRx, "");
             cont = cont.trim();
             const next = doc.skipBlankFwd(ix);
             const folcod = next < lines.length && codeFenceRx.test(lines[next].trim());
@@ -30,8 +31,12 @@ export class ListItemsEndRule extends BaseRule {
             const needsColon = folcod || folsub;
             const endsOk = needsColon ? endsWithColonRx.test(cont) : endsWithSemiRx.test(cont);
             const lstDet = needsColon ? details.listItemsColon : details.listItemsSemi;
-            if (!cont || !endsOk) {
-                onError({ lineNumber: ix + 1, detail: lstDet, context: trim || details.listItemsEmpty });
+            if (!cont) {
+                onError({ lineNumber: ix + 1, detail: details.listItemsEmpty, context: trim });
+                return;
+            }
+            if (!endsOk) {
+                onError({ lineNumber: ix + 1, detail: lstDet, context: trim });
             }
         });
     }

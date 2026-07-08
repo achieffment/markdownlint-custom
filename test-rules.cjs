@@ -236,7 +236,7 @@ if (failed === 0) {
     console.log(`OK   hlprs API (${expectedHlprsKeys.length} exports)`);
 }
 
-const deepMarks = ["1.1", "1.1.1", "1.1.1.1", "1.1.1.1.1"];
+const deepMarks = ["1.1", "1.1.1", "1.1.1.1", "1.1.1.1.1", "1.1.1.1.1.1"];
 deepMarks.forEach(mark => {
     const line = `   ${mark} пункт;`;
     const trim = line.trim();
@@ -282,17 +282,26 @@ const emptyItemErr = `## T
 - 
 `;
 const emptyItemRes = lintStrings({ t: emptyItemErr }, ["list-items-end-with-semicolon-or-colon", "minimum-h2-heading"]);
-const emptyItemFired = getFiredRules(emptyItemRes.t || []);
+const emptyItemViol = emptyItemRes.t || [];
+const emptyItemFired = getFiredRules(emptyItemViol);
 if (!emptyItemFired.has("list-items-end-with-semicolon-or-colon") || emptyItemFired.size !== 1) {
     assert(false, "empty list item: expected list-items-end-with-semicolon-or-colon only, got " + [...emptyItemFired].join(", "));
 } else {
-    console.log("OK   empty list item → list-items-end-with-semicolon-or-colon");
+    const emptyDetail = emptyItemViol[0]?.errorDetail;
+    if (emptyDetail !== "Пустой пункт списка") {
+        assert(false, `empty list item detail: expected "Пустой пункт списка" got "${emptyDetail || "none"}"`);
+    } else {
+        console.log("OK   empty list item → list-items-end-with-semicolon-or-colon");
+    }
 }
 
 const deepErrRes = lintStrings({ deep: deepErr }, ["list-items-end-with-semicolon-or-colon", "minimum-h2-heading"]);
 const deepErrViol = deepErrRes.deep || [];
+const deepErrFired = getFiredRules(deepErrViol);
 const deepErrLines = deepErrViol.map(v => v.lineNumber).sort((a, b) => a - b);
-if (deepErrLines.join() !== "3,5,7,9") {
+if (!deepErrFired.has("list-items-end-with-semicolon-or-colon") || deepErrFired.size !== 1) {
+    assert(false, "deep nesting err: expected list-items-end-with-semicolon-or-colon only, got " + [...deepErrFired].join(", "));
+} else if (deepErrLines.join() !== "3,5,7,9") {
     assert(false, `deep nesting err lines: expected 3,5,7,9 got ${deepErrLines.join() || "none"}`);
 } else {
     console.log("OK   deep nesting err → list-items on lines 3,5,7,9");
@@ -332,8 +341,11 @@ const semiChildErr = `## T
 `;
 const semiChildErrRes = lintStrings({ t: semiChildErr }, ["list-items-end-with-semicolon-or-colon", "minimum-h2-heading"]);
 const semiChildViol = semiChildErrRes.t || [];
+const semiChildFired = getFiredRules(semiChildViol);
 const semiChildLines = semiChildViol.map(v => v.lineNumber).sort((a, b) => a - b);
-if (semiChildLines.join() !== "3") {
+if (!semiChildFired.has("list-items-end-with-semicolon-or-colon") || semiChildFired.size !== 1) {
+    assert(false, "semicolon before child err: expected list-items-end-with-semicolon-or-colon only, got " + [...semiChildFired].join(", "));
+} else if (semiChildLines.join() !== "3") {
     assert(false, `semicolon before child err lines: expected 3 got ${semiChildLines.join() || "none"}`);
 } else {
     console.log("OK   semicolon before child → list-items on line 3");
@@ -433,6 +445,36 @@ if (getFiredRules(unorderedBoundariesOkRes.t || []).size > 0) {
     console.log("OK   unordered boundaries ok → clean");
 }
 
+const bulInternalBlankOk = `## T
+
+Текст:
+
+- первый;
+
+- второй;
+
+Текст после.
+`;
+const bulInternalBlankRes = lintStrings({ t: bulInternalBlankOk }, ["list-blank-line-spacing", "minimum-h2-heading", "list-preceded-by-colon", "list-items-end-with-semicolon-or-colon", "sentences-end-with-mark"]);
+if (getFiredRules(bulInternalBlankRes.t || []).size > 0) {
+    assert(false, "bul internal blank ok: " + [...getFiredRules(bulInternalBlankRes.t || [])].join(", "));
+} else {
+    console.log("OK   bulleted internal blank between items → clean");
+}
+
+const numHeadingBoundErr = `## T
+
+1. one;
+## Next
+`;
+const numHeadingBoundRes = lintStrings({ t: numHeadingBoundErr }, ["list-blank-line-spacing", "minimum-h2-heading"]);
+const numHeadingBoundFired = getFiredRules(numHeadingBoundRes.t || []);
+if (!numHeadingBoundFired.has("list-blank-line-spacing") || numHeadingBoundFired.size !== 1) {
+    assert(false, "num heading bound err: expected list-blank-line-spacing only, got " + [...numHeadingBoundFired].join(", "));
+} else {
+    console.log("OK   num block before heading no blank → list-blank-line-spacing");
+}
+
 const tightThenBlankErr = `## T
 
 1. один;
@@ -443,11 +485,10 @@ const tightThenBlankErr = `## T
 const tightThenBlankRes = lintStrings({ t: tightThenBlankErr }, ["list-blank-line-spacing", "minimum-h2-heading"]);
 const tightThenBlankViol = tightThenBlankRes.t || [];
 const tightThenBlankFired = getFiredRules(tightThenBlankViol);
-if (!tightThenBlankFired.has("list-blank-line-spacing")) {
-    assert(false, "tight then blank err: expected list-blank-line-spacing");
+if (!tightThenBlankFired.has("list-blank-line-spacing") || tightThenBlankFired.size !== 1) {
+    assert(false, "tight then blank err: expected list-blank-line-spacing only, got " + [...tightThenBlankFired].join(", "));
 } else {
     const spacingLines = tightThenBlankViol
-        .filter(v => v.ruleNames.includes("list-blank-line-spacing"))
         .map(v => v.lineNumber)
         .sort((a, b) => a - b);
     if (spacingLines.join() !== "4") {
@@ -587,6 +628,26 @@ if (getFiredRules(listColonSkipCodblkRes.t || []).size > 0) {
     console.log("OK   list-preceded-by-colon skip code fence prev → clean");
 }
 
+const listAtDocStartOk = `1. первый;
+`;
+const listAtDocStartRes = lintStrings({ t: listAtDocStartOk }, ["list-preceded-by-colon"]);
+if (getFiredRules(listAtDocStartRes.t || []).size > 0) {
+    assert(false, "list at doc start: expected skip, got " + [...getFiredRules(listAtDocStartRes.t || [])].join(", "));
+} else {
+    console.log("OK   list at doc start skips list-preceded-by-colon");
+}
+
+const codblkAtDocStartOk = `\`\`\`js
+const x = 1;
+\`\`\`
+`;
+const codblkAtDocStartRes = lintStrings({ t: codblkAtDocStartOk }, ["codeblock-preceded-by-colon"]);
+if (getFiredRules(codblkAtDocStartRes.t || []).size > 0) {
+    assert(false, "fence at doc start: expected skip, got " + [...getFiredRules(codblkAtDocStartRes.t || [])].join(", "));
+} else {
+    console.log("OK   fence at doc start skips codeblock-preceded-by-colon");
+}
+
 const listEndsAtEofOk = `## T
 
 1. пункт;
@@ -624,8 +685,8 @@ const listAfterHeadingNoBlankErr = `## T
 `;
 const listAfterHeadingRes = lintStrings({ t: listAfterHeadingNoBlankErr }, ["list-blank-line-spacing", "minimum-h2-heading"]);
 const listAfterHeadingFired = getFiredRules(listAfterHeadingRes.t || []);
-if (!listAfterHeadingFired.has("list-blank-line-spacing")) {
-    assert(false, "list after heading without blank: expected list-blank-line-spacing");
+if (!listAfterHeadingFired.has("list-blank-line-spacing") || listAfterHeadingFired.size !== 1) {
+    assert(false, "list after heading without blank: expected list-blank-line-spacing only, got " + [...listAfterHeadingFired].join(", "));
 } else {
     console.log("OK   list after heading no blank → list-blank-line-spacing");
 }
@@ -774,8 +835,9 @@ if (getFiredRules(bareCodOkRes.t || []).size > 0) {
 
 const h2InCodeErr = "```js\n## fake h2\n```";
 const h2InCodeRes = lintStrings({ t: h2InCodeErr }, ["minimum-h2-heading"]);
-if (!getFiredRules(h2InCodeRes.t || []).has("minimum-h2-heading")) {
-    assert(false, "H2 inside code block must not satisfy minimum-h2-heading");
+const h2InCodeFired = getFiredRules(h2InCodeRes.t || []);
+if (!h2InCodeFired.has("minimum-h2-heading") || h2InCodeFired.size !== 1) {
+    assert(false, "H2 inside code block: expected minimum-h2-heading only, got " + [...h2InCodeFired].join(", "));
 } else {
     console.log("OK   H2 in code block → minimum-h2-heading");
 }
@@ -867,6 +929,18 @@ if (!noLeadingTopErrFired.has("no-leading-spaces") || noLeadingTopErrFired.size 
     assert(false, "top-level indent err: expected no-leading-spaces only, got " + [...noLeadingTopErrFired].join(", "));
 } else {
     console.log("OK   top-level indent → no-leading-spaces");
+}
+
+const noLeadingFirstIndentedErr = `## T
+
+   1.1 первый без родителя;
+`;
+const noLeadingFirstIndentedRes = lintStrings({ t: noLeadingFirstIndentedErr }, ["no-leading-spaces", "minimum-h2-heading", "list-items-end-with-semicolon-or-colon"]);
+const noLeadingFirstIndentedFired = getFiredRules(noLeadingFirstIndentedRes.t || []);
+if (!noLeadingFirstIndentedFired.has("no-leading-spaces") || noLeadingFirstIndentedFired.size !== 1) {
+    assert(false, "first indented list item err: expected no-leading-spaces only, got " + [...noLeadingFirstIndentedFired].join(", "));
+} else {
+    console.log("OK   first indented list item → no-leading-spaces");
 }
 
 const noLeadingFenceIndentErr = `## T

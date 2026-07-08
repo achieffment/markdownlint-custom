@@ -126,7 +126,7 @@ flowchart LR
 | `npm run build` | `tsc`: `src/` → корень |
 | `npm test` | `pretest` (build) + `test-rules.cjs` + `test-cli2-config.cjs` + `check-function-order.cjs` |
 | `npm run lint:md` | Локальный lint папки/файла (`prelint:md` → build) |
-| `npm run sync:cli2-config` | Регенерация `.markdownlint-cli2.jsonc` из schema + overrides + custom keys из `markdownlint-rules.js` + `ignores` (перед sync — `npm run build`) |
+| `npm run sync:cli2-config` | Регенерация `.markdownlint-cli2.jsonc` из schema + overrides + custom keys из `markdownlint-rules.js` + `ignores` (`presync:cli2-config` → build) |
 | `npm run check` | `tsc --noEmit`, `node --check` артефактов, порядок функций (**без** пересборки) |
 | `npm run check:order` | Только проверка порядка функций |
 
