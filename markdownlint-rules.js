@@ -4,6 +4,7 @@ const {
     lstItemRx,
     isLstItem,
     getIndent,
+    isChildLstItem,
     skipBlankFwd,
     eachLineOutsideCode,
     findPrevListInd,
@@ -13,7 +14,9 @@ const {
 } = require("./markdownlint-hlprs");
 
 const minimumH2Det = "Документ должен содержать минимум один заголовок второго уровня (##) вне блока кода";
-const listItemsEndDet = "Пункт списка должен заканчиваться ;, а если после него идёт блок кода — :";
+const listItemsEndDet = "Пункт списка должен заканчиваться ;, перед блоком кода или вложенным подсписком — :";
+const listItemsColonDet = "Пункт списка перед блоком кода или вложенным подсписком должен заканчиваться :";
+const listItemsSemiDet = "Пункт списка должен заканчиваться ;";
 const listBlankSpacingDet = "Нумерованные списки: blank до/после и единообразно между пунктами; маркированные: blank до/после блока (между пунктами не проверяется)";
 const listPrecededByColonDet = "Обычный текст (не пункт списка) перед первым пунктом блока верхнего уровня должен заканчиваться :, вложенные пункты не проверяются";
 const codeblockColonDet = "Обычный текст (не пункт списка) перед блоком кода должен заканчиваться :";
@@ -52,9 +55,10 @@ module.exports = [
                 let cont = trim.replace(lstItemRx, "");
                 cont = cont.trim();
                 const next = skipBlankFwd(lines, ix);
-                const folcod = next < lines.length && /^```/.test(lines[next].trim());
-                const endsOk = folcod ? /:$/.test(cont) : /;$/.test(cont);
-                const lstDet = folcod ? "Пункт списка перед блоком кода должен заканчиваться :" : "Пункт списка должен заканчиваться ;";
+                const needsColon = next < lines.length
+                    && (/^```/.test(lines[next].trim()) || isChildLstItem(line, lines[next]));
+                const endsOk = needsColon ? /:$/.test(cont) : /;$/.test(cont);
+                const lstDet = needsColon ? listItemsColonDet : listItemsSemiDet;
                 if (!cont || !endsOk) {
                     onError({ lineNumber: ix + 1, detail: lstDet, context: trim || "Пустой пункт списка" });
                 }

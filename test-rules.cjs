@@ -102,6 +102,7 @@ const allowedLineDiff = (errLine, sucLine) => {
     if (sucLine === errLine + ";" || sucLine === errLine + ":" || sucLine === errLine + ".") return true;
     if (sucLine === errLine + "!" || sucLine === errLine + "?") return true;
     if (errLine.endsWith(".") && sucLine === errLine.slice(0, -1) + ":") return true;
+    if (errLine.endsWith(";") && sucLine === errLine.slice(0, -1) + ":") return true;
     if (sucLine === errLine.trimStart() && errLine.length > sucLine.length) return true;
     return false;
 };
@@ -216,13 +217,13 @@ if (failed === 0) {
 
 const deepOk = `## T
 
-1. корень;
+1. корень:
 
-   1.1 второй;
+   1.1 второй:
 
-      1.1.1 третий;
+      1.1.1 третий:
 
-         1.1.1.1 четвёртый;
+         1.1.1.1 четвёртый:
 
             1.1.1.1.1 пятый;
 `;
@@ -258,15 +259,66 @@ if (!emptyItemFired.has("list-items-end-with-semicolon-or-colon") || emptyItemFi
 const deepErrRes = lintStrings({ deep: deepErr }, ["list-items-end-with-semicolon-or-colon", "minimum-h2-heading"]);
 const deepErrViol = deepErrRes.deep || [];
 const deepErrLines = deepErrViol.map(v => v.lineNumber).sort((a, b) => a - b);
-if (deepErrLines.join() !== "5,7,9") {
-    assert(false, `deep nesting err lines: expected 5,7,9 got ${deepErrLines.join() || "none"}`);
+if (deepErrLines.join() !== "3,5,7,9") {
+    assert(false, `deep nesting err lines: expected 3,5,7,9 got ${deepErrLines.join() || "none"}`);
 } else {
-    console.log("OK   deep nesting err → list-items on lines 5,7,9");
+    console.log("OK   deep nesting err → list-items on lines 3,5,7,9");
+}
+
+const colonSubOk = `## T
+
+8. Настроил папкам и файлам права:
+   - \`find /home/bitrix/www/ -type d -exec chmod 755 {} +\` - первый;
+   - \`find /home/bitrix/www/ -type f -exec chmod 644 {} +\` - второй;
+`;
+const colonSubOkRes = lintStrings({ t: colonSubOk }, ["list-items-end-with-semicolon-or-colon", "minimum-h2-heading"]);
+if (getFiredRules(colonSubOkRes.t || []).size > 0) {
+    assert(false, "colon before nested sublist: " + [...getFiredRules(colonSubOkRes.t || [])].join(", "));
+} else {
+    console.log("OK   colon before nested sublist → clean");
+}
+
+const colonSiblingErr = `## T
+
+1. первый:
+2. второй;
+`;
+const colonSiblingErrRes = lintStrings({ t: colonSiblingErr }, ["list-items-end-with-semicolon-or-colon", "minimum-h2-heading"]);
+const colonSiblingFired = getFiredRules(colonSiblingErrRes.t || []);
+if (!colonSiblingFired.has("list-items-end-with-semicolon-or-colon") || colonSiblingFired.size !== 1) {
+    assert(false, "colon sibling err: expected list-items-end-with-semicolon-or-colon only, got " + [...colonSiblingFired].join(", "));
+} else {
+    console.log("OK   colon before sibling → list-items-end-with-semicolon-or-colon");
+}
+
+const subNumSiblingOk = `## T
+
+1. root:
+   1.1 first;
+   1.2 second;
+`;
+const subNumSiblingOkRes = lintStrings({ t: subNumSiblingOk }, ["list-items-end-with-semicolon-or-colon", "minimum-h2-heading"]);
+if (getFiredRules(subNumSiblingOkRes.t || []).size > 0) {
+    assert(false, "subnum sibling ok: " + [...getFiredRules(subNumSiblingOkRes.t || [])].join(", "));
+} else {
+    console.log("OK   subnum sibling → clean");
+}
+
+const orphanSubNumOk = `## T
+
+1. first;
+2.1 not child of one;
+`;
+const orphanSubNumOkRes = lintStrings({ t: orphanSubNumOk }, ["list-items-end-with-semicolon-or-colon", "minimum-h2-heading"]);
+if (getFiredRules(orphanSubNumOkRes.t || []).size > 0) {
+    assert(false, "orphan subnum ok: " + [...getFiredRules(orphanSubNumOkRes.t || [])].join(", "));
+} else {
+    console.log("OK   orphan subnum not child → clean");
 }
 
 const nestedSpacingErr = `## T
 
-1. родитель;
+1. родитель:
 
    1.1 вложенный;
       1.1.1 третий уровень;
@@ -516,7 +568,7 @@ if (!getFiredRules(h2InCodeRes.t || []).has("minimum-h2-heading")) {
 
 const noLeadingNestedOk = `## T
 
-1. родитель;
+1. родитель:
 
    1.1 вложенный;
 `;
@@ -529,7 +581,7 @@ if (getFiredRules(noLeadingNestedOkRes.t || []).size > 0) {
 
 const noLeadingBulSiblingsOk = `## T
 
-- parent;
+- parent:
 
   - key;
 

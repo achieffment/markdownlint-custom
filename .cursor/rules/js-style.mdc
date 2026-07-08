@@ -30,7 +30,7 @@ alwaysApply: false
 
 **Проверка блока:** (1) длины соседних `const`/`let`; (2) **каждая часть** составного имени — словарное сокращение (`Bef`/`Aft`, `Beg`/`End`, `Brk`, `Ind`/`Idx`); (3) пары одной длины (`beg`/`end`, `ind`/`jInd`, `fstBeg`/`lstEnd`, `befIdx`/`aftIdx`).
 
-**Словарь (при необходимости):** `cont`, `rx`, `ix`, `idx`, `prev`/`next`, `curr`, `beg`/`end`/`nxtBeg`, `f`/`t`, `from`/`dest`, `ind` (локально; хелпер `getIndent`), `currInd`/`prevInd`/`lineInd`, `befIdx`/`aftIdx`, `fst`/`lst`, `Bef`/`Aft`, `folcod`, `inCodeB`, `sep`, `incl`, `proc`, `tok`, `lstItemRx`, `isLstItem`, `isNumItem`, `isBulItem`, `isNestedLstItem`, `hasBlankGap`, `boundBefIdx`/`boundAftIdx`, `shouldBrk`.
+**Словарь (при необходимости):** `cont`, `rx`, `ix`, `idx`, `prev`/`next`, `curr`, `beg`/`end`/`nxtBeg`, `f`/`t`, `from`/`dest`, `ind` (локально; хелпер `getIndent`), `currInd`/`prevInd`/`lineInd`, `befIdx`/`aftIdx`, `fst`/`lst`, `Bef`/`Aft`, `folcod`, `folsub`, `needsColon`, `inCodeB`, `sep`, `incl`, `proc`, `tok`, `lstItemRx`, `isLstItem`, `isChildLstItem`, `isNumItem`, `isBulItem`, `isNestedLstItem`, `hasBlankGap`, `boundBefIdx`/`boundAftIdx`, `shouldBrk`.
 
 **Исключения:** `params`, `onError`, сигнатуры markdownlint, внешние API.
 
@@ -62,7 +62,10 @@ let end = beg;
 ```javascript
 let cont = trim.replace(regex, "");
 cont = cont.trim();
-const endsOk = folcod ? /:$/.test(cont) : /;$/.test(cont);
+const folcod = next < lines.length && /^```/.test(lines[next].trim());
+const folsub = next < lines.length && isChildLstItem(line, lines[next]);
+const needsColon = folcod || folsub;
+const endsOk = needsColon ? /:$/.test(cont) : /;$/.test(cont);
 if (!cont || !endsOk) {
     onError({ lineNumber: ix + 1, detail, context: trim || "Пустой пункт списка" });
 }

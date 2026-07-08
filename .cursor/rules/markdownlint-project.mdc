@@ -24,7 +24,7 @@ alwaysApply: true
 | `names` | Что проверяет | Примеры |
 |---------|---------------|---------|
 | `minimum-h2-heading` | Минимум один заголовок H2 (`##`) вне code fence | `markdownlint-examples/minimum-h2-heading/` |
-| `list-items-end-with-semicolon-or-colon` | Пункт списка: `;`, перед блоком кода — `:` | `markdownlint-examples/list-items-end-with-semicolon-or-colon/` |
+| `list-items-end-with-semicolon-or-colon` | Пункт списка: `;`, перед блоком кода или вложенным подсписком — `:` | `markdownlint-examples/list-items-end-with-semicolon-or-colon/` |
 | `list-blank-line-spacing` | Numbered: blank до/после и единообразно между соседними num-пунктами блока (включая поднумерацию); bulleted: blank до/после блока (между пунктами не проверяется) | `markdownlint-examples/list-blank-line-spacing/` |
 | `list-preceded-by-colon` | Обычный текст (не пункт списка) перед первым пунктом блока верхнего уровня (num/bul) заканчивается `:`; вложенные не проверяются | `markdownlint-examples/list-preceded-by-colon/` |
 | `codeblock-preceded-by-colon` | Открывающая `` ``` ``: строка перед ней заканчивается `:` (не пункт списка — те проверяет `list-items-*`) | `markdownlint-examples/codeblock-preceded-by-colon/` |
@@ -51,7 +51,7 @@ alwaysApply: true
 ### `list-items-end-with-semicolon-or-colon` — политика
 
 - **Scope:** все пункты списка (num/bul, вложенные), вне code fence.
-- **Проверка:** текст пункта заканчивается `;`; если следующая непустая строка — открывающая `` ``` ``, то `:`.
+- **Проверка:** текст пункта заканчивается `;`; если следующая непустая строка — открывающая `` ``` `` или **прямой** дочерний пункт (больший отступ; поднумерация `1.` → `1.1`, `1.1` → `1.1.1`, не sibling `1.1` → `1.2`), то `:`.
 - **Пустой пункт** (только маркер) — ошибка.
 
 ### `list-blank-line-spacing` — политика
@@ -99,6 +99,7 @@ alwaysApply: true
 |---------|------------|
 | `lstItemRx` | Regex пункта списка (num/bul) на `trim` |
 | `isLstItem` | Пункт списка по строке |
+| `isChildLstItem` | Следующий пункт — прямой дочерний (отступ или поднумерация `1.` → `1.1`) |
 | `getIndent` | Длина ведущих пробелов |
 | `skipBlankFwd` | Индекс следующей непустой строки |
 | `eachLineOutsideCode` | Колбэк по строкам вне code fence |
@@ -107,7 +108,7 @@ alwaysApply: true
 | `checkListBlankSpacing` | Политика `list-blank-line-spacing` |
 | `checkListPrecededByColon` | Политика `list-preceded-by-colon` (третий аргумент — `colDet`) |
 
-Внутренние (не экспортируются): `trimStart`, `isNumItem`, `isBulItem`, `isNestedLstItem`, `skipBlankBck`, `hasBlankGap`, `boundBefIdx`, `boundAftIdx`, `walkOutsideCode`, `walkListBlocks`, `createListBlockHelpers` (`findItemEnd`, `collectBlock`, `findNumItemEnd`, `findBulItemEnd`, `collectNumBlock`, `collectBulBlock`).
+Внутренние (не экспортируются): `trimStart`, `isNumItem`, `isBulItem`, `isNestedLstItem`, `getNumPath`, `skipBlankBck`, `hasBlankGap`, `boundBefIdx`, `boundAftIdx`, `walkOutsideCode`, `walkListBlocks`, `createListBlockHelpers` (`findItemEnd`, `collectBlock`, `findNumItemEnd`, `findBulItemEnd`, `collectNumBlock`, `collectBulBlock`).
 
 ## Подключение в VS Code
 

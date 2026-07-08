@@ -30,7 +30,7 @@
 | `names` | Суть |
 |---------|------|
 | `minimum-h2-heading` | Минимум один `##` вне code fence |
-| `list-items-end-with-semicolon-or-colon` | `;`, перед блоком кода — `:` |
+| `list-items-end-with-semicolon-or-colon` | `;`, перед блоком кода или вложенным подсписком — `:` |
 | `list-blank-line-spacing` | Numbered: blank до/после (EOF skip, same-kind skip) и единообразно между соседними num-пунктами блока (включая `1.1`, `1.1.1`); bulleted: blank до/после блока |
 | `list-preceded-by-colon` | Обычный текст (не пункт списка) перед первым пунктом блока верхнего уровня (num/bul) заканчивается `:`; вложенные не проверяются |
 | `codeblock-preceded-by-colon` | Открывающая `` ``` ``: строка перед ней заканчивается `:` (обычный текст, не пункт списка) |

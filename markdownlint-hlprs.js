@@ -10,6 +10,23 @@ const isNestedLstItem = (line) => {
     return /^\s*\d+(?:\.\d+)+\s+/.test(line);
 };
 
+const getNumPath = (line) => {
+    if (!isNumItem(line)) return null;
+    const t = trimStart(line);
+    const top = t.match(/^(\d+)\.\s+/);
+    if (top) return top[1];
+    const sub = t.match(/^(\d+(?:\.\d+)+)\s+/);
+    return sub ? sub[1] : null;
+};
+
+const isChildLstItem = (parentLine, childLine) => {
+    if (!isLstItem(parentLine) || !isLstItem(childLine)) return false;
+    if (getIndent(childLine) > getIndent(parentLine)) return true;
+    const parentPath = getNumPath(parentLine);
+    const childPath = getNumPath(childLine);
+    return Boolean(parentPath && childPath && childPath.startsWith(parentPath + "."));
+};
+
 const skipBlankFwd = (lines, ix) => {
     let next = ix + 1;
     while (next < lines.length && lines[next].trim() === "") next++;
@@ -226,6 +243,7 @@ module.exports = {
     lstItemRx,
     getIndent,
     isLstItem,
+    isChildLstItem,
     skipBlankFwd,
     eachLineOutsideCode,
     findPrevListInd,
