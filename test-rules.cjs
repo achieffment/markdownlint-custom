@@ -461,6 +461,20 @@ if (!listColonErrFired.has("list-preceded-by-colon")) {
     }
 }
 
+const listColonBulErr = `## T
+
+Текст перед списком.
+
+- пункт;
+`;
+const listColonBulErrRes = lintStrings({ t: listColonBulErr }, ["list-preceded-by-colon", "minimum-h2-heading", "list-blank-line-spacing"]);
+const listColonBulErrFired = getFiredRules(listColonBulErrRes.t || []);
+if (!listColonBulErrFired.has("list-preceded-by-colon") || listColonBulErrFired.size !== 1) {
+    assert(false, "list colon bul err: expected list-preceded-by-colon only, got " + [...listColonBulErrFired].join(", "));
+} else {
+    console.log("OK   list colon bul err → list-preceded-by-colon");
+}
+
 const listColonOk = `## T
 
 Текст перед списком:
@@ -488,6 +502,47 @@ if (listColonNestedFired.has("list-preceded-by-colon")) {
     console.log("OK   nested list skips list-preceded-by-colon");
 }
 
+const listColonSkipHeadingOk = `## T
+
+## Заголовок
+
+1. пункт;
+`;
+const listColonSkipHeadingRes = lintStrings({ t: listColonSkipHeadingOk }, ["list-preceded-by-colon", "minimum-h2-heading", "list-blank-line-spacing"]);
+if (getFiredRules(listColonSkipHeadingRes.t || []).size > 0) {
+    assert(false, "list colon skip heading: " + [...getFiredRules(listColonSkipHeadingRes.t || [])].join(", "));
+} else {
+    console.log("OK   list-preceded-by-colon skip heading → clean");
+}
+
+const listColonSkipLstPrevOk = `## T
+
+- первый;
+
+1. второй блок;
+`;
+const listColonSkipLstPrevRes = lintStrings({ t: listColonSkipLstPrevOk }, ["list-preceded-by-colon", "minimum-h2-heading", "list-items-end-with-semicolon-or-colon"]);
+if (getFiredRules(listColonSkipLstPrevRes.t || []).size > 0) {
+    assert(false, "list colon skip list prev: " + [...getFiredRules(listColonSkipLstPrevRes.t || [])].join(", "));
+} else {
+    console.log("OK   list-preceded-by-colon skip list item prev → clean");
+}
+
+const listColonSkipCodblkOk = `## T
+
+\`\`\`js
+const x = 1;
+\`\`\`
+
+1. пункт;
+`;
+const listColonSkipCodblkRes = lintStrings({ t: listColonSkipCodblkOk }, ["list-preceded-by-colon", "minimum-h2-heading", "codeblock-preceded-by-colon"]);
+if (getFiredRules(listColonSkipCodblkRes.t || []).size > 0) {
+    assert(false, "list colon skip code fence prev: " + [...getFiredRules(listColonSkipCodblkRes.t || [])].join(", "));
+} else {
+    console.log("OK   list-preceded-by-colon skip code fence prev → clean");
+}
+
 const listEndsAtEofOk = `## T
 
 1. пункт;
@@ -497,6 +552,27 @@ if (getFiredRules(listEndsAtEofRes.t || []).has("list-blank-line-spacing")) {
     assert(false, "list at EOF must not trigger after-boundary");
 } else {
     console.log("OK   list at EOF → no after-boundary");
+}
+
+const fenceContinuationOk = `## T
+
+Вводный текст:
+
+1. пункт:
+
+\`\`\`js
+const x = 1;
+\`\`\`
+
+Продолжение того же пункта;
+
+2. второй;
+`;
+const fenceContinuationOkRes = lintStrings({ t: fenceContinuationOk }, ["list-blank-line-spacing", "list-preceded-by-colon", "minimum-h2-heading", "list-items-end-with-semicolon-or-colon", "sentences-end-with-mark"]);
+if (getFiredRules(fenceContinuationOkRes.t || []).size > 0) {
+    assert(false, "fence continuation ok: " + [...getFiredRules(fenceContinuationOkRes.t || [])].join(", "));
+} else {
+    console.log("OK   num item fence continuation → clean");
 }
 
 const listAfterHeadingNoBlankErr = `## T
@@ -544,6 +620,19 @@ if (getFiredRules(numSameBlockRes.t || []).size > 0) {
     console.log("OK   num same block internal blank → clean");
 }
 
+const numTightOk = `## T
+
+1. a;
+2. b;
+3. c;
+`;
+const numTightRes = lintStrings({ t: numTightOk }, ["list-blank-line-spacing", "minimum-h2-heading"]);
+if (getFiredRules(numTightRes.t || []).size > 0) {
+    assert(false, "num tight ok: " + [...getFiredRules(numTightRes.t || [])].join(", "));
+} else {
+    console.log("OK   num tight no blanks → clean");
+}
+
 const lstCod = `## T
 
 - пункт перед кодом:
@@ -558,6 +647,54 @@ if (lstCodFired.size > 0) {
     assert(false, "list item before code must not trigger codeblock rule: " + [...lstCodFired].join(", "));
 } else {
     console.log("OK   codeblock skips list items before code");
+}
+
+const codblkSkipHeadingOk = `## T
+
+## Заголовок
+
+\`\`\`js
+const x = 1;
+\`\`\`
+`;
+const codblkSkipHeadingRes = lintStrings({ t: codblkSkipHeadingOk }, ["codeblock-preceded-by-colon", "minimum-h2-heading"]);
+if (getFiredRules(codblkSkipHeadingRes.t || []).size > 0) {
+    assert(false, "codeblock skip heading: " + [...getFiredRules(codblkSkipHeadingRes.t || [])].join(", "));
+} else {
+    console.log("OK   codeblock skip heading before fence → clean");
+}
+
+const codblkColonThroughBlankOk = `## T
+
+Ввод:
+
+
+\`\`\`js
+const x = 1;
+\`\`\`
+`;
+const codblkColonThroughBlankRes = lintStrings({ t: codblkColonThroughBlankOk }, ["codeblock-preceded-by-colon", "minimum-h2-heading"]);
+if (getFiredRules(codblkColonThroughBlankRes.t || []).size > 0) {
+    assert(false, "codeblock colon through blank: " + [...getFiredRules(codblkColonThroughBlankRes.t || [])].join(", "));
+} else {
+    console.log("OK   codeblock colon through blank lines → clean");
+}
+
+const codblkSkipAdjacentFenceOk = `## T
+
+\`\`\`js
+const a = 1;
+\`\`\`
+
+\`\`\`js
+const b = 2;
+\`\`\`
+`;
+const codblkSkipAdjacentFenceRes = lintStrings({ t: codblkSkipAdjacentFenceOk }, ["codeblock-preceded-by-colon", "minimum-h2-heading"]);
+if (getFiredRules(codblkSkipAdjacentFenceRes.t || []).size > 0) {
+    assert(false, "codeblock skip adjacent fence: " + [...getFiredRules(codblkSkipAdjacentFenceRes.t || [])].join(", "));
+} else {
+    console.log("OK   codeblock skip prev closing fence → clean");
 }
 
 const bareCodErr = `## T
@@ -738,6 +875,52 @@ if (!sentencesErrFired.has("sentences-end-with-mark") || sentencesErrFired.size 
     assert(false, "sentence without mark err: expected sentences-end-with-mark only, got " + [...sentencesErrFired].join(", "));
 } else {
     console.log("OK   sentence without mark → sentences-end-with-mark");
+}
+
+const sentencesMarksOk = `## T
+
+Восклицание!
+Вопрос?
+Двоеточие:
+Точка с запятой;
+`;
+const sentencesMarksOkRes = lintStrings({ t: sentencesMarksOk }, ["sentences-end-with-mark", "minimum-h2-heading"]);
+if (getFiredRules(sentencesMarksOkRes.t || []).size > 0) {
+    assert(false, "sentences marks ok: " + [...getFiredRules(sentencesMarksOkRes.t || [])].join(", "));
+} else {
+    console.log("OK   sentences marks ! ? : ; → clean");
+}
+
+const sentencesSkipQuoteHrOk = `## T
+
+> цитата без знака
+
+---
+
+***
+
+___
+`;
+const sentencesSkipQuoteHrRes = lintStrings({ t: sentencesSkipQuoteHrOk }, ["sentences-end-with-mark", "minimum-h2-heading"]);
+if (getFiredRules(sentencesSkipQuoteHrRes.t || []).size > 0) {
+    assert(false, "sentences skip quote/hr: " + [...getFiredRules(sentencesSkipQuoteHrRes.t || [])].join(", "));
+} else {
+    console.log("OK   sentences skip blockquote/HR → clean");
+}
+
+const sentencesInCodeOk = `## T
+
+Текст с точкой.
+
+\`\`\`js
+текст без знака
+\`\`\`
+`;
+const sentencesInCodeOkRes = lintStrings({ t: sentencesInCodeOk }, ["sentences-end-with-mark", "minimum-h2-heading"]);
+if (getFiredRules(sentencesInCodeOkRes.t || []).size > 0) {
+    assert(false, "sentences in code fence: " + [...getFiredRules(sentencesInCodeOkRes.t || [])].join(", "));
+} else {
+    console.log("OK   sentences skip code fence body → clean");
 }
 
 if (failed > 0) {

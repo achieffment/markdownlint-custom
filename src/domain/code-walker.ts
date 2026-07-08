@@ -1,18 +1,33 @@
 import type { CodeFenceHandlers, OutsideCodeCallback, OutsideCodeWalker } from "../types";
+import { codeFenceRx } from "../regex";
 
 export class CodeWalker {
-    walkOutsideCode(lines: readonly string[], fn: OutsideCodeWalker): void {
+    private walkLines(
+        lines: readonly string[],
+        onFence: (line: string, ix: number, trim: string, opening: boolean) => void,
+        onOutside: (line: string, ix: number, trim: string) => number | undefined
+    ): void {
         let inCodeB = false;
         for (let ix = 0; ix < lines.length; ix++) {
-            const trim = lines[ix].trim();
-            if (trim.startsWith("```")) {
+            const line = lines[ix];
+            const trim = line.trim();
+            if (codeFenceRx.test(trim)) {
+                onFence(line, ix, trim, !inCodeB);
                 inCodeB = !inCodeB;
                 continue;
             }
             if (inCodeB) continue;
-            const jump = fn(ix, trim);
+            const jump = onOutside(line, ix, trim);
             if (jump !== undefined) ix = jump;
         }
+    }
+
+    walkOutsideCode(lines: readonly string[], fn: OutsideCodeWalker): void {
+        this.walkLines(
+            lines,
+            () => {},
+            (_line, ix, trim) => fn(ix, trim)
+        );
     }
 
     eachLineOutsideCode(lines: readonly string[], fn: OutsideCodeCallback): void {
@@ -23,18 +38,14 @@ export class CodeWalker {
     }
 
     walkCodeFenceAware(lines: readonly string[], handlers: CodeFenceHandlers): void {
-        let inCodeB = false;
-        for (let ix = 0; ix < lines.length; ix++) {
-            const line = lines[ix];
-            const trim = line.trim();
-            if (trim.startsWith("```")) {
-                handlers.onFence(line, ix, trim, !inCodeB);
-                inCodeB = !inCodeB;
-                continue;
+        this.walkLines(
+            lines,
+            (line, ix, trim, opening) => handlers.onFence(line, ix, trim, opening),
+            (line, ix, trim) => {
+                handlers.onOutside(line, ix, trim);
+                return undefined;
             }
-            if (inCodeB) continue;
-            handlers.onOutside(line, ix, trim);
-        }
+        );
     }
 
     eachOpeningCodeFence(lines: readonly string[], fn: (ix: number) => void): void {

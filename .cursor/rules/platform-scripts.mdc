@@ -13,7 +13,7 @@ alwaysApply: true
 |----|----------|------|
 | Linux / WSL | bash | [`bin/lint-markdown.sh`](../bin/lint-markdown.sh) |
 | Windows | CMD | [`bin/lint-markdown.bat`](../bin/lint-markdown.bat) |
-| macOS (терминал) | bash | `lint-markdown.sh` |
+| macOS (терминал) | bash | [`bin/lint-markdown.sh`](../bin/lint-markdown.sh) |
 | macOS (Finder) | bash | [`bin/lint-markdown.command`](../bin/lint-markdown.command) |
 | Любая (npm) | — | `npm run lint:md` |
 
@@ -32,7 +32,9 @@ alwaysApply: true
 | нет `node_modules` | `npm ci` (lock) / `npm install` |
 | нет `markdownlint-rules.js` | `npm run build` |
 
-Оболочки (`.sh` / `.bat` / `.command`) — только `cd` + `node bin/lint-markdown.cjs`.
+Оболочки (`.sh` / `.bat` / `.command`) — только `cd` + `node bin/lint-markdown.cjs`. `.sh` — `set -euo pipefail`; `.command` (Finder) — без strict-mode.
+
+Windows CMD: пути с пробелами передавать в кавычках (`bin\lint-markdown.bat ".\my docs"`).
 
 | Точка входа | Сборка tsc |
 |-------------|------------|
@@ -44,6 +46,7 @@ alwaysApply: true
 - `markdownlint-cli2` из `node_modules/.bin`
 - `--no-globs` + glob целевой папки/файла
 - `cwd` = корень repo
+- Исключение `node_modules`: в [`.markdownlint-cli2.jsonc`](../.markdownlint-cli2.jsonc) — `!node_modules` (IDE/workspace); в [`lint-markdown.cjs`](../bin/lint-markdown.cjs) для папок — `#node_modules` (cli2 glob при `--no-globs`)
 
 ## Новые исполняемые артефакты
 

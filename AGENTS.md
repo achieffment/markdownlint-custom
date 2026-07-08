@@ -41,12 +41,12 @@
 | `names` | Суть |
 |---------|------|
 | `minimum-h2-heading` | Минимум один `##` вне code fence |
-| `list-items-end-with-semicolon-or-colon` | `;`, перед блоком кода или вложенным подсписком — `:` |
+| `list-items-end-with-semicolon-or-colon` | `;`, перед блоком кода или **прямым дочерним** пунктом — `:` |
 | `list-blank-line-spacing` | Numbered: blank до/после (EOF skip, same-kind skip) и единообразно между соседними num-пунктами блока (включая `1.1`, `1.1.1`); bulleted: blank до/после блока |
-| `list-preceded-by-colon` | Обычный текст (не пункт списка) перед первым пунктом блока верхнего уровня (num/bul) заканчивается `:`; вложенные не проверяются |
-| `codeblock-preceded-by-colon` | Открывающая `` ``` ``: строка перед ней заканчивается `:` (обычный текст, не пункт списка) |
+| `list-preceded-by-colon` | Обычный текст (не пункт списка) перед первым пунктом блока верхнего уровня (num/bul) заканчивается `:`; skip prev: заголовок, пункт списка, code fence; вложенные не проверяются |
+| `codeblock-preceded-by-colon` | Открывающая `` ``` ``: строка перед ней заканчивается `:` (обычный текст, не пункт списка); skip prev: заголовок, пункт списка, code fence |
 | `no-leading-spaces` | Нет отступа у обычного текста, пунктов списка верхнего уровня и обозначений блока кода (`` ``` ``); вложенные пункты — при `indent >=` предыдущего |
-| `sentences-end-with-mark` | Обычный текст заканчивается `.`, `!`, `?`, `:` или `;` |
+| `sentences-end-with-mark` | Обычный текст (не заголовок, blockquote, HR, не пункт списка) заканчивается `.`, `!`, `?`, `:` или `;` |
 
 Подробности и пути к примерам — в [markdownlint-project.mdc](.cursor/rules/markdownlint-project.mdc).
 
@@ -57,7 +57,7 @@
 3. **Minimal diff** — без drive-by refactor
 4. **Match conventions** — `extends BaseRule`, `AppContext`, [`src/details.ts`](src/details.ts), стиль как в файле
 5. **Preserve contracts** — `onError({ lineNumber, detail, context? })`, публичный API hlprs, runtime CommonJS
-6. **Register** — `new XxxRule(deps).toRule()` в [`src/markdownlint-rules.ts`](src/markdownlint-rules.ts); ключ в [`.markdownlint-cli2.jsonc`](.markdownlint-cli2.jsonc)
+6. **Register** — `new XxxRule(deps).toRule()` в [`src/markdownlint-rules.ts`](src/markdownlint-rules.ts); ключ в [`.markdownlint-cli2.jsonc`](.markdownlint-cli2.jsonc) и блок custom в [`scripts/sync-cli2-config.cjs`](scripts/sync-cli2-config.cjs)
 7. **Test** — `npm test` (pretest → build; test-rules + test-cli2-config + check-function-order)
 8. **Sync docs** — по [docs-consistency.mdc](.cursor/rules/docs-consistency.mdc): `.mdc` (по матрице) → AGENTS → README
 

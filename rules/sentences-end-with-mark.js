@@ -19,7 +19,9 @@ class SentencesEndMarkRule extends base_rule_1.BaseRule {
         doc.eachLineOutsideCode((line, ix, trim) => {
             if (!trim)
                 return;
-            if (trim.startsWith("#") || this.lineParser.isLstItem(line))
+            if (trim.startsWith("#") || trim.startsWith(">") || regex_1.hrRx.test(trim))
+                return;
+            if (this.lineParser.isLstItem(line))
                 return;
             if (!regex_1.endsWithMarkRx.test(trim)) {
                 onError({ lineNumber: ix + 1, detail: this.description, context: trim });

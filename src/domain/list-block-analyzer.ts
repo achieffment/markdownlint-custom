@@ -19,6 +19,7 @@ export class ListBlockAnalyzer {
         const findItemEnd = (beg: number, shouldBrk: LinePredicate): number => {
             const ind = this.lineParser.getIndent(lines[beg]);
             let end = beg;
+            let aftFence = false;
             for (let ix = beg + 1; ix < lines.length; ix++) {
                 const trim = lines[ix].trim();
                 if (!trim) continue;
@@ -30,9 +31,10 @@ export class ListBlockAnalyzer {
                     ix++;
                     while (ix < lines.length && !lines[ix].trim().startsWith("```")) ix++;
                     if (ix < lines.length) end = ix;
-                    break;
+                    aftFence = true;
+                    continue;
                 }
-                if (jInd > ind) end = ix;
+                if (jInd > ind || (aftFence && jInd >= ind)) end = ix;
                 else break;
             }
             return end;

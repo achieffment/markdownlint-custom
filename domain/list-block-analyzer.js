@@ -10,6 +10,7 @@ class ListBlockAnalyzer {
         const findItemEnd = (beg, shouldBrk) => {
             const ind = this.lineParser.getIndent(lines[beg]);
             let end = beg;
+            let aftFence = false;
             for (let ix = beg + 1; ix < lines.length; ix++) {
                 const trim = lines[ix].trim();
                 if (!trim)
@@ -26,9 +27,10 @@ class ListBlockAnalyzer {
                         ix++;
                     if (ix < lines.length)
                         end = ix;
-                    break;
+                    aftFence = true;
+                    continue;
                 }
-                if (jInd > ind)
+                if (jInd > ind || (aftFence && jInd >= ind))
                     end = ix;
                 else
                     break;

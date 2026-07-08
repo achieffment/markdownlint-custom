@@ -4,7 +4,7 @@ import { details } from "../details";
 import { MarkdownDocument } from "../domain/markdown-document";
 import type { CodeWalker } from "../domain/code-walker";
 import type { ListLineParser } from "../domain/list-line-parser";
-import { endsWithMarkRx } from "../regex";
+import { endsWithMarkRx, hrRx } from "../regex";
 
 export class SentencesEndMarkRule extends BaseRule {
     readonly names = ["sentences-end-with-mark"];
@@ -22,7 +22,8 @@ export class SentencesEndMarkRule extends BaseRule {
         const doc = new MarkdownDocument(lines, this.codeWalker, this.lineParser);
         doc.eachLineOutsideCode((line, ix, trim) => {
             if (!trim) return;
-            if (trim.startsWith("#") || this.lineParser.isLstItem(line)) return;
+            if (trim.startsWith("#") || trim.startsWith(">") || hrRx.test(trim)) return;
+            if (this.lineParser.isLstItem(line)) return;
             if (!endsWithMarkRx.test(trim)) {
                 onError({ lineNumber: ix + 1, detail: this.description, context: trim });
             }
