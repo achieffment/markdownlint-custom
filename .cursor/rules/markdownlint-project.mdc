@@ -23,6 +23,10 @@ alwaysApply: true
 | [`test-rules.cjs`](../test-rules.cjs) | Прогон примеров и inline-кейсов через markdownlint CLI |
 | [`check-function-order.cjs`](../check-function-order.cjs) | Проверка порядка функций (callee перед caller) |
 | [`tsconfig.json`](../tsconfig.json) | Сборка `src/` → CommonJS `.js` в корне |
+| `.gitignore`, `.gitattributes` | Git: ignore-паттерны, LF для text-файлов |
+| `.editorconfig` | LF, отступ 4 пробела (EditorConfig) |
+| `.nvmrc`, `.npmrc` | Node 22 (nvm), `engine-strict` для `engines` |
+| [`package.json`](../package.json) | npm-скрипты, `engines.node >= 20`, `type: commonjs` |
 | [`AGENTS.md`](../AGENTS.md) | Краткий справочник для AI-агента |
 | [`README.md`](../README.md) | Документация для людей (onboarding, правила проверки кратко) |
 | [`.cursor/rules/`](../.cursor/rules/) | Правила Cursor; каталог — [AGENTS.md](../AGENTS.md) |

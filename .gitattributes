@@ -1,0 +1,13 @@
+* text=auto eol=lf
+
+*.ts   text
+*.js   text
+*.cjs  text
+*.json text
+*.md   text diff=markdown
+*.mdc  text
+
+*.png  binary
+*.jpg  binary
+*.gif  binary
+*.webp binary

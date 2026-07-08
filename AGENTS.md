@@ -17,6 +17,7 @@
 | Примеры | `markdownlint-examples/**/*.md` |
 | Тесты | `test-rules.cjs`, `check-function-order.cjs` |
 | Cursor rules | `.cursor/rules/*.mdc` |
+| Repo / tooling | `.gitignore`, `.gitattributes`, `.editorconfig`, `.nvmrc`, `.npmrc` |
 | Docs | `README.md`, `AGENTS.md` |
 
 ## Правила репозитория

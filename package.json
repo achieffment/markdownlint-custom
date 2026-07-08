@@ -1,6 +1,10 @@
 {
     "name": "markdownlint-custom-rules",
     "private": true,
+    "type": "commonjs",
+    "engines": {
+        "node": ">=20"
+    },
     "scripts": {
         "build": "tsc",
         "check": "tsc --noEmit && node --check markdownlint-rules.js && node --check markdownlint-hlprs.js && node --check test-rules.cjs && node --check check-function-order.cjs && node check-function-order.cjs",

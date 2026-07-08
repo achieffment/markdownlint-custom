@@ -6,8 +6,9 @@
 
 ## Требования
 
-- Node.js (актуальный LTS) и npm
+- Node.js ≥ 20 (рекомендуется 22 LTS; версия в [`.nvmrc`](.nvmrc)) и npm
 - VS Code + расширение с поддержкой `markdownlint.customRules`
+- [`.editorconfig`](.editorconfig) — единый LF и отступ 4 пробела в редакторах с поддержкой EditorConfig
 
 ## Быстрый старт
 
@@ -63,6 +64,7 @@ npm test        # pretest → build, test-rules.cjs + check-function-order
 | [`markdownlint-examples/`](markdownlint-examples/) | Пары `_err.md` / `_suc.md` на каждое правило |
 | [`test-rules.cjs`](test-rules.cjs), [`check-function-order.cjs`](check-function-order.cjs) | Тесты и проверка порядка функций |
 | [`.cursor/rules/`](.cursor/rules/) | Правила Cursor; каталог — [`AGENTS.md`](AGENTS.md) |
+| `.gitignore`, `.gitattributes`, `.editorconfig`, `.nvmrc`, `.npmrc` | Git, EditorConfig, Node/npm (подробнее в `.mdc`) |
 | [`AGENTS.md`](AGENTS.md) | Краткий справочник для AI-агента |
 
 Подробная структура — [`.cursor/rules/markdownlint-project.mdc`](.cursor/rules/markdownlint-project.mdc).
