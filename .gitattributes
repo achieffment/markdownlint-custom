@@ -1,13 +1,21 @@
+# Line endings: LF in repository and working tree (Node/markdown; safe on Windows clone)
 * text=auto eol=lf
 
-*.ts   text
-*.js   text
-*.cjs  text
-*.json text
-*.md   text diff=markdown
-*.mdc  text
+# Source and config
+*.ts text eol=lf
+*.js text eol=lf
+*.cjs text eol=lf
+*.json text eol=lf
+*.md text diff=markdown eol=lf
+*.mdc text eol=lf
+.gitignore text eol=lf
+.gitattributes text eol=lf
+.editorconfig text eol=lf
+.npmrc text eol=lf
+.nvmrc text eol=lf
 
-*.png  binary
-*.jpg  binary
-*.gif  binary
+# Binary (never normalize)
+*.png binary
+*.jpg binary
+*.gif binary
 *.webp binary
