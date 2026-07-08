@@ -6,7 +6,7 @@ alwaysApply: false
 
 # Проектирование TypeScript правил markdownlint
 
-SRP/DRY — те же принципы, что в [js-dev.mdc](js-dev.mdc) (для test harness). Оформление — [ts-style.mdc](ts-style.mdc).
+SRP/DRY — те же принципы, что в [js-dev.mdc](js-dev.mdc) (для test harness). Оформление — [ts-style.mdc](ts-style.mdc). Синхронизация docs — [docs-consistency.mdc](docs-consistency.mdc).
 
 **База:** composition over inheritance; один уровень наследования правил (`BaseRule`); контракт `onError` и публичный API hlprs сохранять.
 
@@ -37,12 +37,7 @@ SRP/DRY — те же принципы, что в [js-dev.mdc](js-dev.mdc) (дл
 
 ## Workflow
 
-1. Правка `src/**/*.ts`
-2. Ключи в [`details.ts`](../src/details.ts) / [`regex.ts`](../src/regex.ts) при необходимости
-3. `new XxxRule(deps).toRule()` в [`markdownlint-rules.ts`](../src/markdownlint-rules.ts); новый checker → [`AppContext`](../src/composition/app-context.ts)
-4. `npm run build`
-5. Коммитить `src/` и артефакты `.js`
-6. `npm test`
+Общий порядок — [AGENTS.md](../AGENTS.md). TS-специфика — [markdownlint-project.mdc](markdownlint-project.mdc) («Специфика lint-правила», п. 2–3).
 
 ## Границы
 

@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Руководство для AI-агента при работе с кастомными правилами markdownlint в этом репозитории.
+Краткий справочник для AI-агента при работе с кастомными правилами markdownlint в этом репозитории.
 
 ## Роль
 
@@ -13,19 +13,22 @@
 | Правила | `src/rules/*.ts` (`extends BaseRule`), barrel `src/markdownlint-rules.ts` |
 | Domain / core | `src/core/`, `src/domain/`, `src/composition/app-context.ts` |
 | Barrels | `src/markdownlint-rules.ts`, `src/markdownlint-hlprs.ts` |
-| Runtime | корневые `*.js`, `rules/*.js` (артефакты tsc; entry points: `markdownlint-rules.js`, `markdownlint-hlprs.js`) |
+| Runtime | корневые `*.js`, `core/`, `domain/`, `composition/`, `rules/` (артефакты tsc; entry points: `markdownlint-rules.js`, `markdownlint-hlprs.js`) |
 | Примеры | `markdownlint-examples/**/*.md` |
-| Тесты | `test-rules.cjs` |
+| Тесты | `test-rules.cjs`, `check-function-order.cjs` |
+| Cursor rules | `.cursor/rules/*.mdc` |
+| Docs | `README.md`, `AGENTS.md` |
 
 ## Правила репозитория
 
 | Файл | Вопрос |
 |------|--------|
-| [markdownlint-project.mdc](.cursor/rules/markdownlint-project.mdc) | **Проект:** каталог правил, структура, workflow, VS Code |
+| [markdownlint-project.mdc](.cursor/rules/markdownlint-project.mdc) | **Проект:** политики lint-правил, примеры, API hlprs, структура, VS Code |
 | [ts-style.mdc](.cursor/rules/ts-style.mdc) | **Оформление TS/OOP:** BaseRule, классы, типы |
 | [ts-dev.mdc](.cursor/rules/ts-dev.mdc) | **Проектирование TS:** SRP, DRY, модули |
 | [js-style.mdc](.cursor/rules/js-style.mdc) | **Оформление:** `test-rules.cjs` |
 | [js-dev.mdc](.cursor/rules/js-dev.mdc) | **Проектирование:** `test-rules.cjs` |
+| [docs-consistency.mdc](.cursor/rules/docs-consistency.mdc) | **Синхронизация:** код ↔ все `.mdc` ↔ AGENTS ↔ README при изменении логики |
 
 Перед правками — целевое правило, хелперы и примеры в `markdownlint-examples/`; повторяй локальные конвенции.
 
@@ -51,22 +54,18 @@
 4. **Match conventions** — `extends BaseRule`, `AppContext`, [`src/details.ts`](src/details.ts), стиль как в файле
 5. **Preserve contracts** — `onError({ lineNumber, detail, context? })`, публичный API hlprs, runtime CommonJS
 6. **Register** — `new XxxRule(deps).toRule()` в [`src/markdownlint-rules.ts`](src/markdownlint-rules.ts)
-7. **Build** — после правки `src/`: `npm run build`
-8. **Root cause** — не угадывай; спроси при неясности
+7. **Test** — `npm test` (pretest → build; test-rules + check-function-order)
+8. **Sync docs** — по [docs-consistency.mdc](.cursor/rules/docs-consistency.mdc): `.mdc` (по матрице) → AGENTS → README
 
 ## Верификация
 
-```bash
-npm test
-```
+См. шаг 7 workflow. Дополнительно — `npm run check` (типы и синтаксис без пересборки).
 
-Полная верификация — `npm test` (`pretest` запускает `build`; включает `check-function-order.cjs` для порядка функций). `npm run check` — `tsc --noEmit` + `node --check` артефактов + порядок функций; **не** пересобирает tsc.
-
-- `test-rules.cjs` также содержит inline-кейсы — обязаны проходить
-- После правки примеров — `_err` должен срабатывать **только** на целевое правило
+После правки примеров — `_err` срабатывает **только** на целевое правило; inline-кейсы в `test-rules.cjs` обязаны проходить.
 
 ## Границы
 
+- Не угадывай; спроси при неясности
 - Не коммить/push, не менять конфиги VS Code — без явной просьбы
 - Не раздувать scope; не трогать built-in правила markdownlint
 - Runtime custom rules — CommonJS `.js`; не подключать `.ts` или ESM в markdownlint

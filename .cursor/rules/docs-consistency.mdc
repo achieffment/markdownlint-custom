@@ -1,0 +1,71 @@
+---
+description: Синхронизация кода, .cursor/rules, AGENTS.md и README при изменении логики
+alwaysApply: true
+---
+
+# Синхронизация документации и правил
+
+При изменении логики, архитектуры, тестов, стиля или структуры — синхронизировать код и все связанные артефакты. Не завершать задачу, пока docs и `.mdc` не соответствуют коду.
+
+## Роли артефактов
+
+| Слой | Файлы | Содержит |
+|------|-------|----------|
+| **Поведение (источник истины)** | [`src/`](../src/), [`details.ts`](../src/details.ts), [`regex.ts`](../src/regex.ts) | Реализация, `description`/`detail` |
+| **Канон проекта (AI)** | [markdownlint-project.mdc](markdownlint-project.mdc) | Политики lint-правил, конвенции `_err`/`_suc`, API hlprs, структура, VS Code JSON |
+| **Стиль TS (AI)** | [ts-style.mdc](ts-style.mdc) | Оформление `src/**/*.ts`: BaseRule, типы, barrels, `onError` |
+| **Архитектура TS (AI)** | [ts-dev.mdc](ts-dev.mdc) | SRP/DRY, модули `src/`, порядок функций |
+| **Стиль test (AI)** | [js-style.mdc](js-style.mdc) | Симметрия имён, конвейер в [`test-rules.cjs`](../test-rules.cjs) |
+| **Архитектура test (AI)** | [js-dev.mdc](js-dev.mdc) | SRP/DRY, inline-кейсы, порядок функций в test |
+| **Синхронизация (AI)** | [docs-consistency.mdc](docs-consistency.mdc) | Этот файл — матрица и чеклист |
+| **Справочник AI** | [`AGENTS.md`](../AGENTS.md) | Scope, workflow, краткий каталог lint-правил, ссылки на все `.mdc` |
+| **Документация людей** | [`README.md`](../README.md) | Onboarding, структура, скрипты; таблица lint-правил — **кратко** |
+
+Не копировать политики из `markdownlint-project.mdc` в README. Не менять только README, не обновив `.mdc` и `AGENTS.md`.
+
+## Матрица изменений
+
+| Тип изменения | Код / тесты | Правила и docs |
+|---------------|-------------|----------------|
+| **Новое lint-правило** | `src/rules/`, [`markdownlint-rules.ts`](../src/markdownlint-rules.ts), [`details.ts`](../src/details.ts), [`AppContext`](../src/composition/app-context.ts), `markdownlint-examples/<name>/`, [`test-rules.cjs`](../test-rules.cjs), `npm test` | Каталог + политика в `markdownlint-project.mdc`; строки в `AGENTS.md`, README; ключ в VS Code JSON (README и `.mdc`) |
+| **Изменение политики lint-правила** | `src/` (+ domain), примеры, inline в `test-rules.cjs`, `npm test` | Политика в `markdownlint-project.mdc`; `AGENTS.md` / README — если изменилась суть для пользователя |
+| **Изменение `description` / `detail`** | [`details.ts`](../src/details.ts), класс правила | Политика в `.mdc`; краткие строки в `AGENTS.md` / README при расхождении |
+| **Публичный экспорт hlprs** | [`markdownlint-hlprs.ts`](../src/markdownlint-hlprs.ts), `npm test` | Таблица API в `markdownlint-project.mdc` |
+| **Архитектура / новый domain-модуль** | `src/domain/`, `AppContext`, `npm test` | Таблицы модулей в `ts-dev.mdc`, структура в `markdownlint-project.mdc`, scope в `AGENTS.md`, «Структура» / mermaid в README |
+| **Изменение BaseRule / контракта `onError`** | `src/core/` | `ts-style.mdc`, «Контракты» в `markdownlint-project.mdc`, шаг 5 в `AGENTS.md` |
+| **Конвенции стиля TS** | `src/**/*.ts` | `ts-style.mdc`; перекрёстные ссылки в `ts-dev.mdc` при необходимости |
+| **Конвенции test-rules** | [`test-rules.cjs`](../test-rules.cjs) | `js-style.mdc`, `js-dev.mdc`; конвенции примеров в `markdownlint-project.mdc` при пересечении |
+| **Порядок функций / check-function-order** | `src/`, `test-rules.cjs`, [`check-function-order.cjs`](../check-function-order.cjs) | `ts-dev.mdc`, `js-dev.mdc` |
+| **Структура репозитория** | — | `markdownlint-project.mdc`, `AGENTS.md` scope; README «Структура» (кратко + ссылка на `.mdc`) |
+| **npm-скрипты** | [`package.json`](../package.json) | README «npm-скрипты»; «Верификация» в `AGENTS.md` |
+| **Новое/удаление `.mdc`** | — | Каталог в [AGENTS.md](../AGENTS.md); строка «`.cursor/rules/`» в `markdownlint-project.mdc`; роли в этом файле |
+| **Удаление lint-правила** | `src/`, examples, `test-rules.cjs` | Обратный чеклист: все docs + VS Code JSON |
+
+Список `names` lint-правил — одинаковый в [`markdownlint-rules.ts`](../src/markdownlint-rules.ts), каталогах docs и VS Code JSON.
+
+## Порядок работы
+
+1. Код, примеры, `test-rules.cjs`
+2. `npm test`
+3. `.mdc` по типу изменения (см. матрицу): `markdownlint-project` → `ts-*` / `js-*` при необходимости
+4. `AGENTS.md` → `README.md`
+5. Финальный чеклист
+
+Workflow — канон в [AGENTS.md](../AGENTS.md); `.mdc` не дублируют шаги build/test/sync.
+
+## Антипаттерны
+
+- Обновить docs без `npm test` после изменения логики
+- Развести расхождения в `names` между кодом и документами
+- Дублировать полные политики в README или AGENTS.md
+- Менять workflow в `.mdc`, не сверившись с [AGENTS.md](../AGENTS.md)
+- Забыть VS Code JSON при добавлении/удалении lint-правила
+
+## Финальный чеклист
+
+- [ ] Каталоги `names` совпадают в коде, `.mdc`, `AGENTS.md`, README, VS Code JSON
+- [ ] Политики и конвенции примеров актуальны в `markdownlint-project.mdc`
+- [ ] Модули актуальны в `ts-dev.mdc`, конвенции — в `ts-style.mdc` (если менялся TS)
+- [ ] Конвенции test актуальны в `js-dev.mdc`, `js-style.mdc` (если менялся test)
+- [ ] `AGENTS.md` и README соответствуют канону; ссылки на все `.mdc` на месте
+- [ ] `npm test` проходит

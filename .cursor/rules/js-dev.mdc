@@ -6,7 +6,7 @@ alwaysApply: false
 
 # Проектирование test-rules.cjs
 
-Исходники правил и domain — [ts-dev.mdc](ts-dev.mdc). Оформление inline-кейсов — [js-style.mdc](js-style.mdc). Проект — [markdownlint-project.mdc](markdownlint-project.mdc).
+Исходники правил и domain — [ts-dev.mdc](ts-dev.mdc). Оформление inline-кейсов — [js-style.mdc](js-style.mdc). Проект — [markdownlint-project.mdc](markdownlint-project.mdc). При изменении конвенций test — [docs-consistency.mdc](docs-consistency.mdc).
 
 **База:** минимальный diff; SRP/DRY не повод для рефактора без запроса; не менять сигнатуры hlprs, формат `onError({ lineNumber, detail, context? })`.
 

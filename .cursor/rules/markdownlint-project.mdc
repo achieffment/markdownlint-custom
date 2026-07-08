@@ -1,5 +1,5 @@
 ---
-description: Кастомные правила markdownlint — структура проекта, каталог правил, workflow
+description: Кастомные правила markdownlint — структура, каталог, политики, примеры
 alwaysApply: true
 ---
 
@@ -21,12 +21,11 @@ alwaysApply: true
 | Корневые `*.js`, `core/`, `domain/`, `composition/`, [`rules/`](../rules/) | **Артефакты tsc**; коммитить вместе с `src/` |
 | [`markdownlint-examples/`](../markdownlint-examples/) | Пары `_err.md` / `_suc.md` на каждое правило |
 | [`test-rules.cjs`](../test-rules.cjs) | Прогон примеров и inline-кейсов через markdownlint CLI |
+| [`check-function-order.cjs`](../check-function-order.cjs) | Проверка порядка функций (callee перед caller) |
 | [`tsconfig.json`](../tsconfig.json) | Сборка `src/` → CommonJS `.js` в корне |
-| [`AGENTS.md`](../AGENTS.md) | Руководство для AI-агента |
-| [`.cursor/rules/ts-style.mdc`](ts-style.mdc) | Оформление TypeScript |
-| [`.cursor/rules/ts-dev.mdc`](ts-dev.mdc) | SRP, DRY, модули TypeScript |
-| [`.cursor/rules/js-style.mdc`](js-style.mdc) | Оформление `test-rules.cjs` |
-| [`.cursor/rules/js-dev.mdc`](js-dev.mdc) | Проектирование `test-rules.cjs` |
+| [`AGENTS.md`](../AGENTS.md) | Краткий справочник для AI-агента |
+| [`README.md`](../README.md) | Документация для людей (onboarding, правила проверки кратко) |
+| [`.cursor/rules/`](../.cursor/rules/) | Правила Cursor; каталог — [AGENTS.md](../AGENTS.md) |
 
 ## Каталог правил
 
@@ -141,12 +140,14 @@ alwaysApply: true
 
 ## Workflow: новое или изменённое правило
 
-1. Добавить или обновить `_err.md` / `_suc.md` в `markdownlint-examples/<rule-name>/`.
-2. Реализовать класс в `src/rules/<rule-name>.ts` (`extends BaseRule`, `check()`); ключи в [`src/details.ts`](../src/details.ts), regex — [`src/regex.ts`](../src/regex.ts); domain — при необходимости.
-3. Зарегистрировать `new XxxRule(deps).toRule()` в [`src/markdownlint-rules.ts`](../src/markdownlint-rules.ts); при новом checker — расширить [`AppContext`](../src/composition/app-context.ts).
-4. При ≥3 повторах алгоритма — вынести в domain-класс (не в barrel).
-5. `npm run build` — обновить корневые `.js`.
-6. Верификация: `npm test` (полная); `npm run check` — типы и синтаксис.
+Общий порядок — [AGENTS.md](../AGENTS.md) (шаги 1–8).
+
+Специфика lint-правила:
+
+1. `_err.md` / `_suc.md` в `markdownlint-examples/<rule-name>/`
+2. Класс в `src/rules/<rule-name>.ts`; ключи — [`details.ts`](../src/details.ts), regex — [`regex.ts`](../src/regex.ts); domain — при необходимости
+3. `new XxxRule(deps).toRule()` в [`markdownlint-rules.ts`](../src/markdownlint-rules.ts); новый checker — [`AppContext`](../src/composition/app-context.ts)
+4. При ≥3 повторах алгоритма — domain-класс (не barrel)
 
 ## Контракты
 

@@ -6,7 +6,7 @@ alwaysApply: false
 
 # Стиль TypeScript правил markdownlint
 
-Симметрия имён, конвейер, условия — как в [js-style.mdc](js-style.mdc). Проект — [markdownlint-project.mdc](markdownlint-project.mdc); проектирование — [ts-dev.mdc](ts-dev.mdc).
+Симметрия имён, конвейер, условия — как в [js-style.mdc](js-style.mdc). Проект — [markdownlint-project.mdc](markdownlint-project.mdc); проектирование — [ts-dev.mdc](ts-dev.mdc). При изменении конвенций TS — [docs-consistency.mdc](docs-consistency.mdc).
 
 ## Формат файла
 
