@@ -31,6 +31,10 @@ SRP/DRY — те же принципы, что в [js-dev.mdc](js-dev.mdc) (дл
 - **`onError`** — на границе `check()` / методов checker-ов
 - **Composition root** — `app-context.ts`, barrels; не создавать `new` в domain вне root (кроме `MarkdownDocument` в `check`)
 
+## Порядок функций
+
+В каждой области видимости (модуль, class body, блок с `const`-стрелками) **вызываемая идёт раньше вызывающей**: прямой вызов `foo()`, `this.foo()` между siblings. Проверка: `npm run check:order` (входит в `npm test` и `npm run check`). Эталон — [`list-block-analyzer.ts`](../src/domain/list-block-analyzer.ts) (`createHelpers`).
+
 ## Workflow
 
 1. Правка `src/**/*.ts`

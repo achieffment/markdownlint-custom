@@ -3,9 +3,10 @@
     "private": true,
     "scripts": {
         "build": "tsc",
-        "check": "tsc --noEmit && node --check markdownlint-rules.js && node --check markdownlint-hlprs.js && node --check test-rules.cjs",
+        "check": "tsc --noEmit && node --check markdownlint-rules.js && node --check markdownlint-hlprs.js && node --check test-rules.cjs && node --check check-function-order.cjs && node check-function-order.cjs",
+        "check:order": "node check-function-order.cjs",
         "pretest": "npm run build",
-        "test": "node test-rules.cjs"
+        "test": "node test-rules.cjs && node check-function-order.cjs"
     },
     "devDependencies": {
         "@types/node": "^22.0.0",

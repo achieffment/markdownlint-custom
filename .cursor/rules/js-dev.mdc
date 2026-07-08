@@ -31,6 +31,10 @@ alwaysApply: false
 - **WET лучше неверной абстракции** — похожие markdown-строки в разных кейсах допустимы
 - Выносить хелпер в test — если **≥3 повтора** в `test-rules.cjs`
 
+## Порядок функций
+
+Top-level `const`-хелперы и вложенные `const`-стрелки — **callee перед caller** (как в [ts-dev.mdc](ts-dev.mdc)). Проверка: `npm run check:order`.
+
 ## Функции и модули
 
 - **Guard clauses**, ранний `return`; `onError` — на границе правила, не внутри парсера

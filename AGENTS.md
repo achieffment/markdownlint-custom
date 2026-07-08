@@ -60,7 +60,7 @@
 npm test
 ```
 
-Полная верификация — `npm test` (`pretest` запускает `build`). `npm run check` — `tsc --noEmit` + `node --check` артефактов; **не** пересобирает tsc.
+Полная верификация — `npm test` (`pretest` запускает `build`; включает `check-function-order.cjs` для порядка функций). `npm run check` — `tsc --noEmit` + `node --check` артефактов + порядок функций; **не** пересобирает tsc.
 
 - `test-rules.cjs` также содержит inline-кейсы — обязаны проходить
 - После правки примеров — `_err` должен срабатывать **только** на целевое правило
