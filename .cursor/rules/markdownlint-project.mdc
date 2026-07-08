@@ -11,13 +11,22 @@ alwaysApply: true
 
 | Файл / каталог | Назначение |
 |----------------|------------|
-| [`markdownlint-rules.js`](../markdownlint-rules.js) | Массив правил (`module.exports = [...]`) |
-| [`markdownlint-hlprs.js`](../markdownlint-hlprs.js) | Общие хелперы (≥3 повтора между правилами) |
+| [`src/`](../src/) | Исходники TypeScript (правила, хелперы, типы) |
+| [`src/core/`](../src/core/) | `ICustomRule`, `abstract BaseRule` |
+| [`src/domain/`](../src/domain/) | `ListLineParser`, `CodeWalker`, `MarkdownDocument`, `ListBlockAnalyzer`, `ListSpacingChecker`, `ColonChecker` |
+| [`src/composition/`](../src/composition/) | `AppContext` — wiring зависимостей |
+| [`src/rules/`](../src/rules/) | Класс `XxxRule extends BaseRule` |
+| [`markdownlint-rules.js`](../markdownlint-rules.js) | **Артефакт tsc:** массив правил (`module.exports = [...]`) |
+| [`markdownlint-hlprs.js`](../markdownlint-hlprs.js) | **Артефакт tsc:** публичный API для `test-rules.cjs` (compat); правила — DI через `AppContext` |
+| Корневые `*.js`, `core/`, `domain/`, `composition/`, [`rules/`](../rules/) | **Артефакты tsc**; коммитить вместе с `src/` |
 | [`markdownlint-examples/`](../markdownlint-examples/) | Пары `_err.md` / `_suc.md` на каждое правило |
 | [`test-rules.cjs`](../test-rules.cjs) | Прогон примеров и inline-кейсов через markdownlint CLI |
+| [`tsconfig.json`](../tsconfig.json) | Сборка `src/` → CommonJS `.js` в корне |
 | [`AGENTS.md`](../AGENTS.md) | Руководство для AI-агента |
-| [`.cursor/rules/js-style.mdc`](js-style.mdc) | Оформление кода правил |
-| [`.cursor/rules/js-dev.mdc`](js-dev.mdc) | SRP, DRY, проектирование |
+| [`.cursor/rules/ts-style.mdc`](ts-style.mdc) | Оформление TypeScript |
+| [`.cursor/rules/ts-dev.mdc`](ts-dev.mdc) | SRP, DRY, модули TypeScript |
+| [`.cursor/rules/js-style.mdc`](js-style.mdc) | Оформление `test-rules.cjs` |
+| [`.cursor/rules/js-dev.mdc`](js-dev.mdc) | Проектирование `test-rules.cjs` |
 
 ## Каталог правил
 
@@ -72,7 +81,7 @@ alwaysApply: true
 ### `no-leading-spaces` — политика
 
 - **Scope:** строки вне code fence и строки-обозначения блока (opening/closing `` ``` ``).
-- **Обход:** собственный цикл `inCodeB` (не `eachLineOutsideCode` — тот пропускает fence-строки).
+- **Обход:** `CodeWalker.walkCodeFenceAware` из [`src/domain/code-walker.ts`](../src/domain/code-walker.ts) (строки fence не пропускаются; не `eachLineOutsideCode`).
 - **Skip:** заголовки (`#`); содержимое между fence не проверяется.
 - **Fence:** отступ 0 у opening/closing `` ``` ``.
 - **Пункт списка:** отступ 0; вложенный допустим при `indent > 0` и `indent >=` отступа предыдущего пункта списка (`findPrevListInd`; соседи на одном уровне — с тем же отступом); при поиске предыдущего пункта пропускаются блоки code fence (как тело пункта в `findNumItemEnd`).
@@ -89,11 +98,11 @@ alwaysApply: true
 - **Scope:** только **открывающие** `` ``` `` (не закрывающие).
 - **Проверка:** строка перед fence должна заканчиваться `:`.
 - **Skip prev:** заголовок, **любой** пункт списка (`isLstItem` / `lstItemRx`), code fence, пустая prev-строка (`checkPrecededByColon`).
-- **Обход fence:** правило использует собственный цикл `inCodeB` (не `walkOutsideCode`, который пропускает строки `` ``` ``).
+- **Обход fence:** `CodeWalker.eachOpeningCodeFence` из [`src/domain/code-walker.ts`](../src/domain/code-walker.ts) (не `walkOutsideCode`, который пропускает строки `` ``` ``).
 
 ### Публичный API хелперов (`markdownlint-hlprs.js`)
 
-Экспорт для `markdownlint-rules.js` и `test-rules.cjs`:
+Экспорт для `test-rules.cjs` (обратная совместимость):
 
 | Экспорт | Назначение |
 |---------|------------|
@@ -108,7 +117,7 @@ alwaysApply: true
 | `checkListBlankSpacing` | Политика `list-blank-line-spacing` |
 | `checkListPrecededByColon` | Политика `list-preceded-by-colon` (третий аргумент — `colDet`) |
 
-Внутренние (не экспортируются): `trimStart`, `isNumItem`, `isBulItem`, `isNestedLstItem`, `getNumPath`, `skipBlankBck`, `hasBlankGap`, `boundBefIdx`, `boundAftIdx`, `walkOutsideCode`, `walkListBlocks`, `createListBlockHelpers` (`findItemEnd`, `collectBlock`, `findNumItemEnd`, `findBulItemEnd`, `collectNumBlock`, `collectBulBlock`).
+Внутренние (не экспортируются): `ListLineParser` (`trimStart`, `isNumItem`, `isBulItem`, `isNestedLstItem`, `getNumPath`, `skipBlankBck`), `ListBlockAnalyzer` (`createHelpers`, `walkListBlocks`, `findItemEnd`, `collectBlock`, `findNumItemEnd`, `findBulItemEnd`, `collectNumBlock`, `collectBulBlock`), `ListSpacingChecker` (`hasBlankGap`, `boundBefIdx`, `boundAftIdx`), `CodeWalker` (`walkOutsideCode`, `walkCodeFenceAware`, `eachOpeningCodeFence`; `eachLineOutsideCode` — публичный через hlprs).
 
 ## Подключение в VS Code
 
@@ -133,12 +142,14 @@ alwaysApply: true
 ## Workflow: новое или изменённое правило
 
 1. Добавить или обновить `_err.md` / `_suc.md` в `markdownlint-examples/<rule-name>/`.
-2. Реализовать правило в `markdownlint-rules.js` (`parser: "none"`, русские `description` / `detail`).
-3. При ≥3 повторах алгоритма — вынести в `markdownlint-hlprs.js`.
-4. Верификация: `npm run check` и `npm test`.
+2. Реализовать класс в `src/rules/<rule-name>.ts` (`extends BaseRule`, `check()`); ключи в [`src/details.ts`](../src/details.ts), regex — [`src/regex.ts`](../src/regex.ts); domain — при необходимости.
+3. Зарегистрировать `new XxxRule(deps).toRule()` в [`src/markdownlint-rules.ts`](../src/markdownlint-rules.ts); при новом checker — расширить [`AppContext`](../src/composition/app-context.ts).
+4. При ≥3 повторах алгоритма — вынести в domain-класс (не в barrel).
+5. `npm run build` — обновить корневые `.js`.
+6. Верификация: `npm test` (полная); `npm run check` — типы и синтаксис.
 
 ## Контракты
 
-- **CommonJS only** — ESM не поддерживается загрузчиком custom rules.
+- **Исходники:** TypeScript в `src/`; **runtime custom rules:** CommonJS `.js` в корне (не ESM, не `.ts` напрямую).
 - **onError:** `{ lineNumber, detail, context? }`, `lineNumber` с 1.
 - Не менять built-in правила markdownlint; только custom rules в этом репозитории.

@@ -1,0 +1,23 @@
+import type { RuleOnError } from "markdownlint";
+
+export type OutsideCodeCallback = (line: string, ix: number, trim: string) => void;
+
+export type OutsideCodeWalker = (ix: number, trim: string) => number | undefined;
+
+export type LinePredicate = (line: string) => boolean;
+
+export type FindItemEnd = (beg: number) => number;
+
+export type ListBlockHandler = (
+    items: number[],
+    findEnd: FindItemEnd,
+    isSameKind: LinePredicate,
+    isNum: boolean
+) => void;
+
+export type OnErrorFn = RuleOnError;
+
+export type CodeFenceHandlers = {
+    onFence: (line: string, ix: number, trim: string, opening: boolean) => void;
+    onOutside: (line: string, ix: number, trim: string) => void;
+};

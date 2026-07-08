@@ -1,0 +1,36 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ListItemsEndRule = void 0;
+const base_rule_1 = require("../core/base-rule");
+const details_1 = require("../details");
+const markdown_document_1 = require("../domain/markdown-document");
+const regex_1 = require("../regex");
+class ListItemsEndRule extends base_rule_1.BaseRule {
+    constructor(codeWalker, lineParser) {
+        super();
+        this.codeWalker = codeWalker;
+        this.lineParser = lineParser;
+        this.names = ["list-items-end-with-semicolon-or-colon"];
+        this.description = details_1.details.listItemsEnd;
+        this.tags = ["lists"];
+    }
+    check(lines, onError) {
+        const doc = new markdown_document_1.MarkdownDocument(lines, this.codeWalker, this.lineParser);
+        doc.eachLineOutsideCode((line, ix, trim) => {
+            if (!this.lineParser.isLstItem(line))
+                return;
+            let cont = trim.replace(this.lineParser.lstItemRx, "");
+            cont = cont.trim();
+            const next = doc.skipBlankFwd(ix);
+            const folcod = next < lines.length && regex_1.codeFenceRx.test(lines[next].trim());
+            const folsub = next < lines.length && this.lineParser.isChildLstItem(line, lines[next]);
+            const needsColon = folcod || folsub;
+            const endsOk = needsColon ? regex_1.endsWithColonRx.test(cont) : regex_1.endsWithSemiRx.test(cont);
+            const lstDet = needsColon ? details_1.details.listItemsColon : details_1.details.listItemsSemi;
+            if (!cont || !endsOk) {
+                onError({ lineNumber: ix + 1, detail: lstDet, context: trim || "Пустой пункт списка" });
+            }
+        });
+    }
+}
+exports.ListItemsEndRule = ListItemsEndRule;

@@ -1,19 +1,19 @@
 ---
-description: Стиль кода кастомных правил markdownlint (симметрия имён, конвейер, условия)
-globs: **/*.{js,mjs,cjs}
+description: Стиль test-rules.cjs (симметрия имён, конвейер, условия)
+globs: test-rules.cjs
 alwaysApply: false
 ---
 
-# Стиль кода правил markdownlint
+# Стиль test-rules.cjs
 
-Симметрия имён, однострочные условия, конвейер. Проект — [markdownlint-project.mdc](markdownlint-project.mdc); проектирование — [js-dev.mdc](js-dev.mdc).
+Исходники TypeScript/OOP — [ts-style.mdc](ts-style.mdc). Симметрия имён, однострочные условия, конвейер. Проект — [markdownlint-project.mdc](markdownlint-project.mdc); проектирование — [js-dev.mdc](js-dev.mdc).
+
+**Не редактировать** tsc-артефакты (`rules/*.js`, `domain/*.js`, …) — только `src/**/*.ts`.
 
 ## Формат файла
 
-- JSDoc: `/** @type {import("markdownlint").Rule[]} */`; `module.exports = [ ... ];`
-- Поля правила: `names` → `description` → `tags` → `parser` → `function`
-- Отступ **4 пробела**; одна пустая строка между правилами; без лишних пустых строк внутри `function`
-- `description` / `detail` — на русском; `parser: "none"`
+- CommonJS: `require` / `module.exports` не используется для правил (правила — `./markdownlint-rules.js`)
+- Отступ **4 пробела**
 - **Не выравнивать** ключи, отступы и **пробелы перед `=`**
 
 ## Симметрия имён
@@ -39,11 +39,11 @@ alwaysApply: false
 Те же правила симметрии, что у переменных. Алгоритм: сгруппировать соседей → целевая длина → укоротить только длиннее цели.
 
 ```javascript
-const lstItemRx = /^([-+*]\s|\d+(?:\.\d+)+\s|\d+\.\s)/;
+const { lstItemRx, numItemRx } = require("./regex.js");
 const trimStart = (line) => line.replace(/^\s*/, "");
 const isLstItem = (line) => lstItemRx.test(trimStart(line));
-const isNumItem = (line) => /^\s*\d+(?:\.\d+)+\s+/.test(line) || /^\s*\d+\.\s+/.test(line);
-const getIndent = (line) => line.match(/^(\s*)/)[1].length;
+const isNumItem = (line) => numItemRx.test(trimStart(line));
+const getIndent = (line) => line.match(/^(\s*)/)?.[1]?.length ?? 0;
 const hasBlankGap = (lines, beg, end) => { ... };
 const findNumItemEnd = (beg) => { ... };
 const fstBeg = items[0];
@@ -71,12 +71,11 @@ if (!cont || !endsOk) {
 }
 ```
 
-## Markdownlint
+## Markdownlint (inline-кейсы)
 
-- Начало `function`: `const lines = params.lines;`, regex/хелперы
-- `inCodeB` + toggle на `` ``` ``; `onError({ lineNumber, detail, context? })`, `lineNumber` с 1
-- JSDoc-тип на экспорте; без очевидных комментариев
-- Custom rules для VS Code — **только CommonJS** (`require` / `module.exports`); ESM не поддерживается загрузчиком markdownlint
+- `lintStrings({ key: markdown }, ruleNames)` — прогон через custom rules
+- `getFiredRules(results)` — множество сработавших `names`
+- `onError({ lineNumber, detail, context? })`, `lineNumber` с 1 — в ожиданиях lint
 
 ## Чего не делать
 

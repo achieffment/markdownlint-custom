@@ -1,0 +1,44 @@
+---
+description: Стиль TypeScript/OOP для кастомных правил markdownlint
+globs: **/*.ts
+alwaysApply: false
+---
+
+# Стиль TypeScript правил markdownlint
+
+Симметрия имён, конвейер, условия — как в [js-style.mdc](js-style.mdc). Проект — [markdownlint-project.mdc](markdownlint-project.mdc); проектирование — [ts-dev.mdc](ts-dev.mdc).
+
+## Формат файла
+
+- Исходники в [`src/`](../src/); runtime — CommonJS `.js` после `npm run build`
+- Типы markdownlint — `import type { RuleOnError } from "markdownlint"` ([`markdownlint-api.d.ts`](../src/markdownlint-api.d.ts))
+- Правило: `class XxxRule extends BaseRule` в [`src/rules/`](../src/rules/); export class; регистрация в [`markdownlint-rules.ts`](../src/markdownlint-rules.ts)
+- [`BaseRule.toRule()`](../src/core/base-rule.ts) — единственный способ получить `Rule`
+- Barrels — composition root / wiring; без бизнес-логики
+- `description` / `detail` — [`details.ts`](../src/details.ts); regex — [`regex.ts`](../src/regex.ts)
+- **Не выравнивать** ключи и пробелы перед `=`
+
+## TypeScript / OOP
+
+- `import type` для типов; без `any`, `enum`, `@ts-ignore`
+- `private readonly` для зависимостей в конструкторе правил и domain
+- `readonly string[]` для `lines`
+- `as const` в `details.ts`
+- `module.exports` в barrels
+
+## Симметрия имён и конвейер
+
+Как [js-style.mdc](js-style.mdc): `folcod`/`folsub`, guard + `{}` вокруг `onError`.
+
+## Markdownlint
+
+- `parser: "none"` через `BaseRule.toRule()`
+- `onError({ lineNumber, detail, context? })`, `lineNumber` с 1
+- Runtime — **CommonJS**
+
+## Чего не делать
+
+- Логику в barrels
+- Глубокие иерархии классов
+- `defineRule` / свободные `check*` в корне `src/`
+- Padding перед `=`

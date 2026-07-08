@@ -1,23 +1,22 @@
 ---
-description: Проектирование кастомных правил markdownlint (SRP, DRY, модули)
-globs: **/*.{js,mjs,cjs}
+description: Проектирование test-rules.cjs (SRP, DRY)
+globs: test-rules.cjs
 alwaysApply: false
 ---
 
-# Проектирование правил markdownlint
+# Проектирование test-rules.cjs
 
-Как **разбить** логику, что вынести, что не дублировать. Проект — [markdownlint-project.mdc](markdownlint-project.mdc); оформление — [js-style.mdc](js-style.mdc).
+Исходники правил и domain — [ts-dev.mdc](ts-dev.mdc). Оформление inline-кейсов — [js-style.mdc](js-style.mdc). Проект — [markdownlint-project.mdc](markdownlint-project.mdc).
 
-**База:** минимальный diff; SRP/DRY не повод для рефактора без запроса; не менять `module.exports`, сигнатуры (`params`, `onError`), формат `onError({ lineNumber, detail, context? })`.
+**База:** минимальный diff; SRP/DRY не повод для рефактора без запроса; не менять сигнатуры hlprs, формат `onError({ lineNumber, detail, context? })`.
 
 ## SRP
 
 Одна единица — **одна причина для изменения**.
 
-- **Функция** — одна проверка, один проход, одна операция парсинга
-- **Правило markdownlint** — одна политика в `names`
-- **Const-хелпер** — одна операция (`getIndent`, `findNumItemEnd`, `hasBlankGap`)
-- Разные проходы — разные функции: `walkListBlocks` (обход num/bul-блоков), `checkBlockBounds` / `checkBlockGaps` (валидация)
+- **Функция** — одна проверка, один inline-кейс, одна assert-группа
+- **Const-хелпер** в test — одна операция (`lintStrings`, `getFiredRules`)
+- Разные сценарии — разные блоки inline-кейсов
 
 ```javascript
 // Плохо: одна function на 80+ строк с несвязанными ветками
@@ -28,11 +27,9 @@ alwaysApply: false
 
 Выносить повтор, только если совпадают **алгоритм и смысл** — не «похожие строки».
 
-- Внутри правила — локальные const-хелперы; между правилами — общий хелпер **только по запросу**
-- **WET лучше неверной абстракции** — похожий `inCodeB`-цикл в разных правилах допустим
-- Малый файл (~250 строк) — плоский `module.exports = [...]`, без «фреймворка ради DRY»
-- Выносить в общую функцию — если **≥3 повтора** и блоки **меняются вместе**
-- Co-located хелпер [`markdownlint-hlprs.js`](../markdownlint-hlprs.js) — допустим при явном рефакторе; правила остаются тонкими, SRP — в хелперах
+- Внутри inline-кейса — локальные const; не дублировать логику domain (lint через custom rules)
+- **WET лучше неверной абстракции** — похожие markdown-строки в разных кейсах допустимы
+- Выносить хелпер в test — если **≥3 повтора** в `test-rules.cjs`
 
 ## Функции и модули
 
@@ -46,4 +43,4 @@ alwaysApply: false
 
 1. Задача явно просит — иначе точечная правка
 2. ≥3 повтора и меняются вместе — или функция стала двусмысленной
-3. Не выносить хелперы «на будущее», не дробить файлы и не добавлять OOP без запроса
+3. Не выносить хелперы «на будущее»; domain-логика — в `src/domain/`, не в test

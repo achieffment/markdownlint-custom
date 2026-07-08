@@ -1,0 +1,17 @@
+export const subNumItemRx = /^\d+(?:\.\d+)+\s+/;
+
+export const bulItemRx = /^[-+*]\s/;
+
+export const numItemRx = /^\d+(?:\.\d+)+\s+|\d+\.\s+/;
+
+export const lstItemRx = /^([-+*]\s|\d+(?:\.\d+)+\s|\d+\.\s)/;
+
+export const h2Rx = /^##(?!\#)\s+\S/;
+
+export const endsWithColonRx = /:$/;
+
+export const endsWithSemiRx = /;$/;
+
+export const endsWithMarkRx = /[.!?:;]$/;
+
+export const codeFenceRx = /^```/;

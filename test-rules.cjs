@@ -2,7 +2,9 @@ const fs = require("fs");
 const path = require("path");
 const markdownlint = require("markdownlint/sync");
 const customRules = require("./markdownlint-rules.js");
-const { lstItemRx, isLstItem } = require("./markdownlint-hlprs");
+const hlprs = require("./markdownlint-hlprs");
+const { h2Rx } = require("./regex.js");
+const { lstItemRx, isLstItem } = hlprs;
 
 const examplesDir = path.join(__dirname, "markdownlint-examples");
 const ruleNames = customRules.flatMap(rule => rule.names);
@@ -10,8 +12,6 @@ const ruleConfig = { default: false };
 ruleNames.forEach(name => {
     ruleConfig[name] = true;
 });
-
-const h2Rx = /^##(?!\#)\s+\S/;
 
 const collectCases = () => {
     const cases = [];
@@ -202,6 +202,32 @@ const lintStrings = (strings, rules) => {
     });
     return markdownlint.lint({ strings, customRules, config });
 };
+
+const expectedHlprsKeys = [
+    "lstItemRx",
+    "getIndent",
+    "isLstItem",
+    "isChildLstItem",
+    "skipBlankFwd",
+    "eachLineOutsideCode",
+    "findPrevListInd",
+    "checkPrecededByColon",
+    "checkListBlankSpacing",
+    "checkListPrecededByColon"
+];
+expectedHlprsKeys.forEach(key => {
+    const val = hlprs[key];
+    if (key === "lstItemRx") {
+        if (!(val instanceof RegExp)) {
+            assert(false, `hlprs.${key} must be RegExp`);
+        }
+    } else if (typeof val !== "function") {
+        assert(false, `hlprs.${key} must be function`);
+    }
+});
+if (failed === 0) {
+    console.log(`OK   hlprs API (${expectedHlprsKeys.length} exports)`);
+}
 
 const deepMarks = ["1.1", "1.1.1", "1.1.1.1", "1.1.1.1.1"];
 deepMarks.forEach(mark => {
@@ -566,6 +592,18 @@ if (!getFiredRules(h2InCodeRes.t || []).has("minimum-h2-heading")) {
     console.log("OK   H2 in code block → minimum-h2-heading");
 }
 
+const h3OnlyErr = `### Заголовок H3
+
+Текст.
+`;
+const h3OnlyRes = lintStrings({ t: h3OnlyErr }, ["minimum-h2-heading", "sentences-end-with-mark"]);
+const h3OnlyFired = getFiredRules(h3OnlyRes.t || []);
+if (!h3OnlyFired.has("minimum-h2-heading") || h3OnlyFired.size !== 1) {
+    assert(false, "H3 without H2 err: expected minimum-h2-heading only, got " + [...h3OnlyFired].join(", "));
+} else {
+    console.log("OK   H3 without H2 → minimum-h2-heading");
+}
+
 const noLeadingNestedOk = `## T
 
 1. родитель:
@@ -637,6 +675,22 @@ if (!noLeadingFenceIndentErrFired.has("no-leading-spaces") || noLeadingFenceInde
     assert(false, "indented fence err: expected no-leading-spaces only, got " + [...noLeadingFenceIndentErrFired].join(", "));
 } else {
     console.log("OK   indented fence → no-leading-spaces");
+}
+
+const noLeadingClosingFenceIndentErr = `## T
+
+Строка перед кодом:
+
+\`\`\`js
+const x = 1;
+    \`\`\`
+`;
+const noLeadingClosingFenceIndentErrRes = lintStrings({ t: noLeadingClosingFenceIndentErr }, ruleNames);
+const noLeadingClosingFenceIndentErrFired = getFiredRules(noLeadingClosingFenceIndentErrRes.t || []);
+if (!noLeadingClosingFenceIndentErrFired.has("no-leading-spaces") || noLeadingClosingFenceIndentErrFired.size !== 1) {
+    assert(false, "indented closing fence err: expected no-leading-spaces only, got " + [...noLeadingClosingFenceIndentErrFired].join(", "));
+} else {
+    console.log("OK   indented closing fence → no-leading-spaces");
 }
 
 const noLeadingFenceIndentOk = `## T

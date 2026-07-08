@@ -1,0 +1,18 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ListBlankSpacingRule = void 0;
+const base_rule_1 = require("../core/base-rule");
+const details_1 = require("../details");
+class ListBlankSpacingRule extends base_rule_1.BaseRule {
+    constructor(spacingChecker) {
+        super();
+        this.spacingChecker = spacingChecker;
+        this.names = ["list-blank-line-spacing"];
+        this.description = details_1.details.listBlankSpacing;
+        this.tags = ["lists"];
+    }
+    check(lines, onError) {
+        this.spacingChecker.checkLines(lines, onError);
+    }
+}
+exports.ListBlankSpacingRule = ListBlankSpacingRule;

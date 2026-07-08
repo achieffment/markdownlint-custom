@@ -1,11 +1,15 @@
 {
-  "name": "markdownlint-custom-rules",
-  "private": true,
-  "scripts": {
-    "test": "node test-rules.cjs",
-    "check": "node --check markdownlint-rules.js && node --check markdownlint-hlprs.js && node --check test-rules.cjs"
-  },
-  "devDependencies": {
-    "markdownlint": "^0.38.0"
-  }
+    "name": "markdownlint-custom-rules",
+    "private": true,
+    "scripts": {
+        "build": "tsc",
+        "check": "tsc --noEmit && node --check markdownlint-rules.js && node --check markdownlint-hlprs.js && node --check test-rules.cjs",
+        "pretest": "npm run build",
+        "test": "node test-rules.cjs"
+    },
+    "devDependencies": {
+        "@types/node": "^22.0.0",
+        "markdownlint": "^0.38.0",
+        "typescript": "^5.8.0"
+    }
 }

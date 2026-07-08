@@ -1,0 +1,47 @@
+---
+description: Проектирование TypeScript/OOP модулей кастомных правил markdownlint
+globs: **/*.ts
+alwaysApply: false
+---
+
+# Проектирование TypeScript правил markdownlint
+
+SRP/DRY — те же принципы, что в [js-dev.mdc](js-dev.mdc) (для test harness). Оформление — [ts-style.mdc](ts-style.mdc).
+
+**База:** composition over inheritance; один уровень наследования правил (`BaseRule`); контракт `onError` и публичный API hlprs сохранять.
+
+## Модули `src/`
+
+| Каталог | SRP |
+|---------|-----|
+| [`core/`](../src/core/) | `ICustomRule`, `abstract BaseRule` (Template Method `toRule()`) |
+| [`domain/`](../src/domain/) | `ListLineParser`, `CodeWalker`, `MarkdownDocument`, `ListBlockAnalyzer`, `ListSpacingChecker`, `ColonChecker` |
+| [`composition/`](../src/composition/) | `AppContext` — wiring singleton-ов |
+| [`rules/`](../src/rules/) | Класс `XxxRule extends BaseRule` — одна политика |
+| `regex.ts`, `details.ts` | Константы (не классы) |
+| `types.ts` | Типы колбэков |
+| `markdownlint-rules.ts` | Composition root: `new XxxRule(deps).toRule()` |
+| `markdownlint-hlprs.ts` | Wiring `module.exports` для test-rules |
+
+## OOP
+
+- **Наследование:** только `extends BaseRule`; без цепочек `ListRule → NumListRule`
+- **Composition:** правила получают checker/parser/walker через `constructor(private readonly ...)`
+- **Domain-классы** не наследуют друг друга; делегируют через поля
+- **`onError`** — на границе `check()` / методов checker-ов
+- **Composition root** — `app-context.ts`, barrels; не создавать `new` в domain вне root (кроме `MarkdownDocument` в `check`)
+
+## Workflow
+
+1. Правка `src/**/*.ts`
+2. Ключи в [`details.ts`](../src/details.ts) / [`regex.ts`](../src/regex.ts) при необходимости
+3. `new XxxRule(deps).toRule()` в [`markdownlint-rules.ts`](../src/markdownlint-rules.ts); новый checker → [`AppContext`](../src/composition/app-context.ts)
+4. `npm run build`
+5. Коммитить `src/` и артефакты `.js`
+6. `npm test`
+
+## Границы
+
+- Не менять политики без `markdownlint-examples/`
+- Runtime — CommonJS `.js`
+- `test-rules.cjs` — [js-dev.mdc](js-dev.mdc)
