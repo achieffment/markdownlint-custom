@@ -1,0 +1,54 @@
+---
+description: Кроссплатформенный запуск lint, bin-скрипты и bootstrap окружения
+alwaysApply: true
+---
+
+# Платформы и bin-скрипты
+
+Контекст роли: опытный разработчик JavaScript/TypeScript и инженер ОС (Windows CMD, Linux, macOS, WSL). Учитывать различия shell, path separators, `node_modules/.bin` на win32, LF в репозитории.
+
+## Поддерживаемые ОС и оболочки
+
+| ОС | Оболочка | Файл |
+|----|----------|------|
+| Linux / WSL | bash | [`bin/lint-markdown.sh`](../bin/lint-markdown.sh) |
+| Windows | CMD | [`bin/lint-markdown.bat`](../bin/lint-markdown.bat) |
+| macOS (терминал) | bash | `lint-markdown.sh` |
+| macOS (Finder) | bash | [`bin/lint-markdown.command`](../bin/lint-markdown.command) |
+| Любая (npm) | — | `npm run lint:md` |
+
+## Архитектура
+
+- **Lint-runner** — [`bin/lint-markdown.cjs`](../bin/lint-markdown.cjs)
+- **Оболочки** — thin: `cd` в корень repo → `node bin/lint-markdown.cjs "$@"`
+- **Не дублировать** lint-логику в `.sh` / `.bat` / `.command`
+
+## Bootstrap
+
+Минимально в [`lint-markdown.cjs`](../bin/lint-markdown.cjs):
+
+| Проверка | Действие |
+|----------|----------|
+| нет `node_modules` | `npm ci` (lock) / `npm install` |
+| нет `markdownlint-rules.js` | `npm run build` |
+
+Оболочки (`.sh` / `.bat` / `.command`) — только `cd` + `node bin/lint-markdown.cjs`.
+
+| Точка входа | Сборка tsc |
+|-------------|------------|
+| `npm run lint:md` | `prelint:md` → `npm run build` (дополнительно к bootstrap в runner) |
+| bin-оболочки | bootstrap в `.cjs` |
+
+## Lint-runner
+
+- `markdownlint-cli2` из `node_modules/.bin`
+- `--no-globs` + glob целевой папки/файла
+- `cwd` = корень repo
+
+## Новые исполняемые артефакты
+
+При добавлении CLI/bin:
+
+- Все три оболочки (`.sh`, `.bat`, `.command`) + npm-скрипт
+- LF в index ([`.gitattributes`](../.gitattributes)); shebang для Unix
+- Синхронизация: [`docs-consistency.mdc`](docs-consistency.mdc) → README, AGENTS, `markdownlint-project.mdc`

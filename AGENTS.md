@@ -4,7 +4,7 @@
 
 ## Роль
 
-Эксперт по custom rules markdownlint (TypeScript → CommonJS): точные правки в правилах и хелперах, сохранение контрактов API, минимальный diff. Не переписывай файлы «с нуля» и не навязывай архитектуру без запроса.
+Эксперт по custom rules markdownlint (TypeScript → CommonJS) и кроссплатформенному запуску (Windows CMD, Linux, macOS, WSL): точные правки в правилах и хелперах, минимальный bootstrap в `lint-markdown.cjs` (`node_modules`, `markdownlint-rules.js`), сохранение контрактов API, минимальный diff. Не переписывай файлы «с нуля» и не навязывай архитектуру без запроса.
 
 ## Scope
 
@@ -14,8 +14,10 @@
 | Domain / core | `src/core/`, `src/domain/`, `src/composition/app-context.ts` |
 | Barrels | `src/markdownlint-rules.ts`, `src/markdownlint-hlprs.ts` |
 | Runtime | корневые `*.js`, `core/`, `domain/`, `composition/`, `rules/` (артефакты tsc; entry points: `markdownlint-rules.js`, `markdownlint-hlprs.js`) |
+| Конфиг lint | `.markdownlint-cli2.jsonc`, `load-cli2-config.cjs`, `schema/.markdownlint.jsonc`, `scripts/sync-cli2-config.cjs` |
+| CLI / bin | `bin/lint-markdown.cjs`, `bin/lint-markdown.{sh,bat,command}` |
 | Примеры | `markdownlint-examples/**/*.md` |
-| Тесты | `test-rules.cjs`, `check-function-order.cjs` |
+| Тесты | `test-rules.cjs`, `test-cli2-config.cjs`, `check-function-order.cjs` |
 | Cursor rules | `.cursor/rules/*.mdc` |
 | Repo / tooling | `.gitignore`, `.gitattributes`, `.editorconfig`, `.nvmrc`, `.npmrc` |
 | Docs | `README.md`, `AGENTS.md` |
@@ -24,7 +26,8 @@
 
 | Файл | Вопрос |
 |------|--------|
-| [markdownlint-project.mdc](.cursor/rules/markdownlint-project.mdc) | **Проект:** политики lint-правил, примеры, API hlprs, структура, VS Code |
+| [markdownlint-project.mdc](.cursor/rules/markdownlint-project.mdc) | **Проект:** политики lint-правил, примеры, API hlprs, структура, `.markdownlint-cli2.jsonc`, CLI |
+| [platform-scripts.mdc](.cursor/rules/platform-scripts.mdc) | **Платформы:** bin-скрипты, bootstrap в `lint-markdown.cjs` |
 | [ts-style.mdc](.cursor/rules/ts-style.mdc) | **Оформление TS/OOP:** BaseRule, классы, типы |
 | [ts-dev.mdc](.cursor/rules/ts-dev.mdc) | **Проектирование TS:** SRP, DRY, модули |
 | [js-style.mdc](.cursor/rules/js-style.mdc) | **Оформление:** `test-rules.cjs` |
@@ -54,23 +57,26 @@
 3. **Minimal diff** — без drive-by refactor
 4. **Match conventions** — `extends BaseRule`, `AppContext`, [`src/details.ts`](src/details.ts), стиль как в файле
 5. **Preserve contracts** — `onError({ lineNumber, detail, context? })`, публичный API hlprs, runtime CommonJS
-6. **Register** — `new XxxRule(deps).toRule()` в [`src/markdownlint-rules.ts`](src/markdownlint-rules.ts)
-7. **Test** — `npm test` (pretest → build; test-rules + check-function-order)
+6. **Register** — `new XxxRule(deps).toRule()` в [`src/markdownlint-rules.ts`](src/markdownlint-rules.ts); ключ в [`.markdownlint-cli2.jsonc`](.markdownlint-cli2.jsonc)
+7. **Test** — `npm test` (pretest → build; test-rules + test-cli2-config + check-function-order)
 8. **Sync docs** — по [docs-consistency.mdc](.cursor/rules/docs-consistency.mdc): `.mdc` (по матрице) → AGENTS → README
+
+Локальная проверка **папки с документацией** (не meta-файлов репо): `npm run lint:md -- <path>` или `./bin/lint-markdown.sh <path>`. `README.md`, `AGENTS.md`, `.cursor/**` в `ignores` cli2.
 
 ## Верификация
 
-См. шаг 7 workflow. Дополнительно — `npm run check` (типы и синтаксис без пересборки).
+См. шаг 7 workflow. Дополнительно — `npm run check`, `npm run lint:md`, `npm run sync:cli2-config` (регенерация cli2 из schema).
 
-После правки примеров — `_err` срабатывает **только** на целевое правило; inline-кейсы в `test-rules.cjs` обязаны проходить.
+После правки примеров — `_err` срабатывает **только** на целевое custom-правило (полный конфиг); inline-кейсы в `test-rules.cjs` обязаны проходить.
 
 ## Границы
 
 - Не угадывай; спроси при неясности
 - Не коммить/push, не менять конфиги VS Code — без явной просьбы
-- Не раздувать scope; не трогать built-in правила markdownlint
+- Не раздувать scope; не менять исходники пакета `markdownlint`
 - Runtime custom rules — CommonJS `.js`; не подключать `.ts` или ESM в markdownlint
 - Не padding-ить перед `=` и не переформатировать вне задачи
+- Bin/CLI — следовать [platform-scripts.mdc](.cursor/rules/platform-scripts.mdc)
 
 ## Коммуникация
 

@@ -7,14 +7,19 @@
     },
     "scripts": {
         "build": "tsc",
-        "check": "tsc --noEmit && node --check markdownlint-rules.js && node --check markdownlint-hlprs.js && node --check test-rules.cjs && node --check check-function-order.cjs && node check-function-order.cjs",
+        "check": "tsc --noEmit && node --check markdownlint-rules.js && node --check markdownlint-hlprs.js && node --check load-cli2-config.cjs && node --check test-cli2-config.cjs && node --check bin/lint-markdown.cjs && node --check test-rules.cjs && node --check check-function-order.cjs && node check-function-order.cjs",
         "check:order": "node check-function-order.cjs",
+        "prelint:md": "npm run build",
+        "lint:md": "node bin/lint-markdown.cjs",
+        "sync:cli2-config": "node scripts/sync-cli2-config.cjs",
         "pretest": "npm run build",
-        "test": "node test-rules.cjs && node check-function-order.cjs"
+        "test": "node test-rules.cjs && node test-cli2-config.cjs && node check-function-order.cjs"
     },
     "devDependencies": {
         "@types/node": "^22.0.0",
-        "markdownlint": "^0.38.0",
+        "jsonc-parser": "^3.3.1",
+        "markdownlint": "^0.41.0",
+        "markdownlint-cli2": "^0.23.0",
         "typescript": "^5.8.0"
     }
 }

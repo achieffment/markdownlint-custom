@@ -12,7 +12,8 @@ alwaysApply: true
 | Слой | Файлы | Содержит |
 |------|-------|----------|
 | **Поведение (источник истины)** | [`src/`](../src/), [`details.ts`](../src/details.ts), [`regex.ts`](../src/regex.ts) | Реализация, `description`/`detail` |
-| **Канон проекта (AI)** | [markdownlint-project.mdc](markdownlint-project.mdc) | Политики lint-правил, конвенции `_err`/`_suc`, API hlprs, структура, VS Code JSON |
+| **Канон проекта (AI)** | [markdownlint-project.mdc](markdownlint-project.mdc) | Политики lint-правил, примеры, API hlprs, структура, `.markdownlint-cli2.jsonc`, CLI |
+| **Платформы / bin (AI)** | [platform-scripts.mdc](platform-scripts.mdc) | Bootstrap в `lint-markdown.cjs`, кроссплатформенные скрипты |
 | **Стиль TS (AI)** | [ts-style.mdc](ts-style.mdc) | Оформление `src/**/*.ts`: BaseRule, типы, barrels, `onError` |
 | **Архитектура TS (AI)** | [ts-dev.mdc](ts-dev.mdc) | SRP/DRY, модули `src/`, порядок функций |
 | **Стиль test (AI)** | [js-style.mdc](js-style.mdc) | Симметрия имён, конвейер в [`test-rules.cjs`](../test-rules.cjs) |
@@ -27,7 +28,7 @@ alwaysApply: true
 
 | Тип изменения | Код / тесты | Правила и docs |
 |---------------|-------------|----------------|
-| **Новое lint-правило** | `src/rules/`, [`markdownlint-rules.ts`](../src/markdownlint-rules.ts), [`details.ts`](../src/details.ts), [`AppContext`](../src/composition/app-context.ts), `markdownlint-examples/<name>/`, [`test-rules.cjs`](../test-rules.cjs), `npm test` | Каталог + политика в `markdownlint-project.mdc`; строки в `AGENTS.md`, README; ключ в VS Code JSON (README и `.mdc`) |
+| **Новое lint-правило** | `src/rules/`, [`markdownlint-rules.ts`](../src/markdownlint-rules.ts), [`details.ts`](../src/details.ts), [`AppContext`](../src/composition/app-context.ts), `markdownlint-examples/<name>/`, [`test-rules.cjs`](../test-rules.cjs), `npm test` | Каталог + политика в `markdownlint-project.mdc`; ключ custom в [`.markdownlint-cli2.jsonc`](../.markdownlint-cli2.jsonc); строки в `AGENTS.md`, README |
 | **Изменение политики lint-правила** | `src/` (+ domain), примеры, inline в `test-rules.cjs`, `npm test` | Политика в `markdownlint-project.mdc`; `AGENTS.md` / README — если изменилась суть для пользователя |
 | **Изменение `description` / `detail`** | [`details.ts`](../src/details.ts), класс правила | Политика в `.mdc`; краткие строки в `AGENTS.md` / README при расхождении |
 | **Публичный экспорт hlprs** | [`markdownlint-hlprs.ts`](../src/markdownlint-hlprs.ts), `npm test` | Таблица API в `markdownlint-project.mdc` |
@@ -38,10 +39,12 @@ alwaysApply: true
 | **Порядок функций / check-function-order** | `src/`, `test-rules.cjs`, [`check-function-order.cjs`](../check-function-order.cjs) | `ts-dev.mdc`, `js-dev.mdc` |
 | **Структура репозитория** | — | `markdownlint-project.mdc`, `AGENTS.md` scope; README «Структура» (кратко + ссылка на `.mdc`) |
 | **npm-скрипты** | [`package.json`](../package.json) | README «npm-скрипты»; «Верификация» в `AGENTS.md` |
+| **CLI / bin / конфиг lint** | [`.markdownlint-cli2.jsonc`](../.markdownlint-cli2.jsonc), [`load-cli2-config.cjs`](../load-cli2-config.cjs), [`test-cli2-config.cjs`](../test-cli2-config.cjs), [`bin/`](../bin/), `package.json` `lint:md` | `platform-scripts.mdc`, `markdownlint-project.mdc`, `AGENTS.md`, README; `ignores`/overrides → examples + test-rules |
+| **Schema / sync cli2** | [`schema/.markdownlint.jsonc`](../schema/.markdownlint.jsonc), [`scripts/sync-cli2-config.cjs`](../scripts/sync-cli2-config.cjs), `.markdownlint-cli2.jsonc`, [`test-cli2-config.cjs`](../test-cli2-config.cjs) | `markdownlint-project.mdc` (overrides, sync); `npm test` |
 | **Новое/удаление `.mdc`** | — | Каталог в [AGENTS.md](../AGENTS.md); строка «`.cursor/rules/`» в `markdownlint-project.mdc`; роли в этом файле |
-| **Удаление lint-правила** | `src/`, examples, `test-rules.cjs` | Обратный чеклист: все docs + VS Code JSON |
+| **Удаление lint-правила** | `src/`, examples, `test-rules.cjs` | Обратный чеклист: все docs + `.markdownlint-cli2.jsonc` |
 
-Список `names` lint-правил — одинаковый в [`markdownlint-rules.ts`](../src/markdownlint-rules.ts), каталогах docs и VS Code JSON.
+Список `names` custom lint-правил — одинаковый в [`markdownlint-rules.ts`](../src/markdownlint-rules.ts), [`.markdownlint-cli2.jsonc`](../.markdownlint-cli2.jsonc), каталогах docs.
 
 ## Порядок работы
 
@@ -59,11 +62,11 @@ Workflow — канон в [AGENTS.md](../AGENTS.md); `.mdc` не дублиру
 - Развести расхождения в `names` между кодом и документами
 - Дублировать полные политики в README или AGENTS.md
 - Менять workflow в `.mdc`, не сверившись с [AGENTS.md](../AGENTS.md)
-- Забыть VS Code JSON при добавлении/удалении lint-правила
+- Забыть `.markdownlint-cli2.jsonc` при добавлении/удалении custom lint-правила
 
 ## Финальный чеклист
 
-- [ ] Каталоги `names` совпадают в коде, `.mdc`, `AGENTS.md`, README, VS Code JSON
+- [ ] Каталоги custom `names` совпадают в коде, `.markdownlint-cli2.jsonc`, `.mdc`, `AGENTS.md`, README
 - [ ] Политики и конвенции примеров актуальны в `markdownlint-project.mdc`
 - [ ] Модули актуальны в `ts-dev.mdc`, конвенции — в `ts-style.mdc` (если менялся TS)
 - [ ] Конвенции test актуальны в `js-dev.mdc`, `js-style.mdc` (если менялся test)

@@ -5,7 +5,7 @@ alwaysApply: true
 
 # Проект markdownlint custom rules
 
-Кастомные правила [markdownlint](https://github.com/DavidAnson/markdownlint) для VS Code (расширение **Markdown All in One**). Загрузка через `markdownlint.customRules`.
+Кастомные правила [markdownlint](https://github.com/DavidAnson/markdownlint) для VS Code (**vscode-markdownlint**) и локального CLI (**markdownlint-cli2**). Единый конфиг — [`.markdownlint-cli2.jsonc`](../.markdownlint-cli2.jsonc).
 
 ## Структура репозитория
 
@@ -17,6 +17,12 @@ alwaysApply: true
 | [`src/composition/`](../src/composition/) | `AppContext` — wiring зависимостей |
 | [`src/rules/`](../src/rules/) | Класс `XxxRule extends BaseRule` |
 | [`markdownlint-rules.js`](../markdownlint-rules.js) | **Артефакт tsc:** массив правил (`module.exports = [...]`) |
+| [`.markdownlint-cli2.jsonc`](../.markdownlint-cli2.jsonc) | **Единый конфиг:** built-in MD001–MD060 + custom rules + `customRules`; IDE и CLI |
+| [`load-cli2-config.cjs`](../load-cli2-config.cjs) | Загрузка `config` из cli2 для [`test-rules.cjs`](../test-rules.cjs) |
+| [`test-cli2-config.cjs`](../test-cli2-config.cjs) | Parity cli2 `config` ↔ [`schema/.markdownlint.jsonc`](../schema/.markdownlint.jsonc) |
+| [`scripts/sync-cli2-config.cjs`](../scripts/sync-cli2-config.cjs) | Регенерация `.markdownlint-cli2.jsonc` из schema (`npm run sync:cli2-config`) |
+| [`schema/.markdownlint.jsonc`](../schema/.markdownlint.jsonc) | Snapshot official schema для тестов |
+| [`bin/`](../bin/) | `lint-markdown.cjs`; `.sh` / `.bat` / `.command` |
 | [`markdownlint-hlprs.js`](../markdownlint-hlprs.js) | **Артефакт tsc:** публичный API для `test-rules.cjs` (compat); правила — DI через `AppContext` |
 | Корневые `*.js`, `core/`, `domain/`, `composition/`, [`rules/`](../rules/) | **Артефакты tsc**; коммитить вместе с `src/` |
 | [`markdownlint-examples/`](../markdownlint-examples/) | Пары `_err.md` / `_suc.md` на каждое правило |
@@ -46,7 +52,7 @@ alwaysApply: true
 ## Конвенция примеров
 
 - Каталог = имя правила в `names`.
-- `_err.md` — нарушает **только** целевое правило (`npm test` проверяет exclusivity).
+- `_err.md` — нарушает **только** целевое custom-правило (`npm test` проверяет exclusivity при полном конфиге из `.markdownlint-cli2.jsonc`).
 - `_err.md` (кроме `minimum-h2-heading`) содержит `##`, чтобы не срабатывал `minimum-h2-heading`; прочий текст и списки оформлены под остальные правила.
 - `_suc.md` — проходит все custom rules.
 - **`_err.md` и `_suc.md` — один и тот же текст:** в `_suc` исправлены только нарушения целевого правила (и минимальные правки для exclusivity в `_err`, например `;` / `:` у пунктов списка). Не менять порядок блоков, не подменять сценарии «успешным» вариантом. Исключение: `list-blank-line-spacing` — непустые строки идентичны, отличаются только пустые строки (сама правка — blank lines). `test-rules.cjs`: `checkExamplePair`, допустимые отличия строк — `allowedLineDiff`.
@@ -122,25 +128,75 @@ alwaysApply: true
 
 Внутренние (не экспортируются): `ListLineParser` (`trimStart`, `isNumItem`, `isBulItem`, `isNestedLstItem`, `getNumPath`, `skipBlankBck`), `ListBlockAnalyzer` (`createHelpers`, `walkListBlocks`, `findItemEnd`, `collectBlock`, `findNumItemEnd`, `findBulItemEnd`, `collectNumBlock`, `collectBulBlock`), `ListSpacingChecker` (`hasBlankGap`, `boundBefIdx`, `boundAftIdx`), `CodeWalker` (`walkOutsideCode`, `walkCodeFenceAware`, `eachOpeningCodeFence`; `eachLineOutsideCode` — публичный через hlprs).
 
-## Подключение в VS Code
+## Конфигурация lint (`.markdownlint-cli2.jsonc`)
 
-Фрагмент для `.vscode/settings.json` (не коммитить без запроса):
+Единый канон для **vscode-markdownlint**, **markdownlint-cli2** и [`bin/lint-markdown.cjs`](../bin/lint-markdown.cjs). Расширение подхватывает файл в корне workspace автоматически.
+
+| Политика | Значение |
+|----------|----------|
+| `default` | `true` — все built-in включены |
+| `MD013` | `false` — как дефолт vscode-markdownlint |
+| `MD029` | `false` — намеренно (поднумерация `1.1` в custom) |
+| `MD046` | `false` — намеренно (fenced code в examples) |
+| `MD032` | `false` — заменено custom `list-blank-line-spacing` |
+| `MD007` | `false` — пересекается с custom `no-leading-spaces` |
+| `MD043` | `false` — дефолт schema с пустым `headings` некорректен |
+| 7 custom `names` | `true` |
+
+Полный список MD001–MD060 — в [`config`](../.markdownlint-cli2.jsonc) (на базе [official schema](https://github.com/DavidAnson/markdownlint/blob/main/schema/.markdownlint.jsonc)). Отключения MD029/MD046 документированы комментарием с закомментированным дефолтом.
+
+`customRules`: `["./markdownlint-rules.js"]`.
+
+Синхронизация config с upstream schema: `npm run sync:cli2-config` (сохраняет overrides, custom keys, `ignores`).
+
+## Scope lint
+
+Правила предназначены для **пользовательских папок с документацией**, не для meta-файлов репозитория.
+
+| Механизм | Назначение |
+|----------|------------|
+| `ignores` в cli2 | `README.md`, `AGENTS.md`, `.cursor/**` — не lintятся в IDE/`lintWorkspace` |
+| `npm run lint:md -- <path>` | Lint указанной папки или файла (типично внешняя docs) |
+| [`markdownlint-examples/`](markdownlint-examples/) | В scope (тесты и демо правил) |
+
+## IDE и EditorConfig
+
+Рекомендуемые настройки VS Code для markdown (согласованы с правилами и [`.editorconfig`](../.editorconfig)):
 
 ```json
-{
-  "markdownlint.customRules": ["./markdownlint-rules.js"],
-  "markdownlint.config": {
-    "default": false,
-    "minimum-h2-heading": true,
-    "list-items-end-with-semicolon-or-colon": true,
-    "list-blank-line-spacing": true,
-    "list-preceded-by-colon": true,
-    "codeblock-preceded-by-colon": true,
-    "no-leading-spaces": true,
-    "sentences-end-with-mark": true
-  }
+"[markdown]": {
+  "editor.tabSize": 4,
+  "editor.wordWrap": "on",
+  "editor.wrappingIndent": "same",
+  "files.insertFinalNewline": true,
+  "files.trimTrailingWhitespace": false
 }
 ```
+
+| Настройка | Стыковка с правилами |
+|-----------|----------------------|
+| `insertFinalNewline` | `MD047` |
+| `trimTrailingWhitespace: false` | `[*.md]` в EditorConfig; иначе срежутся 2 пробела hard break (`MD009`, `br_spaces: 2`) |
+| `tabSize: 4` | EditorConfig `indent_size = 4`; Tab вставляет 4 пробела |
+| Вложенные списки | В examples шаг **3** пробела на уровень (`1.1`, `1.1.1`); не полагаться на один Tab = один уровень |
+| `wordWrap` / `wrappingIndent` | Только UI; `MD013` отключён |
+
+## Локальный CLI
+
+| Точка входа | Команда |
+|-------------|---------|
+| npm | `npm run lint:md -- <папка\|файл>` |
+| Linux / WSL / macOS | `./bin/lint-markdown.sh <путь>` |
+| Windows CMD | `bin\lint-markdown.bat <путь>` |
+| macOS Finder | `bin/lint-markdown.command` |
+
+Bootstrap ([`bin/lint-markdown.cjs`](../bin/lint-markdown.cjs)): `node_modules` → `npm ci`/`install`; нет `markdownlint-rules.js` → `npm run build`. Оболочки — thin. Подробнее — [platform-scripts.mdc](platform-scripts.mdc).
+
+## Подключение в VS Code
+
+Достаточно [`.markdownlint-cli2.jsonc`](../.markdownlint-cli2.jsonc) в корне workspace. Ручной `markdownlint.config` / `markdownlint.customRules` в settings **не нужен**, если файл в корне.
+
+Опционально (файл не в корне): `"markdownlint.configFile": "./.markdownlint-cli2.jsonc"`.
 
 ## Workflow: новое или изменённое правило
 
@@ -150,11 +206,11 @@ alwaysApply: true
 
 1. `_err.md` / `_suc.md` в `markdownlint-examples/<rule-name>/`
 2. Класс в `src/rules/<rule-name>.ts`; ключи — [`details.ts`](../src/details.ts), regex — [`regex.ts`](../src/regex.ts); domain — при необходимости
-3. `new XxxRule(deps).toRule()` в [`markdownlint-rules.ts`](../src/markdownlint-rules.ts); новый checker — [`AppContext`](../src/composition/app-context.ts)
+3. `new XxxRule(deps).toRule()` в [`markdownlint-rules.ts`](../src/markdownlint-rules.ts); ключ `"<name>": true` в [`.markdownlint-cli2.jsonc`](../.markdownlint-cli2.jsonc) и блок custom в [`scripts/sync-cli2-config.cjs`](../scripts/sync-cli2-config.cjs); новый checker — [`AppContext`](../src/composition/app-context.ts)
 4. При ≥3 повторах алгоритма — domain-класс (не barrel)
 
 ## Контракты
 
 - **Исходники:** TypeScript в `src/`; **runtime custom rules:** CommonJS `.js` в корне (не ESM, не `.ts` напрямую).
 - **onError:** `{ lineNumber, detail, context? }`, `lineNumber` с 1.
-- Не менять built-in правила markdownlint; только custom rules в этом репозитории.
+- Не менять исходники пакета `markdownlint` (built-in rules); конфигурация built-in — только в [`.markdownlint-cli2.jsonc`](../.markdownlint-cli2.jsonc).

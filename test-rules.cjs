@@ -2,16 +2,23 @@ const fs = require("fs");
 const path = require("path");
 const markdownlint = require("markdownlint/sync");
 const customRules = require("./markdownlint-rules.js");
+const { loadLintConfig } = require("./load-cli2-config.cjs");
 const hlprs = require("./markdownlint-hlprs");
 const { h2Rx } = require("./regex.js");
 const { lstItemRx, isLstItem } = hlprs;
 
+const { config: lintConfig } = loadLintConfig();
+
 const examplesDir = path.join(__dirname, "markdownlint-examples");
 const ruleNames = customRules.flatMap(rule => rule.names);
-const ruleConfig = { default: false };
+
 ruleNames.forEach(name => {
-    ruleConfig[name] = true;
+    if (lintConfig[name] !== true) {
+        console.error(`FAIL cli2 config must enable custom rule "${name}"`);
+        process.exit(1);
+    }
 });
+console.log(`OK   cli2 custom keys (${ruleNames.length} rules)`);
 
 const collectCases = () => {
     const cases = [];
@@ -38,7 +45,7 @@ const getViolations = (filePath) => {
     const result = markdownlint.lint({
         files: [filePath],
         customRules,
-        config: ruleConfig
+        config: lintConfig
     });
     return result[rel] || result[filePath] || [];
 };

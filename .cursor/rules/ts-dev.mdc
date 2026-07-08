@@ -8,7 +8,7 @@ alwaysApply: false
 
 SRP/DRY — те же принципы, что в [js-dev.mdc](js-dev.mdc) (для test harness). Оформление — [ts-style.mdc](ts-style.mdc). Синхронизация docs — [docs-consistency.mdc](docs-consistency.mdc).
 
-**База:** composition over inheritance; один уровень наследования правил (`BaseRule`); контракт `onError` и публичный API hlprs сохранять.
+**База:** composition over inheritance; один уровень наследования правил (`BaseRule`); контракт `onError` и публичный API hlprs сохранять. Задачи с CLI/bin — [platform-scripts.mdc](platform-scripts.mdc).
 
 ## Модули `src/`
 
