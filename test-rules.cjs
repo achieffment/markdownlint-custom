@@ -624,15 +624,10 @@ const listColonErr = `## T
 `;
 const listColonErrRes = lintStrings({ t: listColonErr }, ["list-preceded-by-colon", "minimum-h2-heading", "list-blank-line-spacing"]);
 const listColonErrFired = getFiredRules(listColonErrRes.t || []);
-if (!listColonErrFired.has("list-preceded-by-colon")) {
-    assert(false, "list colon err: expected list-preceded-by-colon, got " + [...listColonErrFired].join(", "));
+if (!listColonErrFired.has("list-preceded-by-colon") || listColonErrFired.size !== 1) {
+    assert(false, "list colon err: expected list-preceded-by-colon only, got " + [...listColonErrFired].join(", "));
 } else {
-    const extra = [...listColonErrFired].filter(n => n !== "list-preceded-by-colon");
-    if (extra.length > 0) {
-        assert(false, "list colon err: extra rules " + extra.join(", "));
-    } else {
-        console.log("OK   list colon err → list-preceded-by-colon");
-    }
+    console.log("OK   list colon err → list-preceded-by-colon");
     const listColonLine = (listColonErrRes.t || [])
         .find(v => v.ruleNames.includes("list-preceded-by-colon"))?.lineNumber;
     if (listColonLine !== 3) {

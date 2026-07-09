@@ -56,13 +56,14 @@ let end = beg;
 - **Условие в одну строку**; guard без вызова — без `{}`; **вызов в теле — обязательно `{}`**
 
 ```javascript
+const { codeFenceRx, endsWithColonRx, endsWithSemiRx } = require("./regex.js");
 const lineStart = lineParser.trimStart(line);
 let cont = lineStart.replace(regex, "");
 cont = cont.trim();
-const folcod = next < lines.length && /^```/.test(lines[next].trim());
+const folcod = next < lines.length && codeFenceRx.test(lines[next].trim());
 const folsub = next < lines.length && isChildLstItem(line, lines[next]);
 const needsColon = folcod || folsub;
-const endsOk = needsColon ? /:$/.test(cont) : /;$/.test(cont);
+const endsOk = needsColon ? endsWithColonRx.test(cont) : endsWithSemiRx.test(cont);
 if (!cont) {
     onError({ lineNumber: ix + 1, detail: details.listItemsEmpty, context: trim });
     return;

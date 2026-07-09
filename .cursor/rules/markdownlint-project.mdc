@@ -43,7 +43,7 @@ alwaysApply: true
 | `names` | Что проверяет | Примеры |
 |---------|---------------|---------|
 | `minimum-h2-heading` | Минимум один заголовок H2 (`##`) вне code fence | `markdownlint-examples/minimum-h2-heading/` |
-| `list-items-end-with-semicolon-or-colon` | Пункт списка (num/bul, вложенные): `;`, перед блоком кода или **прямым дочерним** пунктом — `:` | `markdownlint-examples/list-items-end-with-semicolon-or-colon/` |
+| `list-items-end-with-semicolon-or-colon` | Пункт списка (num/bul, вложенные): `;`, перед открывающей `` ``` `` или **прямым дочерним** пунктом — `:` | `markdownlint-examples/list-items-end-with-semicolon-or-colon/` |
 | `list-blank-line-spacing` | Numbered: blank до/после (EOF skip, same-kind skip) и единообразно между соседними num-пунктами блока (включая поднумерацию `1.1`, `1.1.1`); bulleted: blank до/после блока (между пунктами не проверяется) | `markdownlint-examples/list-blank-line-spacing/` |
 | `list-preceded-by-colon` | Обычный текст (не пункт списка) перед первым пунктом блока верхнего уровня (num/bul) заканчивается `:`; skip prev: заголовок, пункт списка, code fence, pipe-таблица; вложенные не проверяются | `markdownlint-examples/list-preceded-by-colon/` |
 | `codeblock-preceded-by-colon` | Открывающая `` ``` ``: строка перед ней заканчивается `:` (не пункт списка — те проверяет `list-items-*`); skip prev: заголовок, пункт списка, code fence, pipe-таблица | `markdownlint-examples/codeblock-preceded-by-colon/` |
@@ -72,7 +72,7 @@ alwaysApply: true
 - **Scope:** все пункты списка (num/bul, вложенные), вне code fence.
 - **Проверка:** текст пункта заканчивается `;`; если следующая непустая строка — открывающая `` ``` `` или **прямой** дочерний пункт (больший отступ; поднумерация `1.` → `1.1`, `1.1` → `1.1.1`, не sibling `1.1` → `1.2`), то `:`.
 - **Пустой пункт** (только маркер) — ошибка с `detail: listItemsEmpty`; контент после маркера — через `ListLineParser.trimStart`, не `line.trim()` (иначе `- ` теряет пробел маркера).
-- **Sub-detail:** `listItemsColon` — перед code fence или прямым дочерним пунктом нужен `:`; `listItemsSemi` — в остальных случаях нужен `;`.
+- **Sub-detail:** `listItemsColon` — перед открывающей `` ``` `` или прямым дочерним пунктом нужен `:`; `listItemsSemi` — в остальных случаях нужен `;`.
 - **lineNumber:** строка с нарушением пункта.
 
 ### `list-blank-line-spacing` — политика
