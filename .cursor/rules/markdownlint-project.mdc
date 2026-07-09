@@ -156,19 +156,19 @@ alwaysApply: true
 
 `customRules`: `["./markdownlint-rules.js"]`.
 
-`globs`: `["markdownlint-examples/**/*.{md,markdown}"]` — workspace/IDE lint **только** примеры в репозитории; в [`bin/lint-markdown.cjs`](../bin/lint-markdown.cjs) для папок — `#node_modules` (явный путь, `--no-globs`).
+`globs`: `["**/*.{md,markdown}", "!node_modules", "!vendor"]` — workspace/IDE: весь markdown, кроме `node_modules` и `vendor`; в [`bin/lint-markdown.cjs`](../bin/lint-markdown.cjs) для папок — `#node_modules`, `#vendor` (явный путь, `--no-globs`).
 
-Синхронизация config с upstream schema: `npm run sync:cli2-config` (сохраняет overrides, custom keys из `markdownlint-rules.js`, `ignores`).
+Синхронизация config с upstream schema: `npm run sync:cli2-config` (сохраняет overrides, custom keys из `markdownlint-rules.js`, `globs`).
 
 ## Scope lint
 
-Правила предназначены для **пользовательских папок с документацией** (вне репозитория). **Внутри репозитория** lint только [`markdownlint-examples/`](markdownlint-examples/) — через `globs` в cli2; meta-файлы дополнительно в `ignores`.
+Весь markdown workspace lintится всегда, кроме `node_modules` и `vendor`.
 
-| Контекст | Scope |
-|----------|-------|
-| IDE / workspace (cli2 `globs`) | Только [`markdownlint-examples/`](markdownlint-examples/) |
-| `npm run lint:md -- <path>` | Явный путь к **внешней** пользовательской документации; конфиг из корня репо |
-| Meta-файлы репо | Не lintятся (`ignores`: `README.md`, `AGENTS.md`, `.cursor/**`) |
+| Контекст | Поведение |
+|----------|-----------|
+| IDE (workspace) | Все `*.md` / `*.markdown`, кроме `node_modules`, `vendor` |
+| Другой workspace + правила из этой папки | `"markdownlint.configFile": "<abs/path>/.markdownlint-cli2.jsonc"`; `customRules` резолвятся относительно файла конфига |
+| `npm run lint:md -- <path>` | Явный путь; globs из конфига не используются (`--no-globs`) |
 
 ## IDE и EditorConfig
 
@@ -196,7 +196,15 @@ alwaysApply: true
 
 Достаточно [`.markdownlint-cli2.jsonc`](../.markdownlint-cli2.jsonc) в корне workspace. Ручной `markdownlint.config` / `markdownlint.customRules` в settings **не нужен**, если файл в корне.
 
-Опционально (файл не в корне): `"markdownlint.configFile": "./.markdownlint-cli2.jsonc"`.
+Другой workspace (документация), правила из этой папки:
+
+```json
+{
+  "markdownlint.configFile": "/abs/path/to/markdownlint-custom/.markdownlint-cli2.jsonc"
+}
+```
+
+`customRules` в конфиге резолвятся относительно расположения `.markdownlint-cli2.jsonc`.
 
 ## Workflow: новое или изменённое правило
 

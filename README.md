@@ -35,7 +35,7 @@ npm run lint:md -- ./path/to/docs
 bin\lint-markdown.bat .\path\to\docs    # Windows CMD
 ```
 
-В репозитории lint только [`markdownlint-examples/`](markdownlint-examples/) (cli2 `globs`). Meta-файлы (`README.md`, `AGENTS.md`, `.cursor/**`) дополнительно в `ignores`. Внешняя документация — `npm run lint:md -- <path>`. macOS Finder: drag-and-drop на `bin/lint-markdown.command`.
+В IDE lint весь markdown workspace (кроме `node_modules`, `vendor`). Внешняя документация — `npm run lint:md -- <path>`. macOS Finder: drag-and-drop на `bin/lint-markdown.command`.
 
 Конфиг — [`.markdownlint-cli2.jsonc`](.markdownlint-cli2.jsonc). Built-in: `default: true`; намеренные overrides — таблица в [`.cursor/rules/markdownlint-project.mdc`](.cursor/rules/markdownlint-project.mdc) (`MD013`, `MD007`, `MD029`, `MD032`, `MD043`, `MD046`).
 
@@ -115,7 +115,7 @@ flowchart LR
 | `npm run build` | `tsc`: `src/` → корень |
 | `npm test` | `pretest` (build) + `test-rules.cjs` + `test-cli2-config.cjs` + `check-function-order.cjs` |
 | `npm run lint:md` | Локальный lint папки/файла (bootstrap в runner) |
-| `npm run sync:cli2-config` | Регенерация `.markdownlint-cli2.jsonc` из schema + overrides + custom keys из `markdownlint-rules.js` + `ignores` (`presync:cli2-config` → build) |
+| `npm run sync:cli2-config` | Регенерация `.markdownlint-cli2.jsonc` из schema + overrides + custom keys из `markdownlint-rules.js` + `globs` (`presync:cli2-config` → build) |
 | `npm run check` | `precheck` (build) + `tsc --noEmit` + `node --check` (см. `package.json`) + порядок функций |
 | `npm run check:order` | Только проверка порядка функций |
 

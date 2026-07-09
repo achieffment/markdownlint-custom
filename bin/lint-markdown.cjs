@@ -93,7 +93,8 @@ const targetToGlobs = (target) => {
     const base = rel === "" ? "." : rel;
     return [
         `${base}/**/*.{md,markdown}`,
-        "#node_modules"
+        "#node_modules",
+        "#vendor"
     ];
 };
 

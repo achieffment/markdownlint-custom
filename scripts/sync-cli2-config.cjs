@@ -54,18 +54,13 @@ body = body.replace(/\n\}$/, `,
 ${customBlock}`);
 const indented = body.split("\n").map(line => line ? "  " + line : line).join("\n");
 const out = `// markdownlint-cli2 — единый конфиг для IDE, CLI и bin-скриптов
-// Scope: правила для пользовательских папок с документацией; meta-файлы репозитория — в ignores
+// Scope: весь markdown workspace; исключения — node_modules, vendor; bin — явный путь через --no-globs
 {
   "customRules": ["./markdownlint-rules.js"],
-  "ignores": [
-    "README.md",
-    "AGENTS.md",
-    ".cursor/**"
-  ],
   "config": {
 ${indented}
   },
-  "globs": ["markdownlint-examples/**/*.{md,markdown}"]
+  "globs": ["**/*.{md,markdown}", "!node_modules", "!vendor"]
 }
 `;
 fs.writeFileSync(outPath, out.endsWith("\n") ? out : out + "\n");

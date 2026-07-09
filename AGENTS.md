@@ -23,7 +23,7 @@
 | Repo / tooling | `.gitignore`, `.gitattributes`, `.editorconfig`, `.nvmrc`, `.npmrc` |
 | Docs | `README.md`, `AGENTS.md` |
 
-**Lint in-repo:** только [`markdownlint-examples/`](markdownlint-examples/) (cli2 `globs`); meta — `ignores`. Внешняя docs — `npm run lint:md -- <path>`. Подробнее — [markdownlint-project.mdc](.cursor/rules/markdownlint-project.mdc) (Scope lint).
+**Lint:** весь markdown workspace (кроме `node_modules`, `vendor`); внешняя docs — `npm run lint:md -- <path>`. Подробнее — [markdownlint-project.mdc](.cursor/rules/markdownlint-project.mdc) (Scope lint).
 
 ## Правила репозитория
 
@@ -64,11 +64,11 @@
 7. **Test** — `npm test` (pretest → build; test-rules + test-cli2-config + check-function-order)
 8. **Sync docs** — по [docs-consistency.mdc](.cursor/rules/docs-consistency.mdc): `.mdc` (по матрице) → AGENTS → README
 
-Локальная проверка **папки или файла** (не meta-файлов репо): `npm run lint:md -- <path>`, `./bin/lint-markdown.sh <path>` (см. [platform-scripts.mdc](.cursor/rules/platform-scripts.mdc) для `.bat`/`.command`); **без пути** — `usage` и `exit 1`.
+Локальная проверка **папки или файла**: `npm run lint:md -- <path>`, `./bin/lint-markdown.sh <path>` (см. [platform-scripts.mdc](.cursor/rules/platform-scripts.mdc) для `.bat`/`.command`); **без пути** — `usage` и `exit 1`.
 
 ## Верификация
 
-См. шаг 7 workflow. Дополнительно — `npm run check` (`precheck` → build), `npm run lint:md -- <path>`, `npm run sync:cli2-config` (через `presync:cli2-config` → build: schema + overrides + custom keys из `markdownlint-rules.js`, `ignores`).
+См. шаг 7 workflow. Дополнительно — `npm run check` (`precheck` → build), `npm run lint:md -- <path>`, `npm run sync:cli2-config` (через `presync:cli2-config` → build: schema + overrides + custom keys из `markdownlint-rules.js`, `globs`).
 
 После правки примеров — `_err` срабатывает **только** на целевое custom-правило (полный конфиг); inline-кейсы в `test-rules.cjs` обязаны проходить.
 

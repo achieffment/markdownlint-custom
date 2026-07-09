@@ -20,12 +20,6 @@ const ovrdRules = new Set([
     "MD046"
 ]);
 
-const metaIgnores = [
-    "README.md",
-    "AGENTS.md",
-    ".cursor/**"
-];
-
 const loadJsonc = (fp) => {
     const raw = fs.readFileSync(fp, "utf8");
     const val = parse(raw);
@@ -56,16 +50,12 @@ assert(cfg.default === true, 'config.default must be true');
 assert(Array.isArray(cli2.customRules) && cli2.customRules.length === 1
     && cli2.customRules[0] === "./markdownlint-rules.js", "customRules must be ['./markdownlint-rules.js']");
 
-assert(Array.isArray(cli2.ignores), "ignores must be set");
-metaIgnores.forEach(ig => {
-    assert(cli2.ignores.includes(ig), `ignores must include ${ig}`);
-});
+assert(cli2.ignores === undefined, "ignores must not be set");
 
 assert(Array.isArray(cli2.globs), "globs must be set");
-assert(
-    cli2.globs.includes("markdownlint-examples/**/*.{md,markdown}"),
-    'globs must include "markdownlint-examples/**/*.{md,markdown}"'
-);
+assert(cli2.globs.includes("**/*.{md,markdown}"), 'globs must include "**/*.{md,markdown}"');
+assert(cli2.globs.includes("!node_modules"), 'globs must include "!node_modules"');
+assert(cli2.globs.includes("!vendor"), 'globs must include "!vendor"');
 
 ovrdRules.forEach(key => {
     assert(cfg[key] === false, `${key} override must be false`);
@@ -109,7 +99,6 @@ const syncRes = spawnSync(process.execPath, [syncScript, schemaPath, tmpCli2], {
 assert(syncRes.status === 0, `sync-cli2-config failed: ${syncRes.stderr || syncRes.stdout || "unknown"}`);
 const synced = loadJsonc(tmpCli2);
 assert(deepEq(synced.config, cli2.config), "synced config must match committed cli2.config");
-assert(deepEq(synced.ignores, cli2.ignores), "synced ignores must match committed cli2.ignores");
 assert(deepEq(synced.globs, cli2.globs), "synced globs must match committed cli2.globs");
 assert(deepEq(synced.customRules, cli2.customRules), "synced customRules must match committed cli2.customRules");
 try {
@@ -123,4 +112,4 @@ if (failed > 0) {
     process.exit(1);
 }
 
-console.log("OK   cli2 config (schema parity, custom rules, ignores, sync round-trip)");
+console.log("OK   cli2 config (schema parity, custom rules, globs, sync round-trip)");
