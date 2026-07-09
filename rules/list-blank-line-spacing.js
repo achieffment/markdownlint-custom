@@ -12,7 +12,11 @@ class ListBlankSpacingRule extends base_rule_1.BaseRule {
         this.tags = ["lists"];
     }
     check(lines, onError) {
-        this.spacingChecker.checkLines(lines, onError);
+        this.spacingChecker.checkLines(lines, onError, {
+            bef: details_1.details.listBlankBef,
+            aft: details_1.details.listBlankAft,
+            gap: details_1.details.listBlankGap
+        });
     }
 }
 exports.ListBlankSpacingRule = ListBlankSpacingRule;

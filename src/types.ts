@@ -1,3 +1,8 @@
+export type BlankDets = {
+    bef: string;
+    aft: string;
+    gap: string;
+};
 
 export type OutsideCodeCallback = (line: string, ix: number, trim: string) => void;
 

@@ -13,6 +13,10 @@ export class ListBlankSpacingRule extends BaseRule {
     }
 
     check(lines: readonly string[], onError: RuleOnError): void {
-        this.spacingChecker.checkLines(lines, onError);
+        this.spacingChecker.checkLines(lines, onError, {
+            bef: details.listBlankBef,
+            aft: details.listBlankAft,
+            gap: details.listBlankGap
+        });
     }
 }

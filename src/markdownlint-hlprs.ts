@@ -1,6 +1,6 @@
 import type { RuleOnError } from "markdownlint";
 import { appContext } from "./composition/app-context";
-import type { OutsideCodeCallback } from "./types";
+import type { BlankDets, OutsideCodeCallback } from "./types";
 
 const { lineParser, codeWalker, spacingChecker, colonChecker } = appContext;
 
@@ -20,8 +20,8 @@ module.exports = {
         onError: RuleOnError,
         colDet: string
     ) => colonChecker.checkPrecededByColon(lines, ix, onError, colDet),
-    checkListBlankSpacing: (lines: readonly string[], onError: RuleOnError) =>
-        spacingChecker.checkLines(lines, onError),
+    checkListBlankSpacing: (lines: readonly string[], onError: RuleOnError, blankDets: BlankDets) =>
+        spacingChecker.checkLines(lines, onError, blankDets),
     checkListPrecededByColon: (lines: readonly string[], onError: RuleOnError, colDet: string) =>
         colonChecker.checkListPrecededByColon(lines, onError, colDet)
 };

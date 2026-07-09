@@ -1,6 +1,5 @@
 import type { RuleOnError } from "markdownlint";
-import { details } from "../details";
-import type { FindItemEnd, LinePredicate } from "../types";
+import type { BlankDets, FindItemEnd, LinePredicate } from "../types";
 import type { ListBlockAnalyzer } from "./list-block-analyzer";
 import type { ListLineParser } from "./list-line-parser";
 
@@ -34,10 +33,10 @@ export class ListSpacingChecker {
         return next;
     }
 
-    checkLines(lines: readonly string[], onError: RuleOnError): void {
-        const befDet = details.listBlankBef;
-        const aftDet = details.listBlankAft;
-        const gapDet = details.listBlankGap;
+    checkLines(lines: readonly string[], onError: RuleOnError, blankDets: BlankDets): void {
+        const befDet = blankDets.bef;
+        const aftDet = blankDets.aft;
+        const gapDet = blankDets.gap;
         const checkBlockBounds = (items: number[], findEnd: FindItemEnd, isSameKind: LinePredicate): void => {
             if (items.length === 0) return;
             const fstBeg = items[0];

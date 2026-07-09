@@ -399,6 +399,29 @@ if (!semiChildFired.has("list-items-end-with-semicolon-or-colon") || semiChildFi
     }
 }
 
+const semiBulChildErr = `## T
+
+- root;
+
+   - child;
+`;
+const semiBulChildErrRes = lintStrings({ t: semiBulChildErr }, ["list-items-end-with-semicolon-or-colon", "minimum-h2-heading"]);
+const semiBulChildViol = semiBulChildErrRes.t || [];
+const semiBulChildFired = getFiredRules(semiBulChildViol);
+const semiBulChildLines = semiBulChildViol.map(v => v.lineNumber).sort((a, b) => a - b);
+if (!semiBulChildFired.has("list-items-end-with-semicolon-or-colon") || semiBulChildFired.size !== 1) {
+    assert(false, "semicolon before bul child err: expected list-items-end-with-semicolon-or-colon only, got " + [...semiBulChildFired].join(", "));
+} else if (semiBulChildLines.join() !== "3") {
+    assert(false, `semicolon before bul child err lines: expected 3 got ${semiBulChildLines.join() || "none"}`);
+} else {
+    const semiBulChildDet = semiBulChildViol[0]?.errorDetail;
+    if (semiBulChildDet !== details.listItemsColon) {
+        assert(false, `semicolon before bul child detail: expected listItemsColon got "${semiBulChildDet || "none"}"`);
+    } else {
+        console.log("OK   semicolon before bul child → listItemsColon on line 3");
+    }
+}
+
 const codFenceSemiErr = `## T
 
 - перед кодом;
@@ -631,6 +654,13 @@ if (!listColonBulErrFired.has("list-preceded-by-colon") || listColonBulErrFired.
     assert(false, "list colon bul err: expected list-preceded-by-colon only, got " + [...listColonBulErrFired].join(", "));
 } else {
     console.log("OK   list colon bul err → list-preceded-by-colon");
+    const listColonBulLine = (listColonBulErrRes.t || [])
+        .find(v => v.ruleNames.includes("list-preceded-by-colon"))?.lineNumber;
+    if (listColonBulLine !== 3) {
+        assert(false, `list colon bul err line: expected 3 got ${listColonBulLine ?? "none"}`);
+    } else if (failed === 0) {
+        console.log("OK   list colon bul err lineNumber on prose");
+    }
 }
 
 const listColonOk = `## T
@@ -870,6 +900,26 @@ if (!numThenBulFired.has("list-blank-line-spacing") || numThenBulFired.size !== 
     }
 }
 
+const numBlankAftErr = `## T
+
+1. один;
+2. два;
+Текст после.
+`;
+const numBlankAftRes = lintStrings({ t: numBlankAftErr }, ["list-blank-line-spacing", "minimum-h2-heading", "sentences-end-with-mark"]);
+const numBlankAftViol = numBlankAftRes.t || [];
+const numBlankAftFired = getFiredRules(numBlankAftViol);
+if (!numBlankAftFired.has("list-blank-line-spacing") || numBlankAftFired.size !== 1) {
+    assert(false, "num blank aft err: expected list-blank-line-spacing only, got " + [...numBlankAftFired].join(", "));
+} else {
+    const numAftDet = numBlankAftViol.find(v => v.errorDetail === details.listBlankAft);
+    if (!numAftDet || numAftDet.lineNumber !== 5) {
+        assert(false, `num blank aft detail: expected listBlankAft on line 5 got ${numAftDet?.lineNumber || "none"}`);
+    } else {
+        console.log("OK   num blank aft → listBlankAft on line 5");
+    }
+}
+
 const numThenNumSameBlockOk = `## T
 
 1. a;
@@ -981,6 +1031,29 @@ if (bareCodLine !== 3) {
     assert(false, `bare fence err line: expected 3 got ${bareCodLine ?? "none"}`);
 } else if (failed === 0) {
     console.log("OK   bare fence err lineNumber on prose");
+}
+
+const jsCodErr = `## T
+
+Текст перед кодом.
+
+\`\`\`js
+const x = 1;
+\`\`\`
+`;
+const jsCodRes = lintStrings({ t: jsCodErr }, ["codeblock-preceded-by-colon", "minimum-h2-heading"]);
+const jsCodFired = getFiredRules(jsCodRes.t || []);
+if (!jsCodFired.has("codeblock-preceded-by-colon") || jsCodFired.size !== 1) {
+    assert(false, "js fence err: expected codeblock-preceded-by-colon only, got " + [...jsCodFired].join(", "));
+} else {
+    console.log("OK   js fence without colon → codeblock-preceded-by-colon");
+}
+const jsCodLine = (jsCodRes.t || [])
+    .find(v => v.ruleNames.includes("codeblock-preceded-by-colon"))?.lineNumber;
+if (jsCodLine !== 3) {
+    assert(false, `js fence err line: expected 3 got ${jsCodLine ?? "none"}`);
+} else if (failed === 0) {
+    console.log("OK   js fence err lineNumber on prose");
 }
 
 const bareCodOk = `## T
@@ -1233,6 +1306,28 @@ if (!sentencesErrFired.has("sentences-end-with-mark") || sentencesErrFired.size 
     assert(false, "sentence without mark err: expected sentences-end-with-mark only, got " + [...sentencesErrFired].join(", "));
 } else {
     console.log("OK   sentence without mark → sentences-end-with-mark");
+}
+
+const sentencesMultiErr = `## T
+
+Текст без знака
+
+Вторая без знака
+
+Третья без знака
+`;
+const sentencesMultiErrRes = lintStrings({ t: sentencesMultiErr }, ["sentences-end-with-mark", "minimum-h2-heading"]);
+const sentencesMultiViol = sentencesMultiErrRes.t || [];
+const sentencesMultiFired = getFiredRules(sentencesMultiViol);
+if (!sentencesMultiFired.has("sentences-end-with-mark") || sentencesMultiFired.size !== 1) {
+    assert(false, "sentences multi err: expected sentences-end-with-mark only, got " + [...sentencesMultiFired].join(", "));
+} else {
+    const multiLines = sentencesMultiViol.map(v => v.lineNumber).sort((a, b) => a - b);
+    if (multiLines.join() !== "3,5,7") {
+        assert(false, `sentences multi err lines: expected 3,5,7 got ${multiLines.join() || "none"}`);
+    } else {
+        console.log("OK   sentences multi err → lines 3,5,7");
+    }
 }
 
 const sentencesMarksOk = `## T

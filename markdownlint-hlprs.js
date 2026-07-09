@@ -11,6 +11,6 @@ module.exports = {
     eachLineOutsideCode: (lines, fn) => codeWalker.eachLineOutsideCode(lines, fn),
     findPrevListInd: (lines, ix) => lineParser.findPrevListInd(lines, ix),
     checkPrecededByColon: (lines, ix, onError, colDet) => colonChecker.checkPrecededByColon(lines, ix, onError, colDet),
-    checkListBlankSpacing: (lines, onError) => spacingChecker.checkLines(lines, onError),
+    checkListBlankSpacing: (lines, onError, blankDets) => spacingChecker.checkLines(lines, onError, blankDets),
     checkListPrecededByColon: (lines, onError, colDet) => colonChecker.checkListPrecededByColon(lines, onError, colDet)
 };

@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ListSpacingChecker = void 0;
-const details_1 = require("../details");
 class ListSpacingChecker {
     constructor(listAnalyzer, lineParser) {
         this.listAnalyzer = listAnalyzer;
@@ -36,10 +35,10 @@ class ListSpacingChecker {
             return -1;
         return next;
     }
-    checkLines(lines, onError) {
-        const befDet = details_1.details.listBlankBef;
-        const aftDet = details_1.details.listBlankAft;
-        const gapDet = details_1.details.listBlankGap;
+    checkLines(lines, onError, blankDets) {
+        const befDet = blankDets.bef;
+        const aftDet = blankDets.aft;
+        const gapDet = blankDets.gap;
         const checkBlockBounds = (items, findEnd, isSameKind) => {
             if (items.length === 0)
                 return;
