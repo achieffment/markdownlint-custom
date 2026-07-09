@@ -23,7 +23,7 @@ export class MinimumH2Rule extends BaseRule {
             return undefined;
         });
         if (!hasH2) {
-            onError({ lineNumber: 1, detail: this.description });
+            onError({ lineNumber: 1, detail: details.minimumH2 });
         }
     }
 }

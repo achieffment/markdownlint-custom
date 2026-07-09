@@ -35,7 +35,7 @@ npm run lint:md -- ./path/to/docs
 bin\lint-markdown.bat .\path\to\docs    # Windows CMD
 ```
 
-Meta-файлы репозитория (`README.md`, `AGENTS.md`, `.cursor/**`) исключены через `ignores` в [`.markdownlint-cli2.jsonc`](.markdownlint-cli2.jsonc). macOS Finder: drag-and-drop на `bin/lint-markdown.command`.
+В репозитории lint только [`markdownlint-examples/`](markdownlint-examples/) (cli2 `globs`). Meta-файлы (`README.md`, `AGENTS.md`, `.cursor/**`) дополнительно в `ignores`. Внешняя документация — `npm run lint:md -- <path>`. macOS Finder: drag-and-drop на `bin/lint-markdown.command`.
 
 Конфиг — [`.markdownlint-cli2.jsonc`](.markdownlint-cli2.jsonc). Built-in: `default: true`; намеренные overrides — таблица в [`.cursor/rules/markdownlint-project.mdc`](.cursor/rules/markdownlint-project.mdc) (`MD013`, `MD007`, `MD029`, `MD032`, `MD043`, `MD046`).
 
@@ -127,6 +127,7 @@ Runtime — CommonJS `.js`, не `.ts` и не ESM.
 
 ## Связанная документация
 
+- [`AGENTS.md`](AGENTS.md) — краткий справочник для AI-агента, workflow
 - [`.cursor/rules/markdownlint-project.mdc`](.cursor/rules/markdownlint-project.mdc) — полные политики lint-правил, `.markdownlint-cli2.jsonc`, CLI
 - [`.cursor/rules/platform-scripts.mdc`](.cursor/rules/platform-scripts.mdc) — bin-скрипты и bootstrap `node_modules`
 - [`.cursor/rules/docs-consistency.mdc`](.cursor/rules/docs-consistency.mdc) — синхронизация кода и документации

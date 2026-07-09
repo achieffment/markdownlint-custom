@@ -36,10 +36,10 @@ alwaysApply: true
 
 Windows CMD: пути с пробелами передавать в кавычках (`bin\lint-markdown.bat ".\my docs"`).
 
-| Точка входа | Сборка tsc |
-|-------------|------------|
-| `npm run lint:md` | bootstrap в `.cjs` (`ensureBuild`) |
-| bin-оболочки | bootstrap в `.cjs` |
+| Точка входа | Bootstrap |
+|-------------|-----------|
+| `npm run lint:md` | `ensureNodeModules` + `ensureBuild` в `.cjs` |
+| bin-оболочки | `ensureNodeModules` + `ensureBuild` в `.cjs` |
 
 ## Lint-runner
 

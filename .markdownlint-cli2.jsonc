@@ -327,5 +327,5 @@
     "no-leading-spaces": true,
     "sentences-end-with-mark": true
   },
-  "globs": ["**/*.{md,markdown}", "!node_modules"]
+  "globs": ["markdownlint-examples/**/*.{md,markdown}"]
 }

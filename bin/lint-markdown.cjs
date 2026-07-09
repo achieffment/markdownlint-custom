@@ -67,7 +67,7 @@ const parseArgs = (argv) => {
         rest.push(...args.slice(ix));
         break;
     }
-    let target = ".";
+    let target;
     let passthrough = [];
     if (rest.length > 0 && !rest[0].startsWith("-")) {
         target = rest[0];

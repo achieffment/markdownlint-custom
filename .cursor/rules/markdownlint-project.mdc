@@ -156,19 +156,19 @@ alwaysApply: true
 
 `customRules`: `["./markdownlint-rules.js"]`.
 
-`globs`: `["**/*.{md,markdown}", "!node_modules"]` — workspace/IDE; в [`bin/lint-markdown.cjs`](../bin/lint-markdown.cjs) для папок — `#node_modules`.
+`globs`: `["markdownlint-examples/**/*.{md,markdown}"]` — workspace/IDE lint **только** примеры в репозитории; в [`bin/lint-markdown.cjs`](../bin/lint-markdown.cjs) для папок — `#node_modules` (явный путь, `--no-globs`).
 
 Синхронизация config с upstream schema: `npm run sync:cli2-config` (сохраняет overrides, custom keys из `markdownlint-rules.js`, `ignores`).
 
 ## Scope lint
 
-Правила предназначены для **пользовательских папок с документацией**, не для meta-файлов репозитория.
+Правила предназначены для **пользовательских папок с документацией** (вне репозитория). **Внутри репозитория** lint только [`markdownlint-examples/`](markdownlint-examples/) — через `globs` в cli2; meta-файлы дополнительно в `ignores`.
 
-| Механизм | Назначение |
-|----------|------------|
-| `ignores` в cli2 | `README.md`, `AGENTS.md`, `.cursor/**` — не lintятся в IDE и через `markdownlint-cli2` с этим конфигом |
-| `npm run lint:md -- <path>` | Lint указанной папки или файла (типично внешняя docs); точки входа и bootstrap — [platform-scripts.mdc](platform-scripts.mdc) |
-| [`markdownlint-examples/`](markdownlint-examples/) | В scope (тесты и демо правил) |
+| Контекст | Scope |
+|----------|-------|
+| IDE / workspace (cli2 `globs`) | Только [`markdownlint-examples/`](markdownlint-examples/) |
+| `npm run lint:md -- <path>` | Явный путь к **внешней** пользовательской документации; конфиг из корня репо |
+| Meta-файлы репо | Не lintятся (`ignores`: `README.md`, `AGENTS.md`, `.cursor/**`) |
 
 ## IDE и EditorConfig
 
@@ -206,7 +206,7 @@ alwaysApply: true
 
 1. `_err.md` / `_suc.md` в `markdownlint-examples/<rule-name>/`
 2. Класс в `src/rules/<rule-name>.ts`; ключи — [`details.ts`](../src/details.ts), regex — [`regex.ts`](../src/regex.ts); domain — при необходимости
-3. `new XxxRule(deps).toRule()` в [`src/markdownlint-rules.ts`](../src/markdownlint-rules.ts); `npm run sync:cli2-config` для [`.markdownlint-cli2.jsonc`](../.markdownlint-cli2.jsonc) (custom keys из `markdownlint-rules.js`); новый checker — [`AppContext`](../src/composition/app-context.ts)
+3. `new XxxRule(deps).toRule()` в [`src/markdownlint-rules.ts`](../src/markdownlint-rules.ts); `npm run sync:cli2-config` для [`.markdownlint-cli2.jsonc`](../.markdownlint-cli2.jsonc) (custom keys из `markdownlint-rules.js`); новый checker — [`AppContext`](../src/composition/app-context.ts); inline-кейсы — [`test-rules.cjs`](../test-rules.cjs)
 4. При ≥3 повторах алгоритма — domain-класс (не barrel)
 
 ## Контракты

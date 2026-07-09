@@ -37,7 +37,7 @@ SRP/DRY — те же принципы, что в [js-dev.mdc](js-dev.mdc) (дл
 
 ## Workflow
 
-Общий порядок — [AGENTS.md](../AGENTS.md). TS-специфика — [markdownlint-project.mdc](markdownlint-project.mdc) («Специфика lint-правила», п. 2–3).
+Общий порядок — [AGENTS.md](../AGENTS.md). TS-специфика — [markdownlint-project.mdc](markdownlint-project.mdc) («Специфика lint-правила», п. 1–4).
 
 ## Границы
 

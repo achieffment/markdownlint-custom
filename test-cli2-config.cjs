@@ -62,8 +62,10 @@ metaIgnores.forEach(ig => {
 });
 
 assert(Array.isArray(cli2.globs), "globs must be set");
-assert(cli2.globs.includes("**/*.{md,markdown}"), 'globs must include "**/*.{md,markdown}"');
-assert(cli2.globs.includes("!node_modules"), 'globs must include "!node_modules"');
+assert(
+    cli2.globs.includes("markdownlint-examples/**/*.{md,markdown}"),
+    'globs must include "markdownlint-examples/**/*.{md,markdown}"'
+);
 
 ovrdRules.forEach(key => {
     assert(cfg[key] === false, `${key} override must be false`);

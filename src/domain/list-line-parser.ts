@@ -1,4 +1,4 @@
-import { bulItemRx, lstItemRx, numItemRx, subNumItemRx } from "../regex";
+import { bulItemRx, lstItemRx, numItemRx, subNumItemRx, subNumPathRx, topNumPathRx } from "../regex";
 
 export class ListLineParser {
     get lstItemRx(): RegExp {
@@ -33,9 +33,9 @@ export class ListLineParser {
     private getNumPath(line: string): string | null {
         if (!this.isNumItem(line)) return null;
         const t = this.trimStart(line);
-        const top = t.match(/^(\d+)\.\s+/);
+        const top = t.match(topNumPathRx);
         if (top) return top[1];
-        const sub = t.match(/^(\d+(?:\.\d+)+)\s+/);
+        const sub = t.match(subNumPathRx);
         return sub ? sub[1] : null;
     }
 

@@ -65,7 +65,7 @@ const out = `// markdownlint-cli2 — единый конфиг для IDE, CLI 
   "config": {
 ${indented}
   },
-  "globs": ["**/*.{md,markdown}", "!node_modules"]
+  "globs": ["markdownlint-examples/**/*.{md,markdown}"]
 }
 `;
 fs.writeFileSync(outPath, out.endsWith("\n") ? out : out + "\n");

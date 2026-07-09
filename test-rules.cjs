@@ -300,8 +300,8 @@ if (!emptyItemFired.has("list-items-end-with-semicolon-or-colon") || emptyItemFi
     assert(false, "empty list item: expected list-items-end-with-semicolon-or-colon only, got " + [...emptyItemFired].join(", "));
 } else {
     const emptyDetail = emptyItemViol[0]?.errorDetail;
-    if (emptyDetail !== "Пустой пункт списка") {
-        assert(false, `empty list item detail: expected "Пустой пункт списка" got "${emptyDetail || "none"}"`);
+    if (emptyDetail !== details.listItemsEmpty) {
+        assert(false, `empty list item detail: expected "${details.listItemsEmpty}" got "${emptyDetail || "none"}"`);
     } else {
         console.log("OK   empty list item → list-items-end-with-semicolon-or-colon");
     }

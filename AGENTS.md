@@ -16,11 +16,14 @@
 | Runtime | корневые `*.js`, `core/`, `domain/`, `composition/`, `rules/` (артефакты tsc; entry points: `markdownlint-rules.js`, `markdownlint-hlprs.js`) |
 | Конфиг lint | `.markdownlint-cli2.jsonc`, `load-cli2-config.cjs`, `schema/`, `scripts/sync-cli2-config.cjs` |
 | CLI / bin | `bin/lint-markdown.cjs`, `bin/lint-markdown.{sh,bat,command}` |
+| Scripts | `scripts/sync-cli2-config.cjs` |
 | Примеры | `markdownlint-examples/**/*.md` |
 | Тесты | `test-rules.cjs`, `test-cli2-config.cjs`, `check-function-order.cjs` |
 | Cursor rules | `.cursor/rules/*.mdc` |
 | Repo / tooling | `.gitignore`, `.gitattributes`, `.editorconfig`, `.nvmrc`, `.npmrc` |
 | Docs | `README.md`, `AGENTS.md` |
+
+**Lint in-repo:** только [`markdownlint-examples/`](markdownlint-examples/) (cli2 `globs`); meta — `ignores`. Внешняя docs — `npm run lint:md -- <path>`. Подробнее — [markdownlint-project.mdc](.cursor/rules/markdownlint-project.mdc) (Scope lint).
 
 ## Правила репозитория
 
