@@ -137,9 +137,9 @@ const checkExamplePair = (ruleName, errPath, sucPath) => {
         return;
     }
     if (ruleName === "minimum-h2-heading") {
-        const sucBody = suc.replace(/\n## (?!\#)\S[^\n]*$/, "");
+        const sucBody = suc.replace(/\n##(?!\#)\s+\S[^\n]*$/, "");
         assert(err === sucBody, `${rel}: _suc must differ from _err only by added ## heading`);
-        assert(/^## (?!\#)\S/.test(suc.split("\n").pop()), `${rel}: _suc must add ## heading`);
+        assert(h2Rx.test(suc.split("\n").pop().trim()), `${rel}: _suc must add ## heading`);
         return;
     }
     const errLines = err.split("\n");

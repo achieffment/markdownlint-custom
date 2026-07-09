@@ -45,7 +45,7 @@
 | `names` | Суть |
 | --- | --- |
 | `minimum-h2-heading` | Минимум один `##` вне code fence |
-| `list-items-end-with-semicolon-or-colon` | `;`, перед блоком кода или **прямым дочерним** пунктом — `:` |
+| `list-items-end-with-semicolon-or-colon` | Пункт списка (num/bul, вложенные): `;`, перед блоком кода или **прямым дочерним** пунктом — `:` |
 | `list-blank-line-spacing` | Numbered: blank до/после (EOF skip, same-kind skip) и единообразно между соседними num-пунктами блока (включая `1.1`, `1.1.1`); bulleted: blank до/после блока |
 | `list-preceded-by-colon` | Обычный текст (не пункт списка) перед первым пунктом блока верхнего уровня (num/bul) заканчивается `:`; skip prev: заголовок, пункт списка, code fence, pipe-таблица; вложенные не проверяются |
 | `codeblock-preceded-by-colon` | Открывающая `` ``` ``: строка перед ней заканчивается `:` (обычный текст, не пункт списка); skip prev: заголовок, пункт списка, code fence, pipe-таблица |
@@ -72,6 +72,15 @@
 См. шаг 7 workflow. Дополнительно — `npm run check` (`precheck` → build, без cli2 parity): `tsc --noEmit`, `node --check` на 9 `.js`/`.cjs` (см. [`package.json`](package.json) `scripts.check`), затем `check-function-order.cjs`; `npm run lint:md -- <path>`, `npm run sync:cli2-config` (через `presync:cli2-config` → build: schema + overrides + custom keys из `markdownlint-rules.js`, `globs`). **Parity cli2 ↔ schema** — только `npm test` (`test-cli2-config.cjs`).
 
 После правки примеров — `_err` срабатывает **только** на целевое custom-правило (полный конфиг); inline-кейсы в `test-rules.cjs` обязаны проходить.
+
+## Критерии завершения аудита
+
+- `npm test` и `npm run check` — зелёные;
+- `npm run lint:md -- README.md AGENTS.md` — 0 ошибок;
+- Каталог 7 `names` идентичен в коде, cli2, AGENTS, README, `.mdc`;
+- Каждый sub-detail в [`src/details.ts`](src/details.ts) семантически соответствует политике в `markdownlint-project.mdc`;
+- `test-rules.cjs` использует `regex.js` / `hlprs` вместо дублирующих inline-regex там, где есть канон;
+- Нет открытых расхождений между `.mdc`-примерами и фактическим кодом test/TS;
 
 ## Границы
 

@@ -39,13 +39,9 @@ alwaysApply: false
 Те же правила симметрии, что у переменных. Алгоритм: сгруппировать соседей → целевая длина → укоротить только длиннее цели.
 
 ```javascript
+const hlprs = require("./markdownlint-hlprs");
 const { lstItemRx, numItemRx } = require("./regex.js");
-const trimStart = (line) => line.replace(/^\s*/, "");
-const isLstItem = (line) => lstItemRx.test(trimStart(line));
-const isNumItem = (line) => numItemRx.test(trimStart(line));
-const getIndent = (line) => line.match(/^(\s*)/)?.[1]?.length ?? 0;
-const hasBlankGap = (lines, beg, end) => { ... };
-const findNumItemEnd = (beg) => { ... };
+const { isLstItem, getIndent } = hlprs;
 const fstBeg = items[0];
 const ind = getIndent(lines[beg]);
 let end = beg;
