@@ -89,19 +89,19 @@ alwaysApply: true
 - **Scope:** нумерованные и маркированные списки.
 - **Проверка:** только строка перед **первым пунктом блока** верхнего уровня (не перед каждым вложенным).
 - **Skip вложенные:** пункт с отступом (`indent > 0`) или поднумерация (`1.1`, `1.1.1`) — `:` не требуется (`isNestedLstItem`).
-- **Skip prev:** заголовок, пункт списка, code fence, pipe-строки таблицы (подъём вверх через `tableRowRx` в `checkPrecededByColon`); нет непустой строки выше (`prev < 0`) — skip.
-- **Пустые строки:** между целью и prev пропускаются (`skipBlankBck`); `:` ищется на первой непустой строке выше.
+- **Skip prev:** заголовок, пункт списка, code fence, pipe-строки таблицы (подъём вверх через `tableRowRx` в `checkPrecededByColon`, включая пустые строки между pipe-строками); нет непустой строки выше (`prev < 0`) — skip.
+- **Пустые строки:** между целью и prev пропускаются (`skipBlankBck`); `:` ищется на первой непустой prose-строке выше после skip blank + pipe-блока.
 - **Тело пункта:** текст после code fence внутри пункта не считается отдельным блоком (`findNumItemEnd` / `findBulItemEnd`).
-- **lineNumber:** строка **перед** первым пунктом блока (первая непустая выше после `skipBlankBck`).
+- **lineNumber:** строка prose **перед** первым пунктом блока (первая непустая выше после skip blank + pipe-блока; не pipe-строка).
 
 ### `codeblock-preceded-by-colon` — политика
 
 - **Scope:** только **открывающие** `` ``` `` (не закрывающие).
 - **Проверка:** строка перед fence должна заканчиваться `:`.
-- **Skip prev:** заголовок, **любой** пункт списка (`isLstItem` / `lstItemRx`), code fence, pipe-строки таблицы (подъём вверх через `tableRowRx` в `checkPrecededByColon`); нет непустой строки выше — skip.
-- **Пустые строки:** между fence и prev пропускаются (`skipBlankBck`); `:` ищется на первой непустой строке выше.
+- **Skip prev:** заголовок, **любой** пункт списка (`isLstItem` / `lstItemRx`), code fence, pipe-строки таблицы (подъём вверх через `tableRowRx` в `checkPrecededByColon`, включая пустые строки между pipe-строками); нет непустой строки выше — skip.
+- **Пустые строки:** между fence и prev пропускаются (`skipBlankBck`); `:` ищется на первой непустой prose-строке выше после skip blank + pipe-блока.
 - **Обход fence:** `CodeWalker.eachOpeningCodeFence` из [`src/domain/code-walker.ts`](../src/domain/code-walker.ts) (не `walkOutsideCode`, который пропускает строки `` ``` ``).
-- **lineNumber:** строка **перед** открывающей `` ``` `` (первая непустая выше после `skipBlankBck`).
+- **lineNumber:** строка prose **перед** открывающей `` ``` `` (первая непустая выше после skip blank + pipe-блока; не pipe-строка).
 
 ### `no-leading-spaces` — политика
 

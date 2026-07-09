@@ -9,11 +9,17 @@ class ColonChecker {
     }
     checkPrecededByColon(lines, ix, onError, colDet) {
         let prev = this.lineParser.skipBlankBck(lines, ix);
-        while (prev >= 0 && regex_1.tableRowRx.test(lines[prev].trim())) {
-            prev--;
-        }
-        if (prev >= 0 && !lines[prev].trim()) {
-            prev = this.lineParser.skipBlankBck(lines, prev);
+        while (prev >= 0) {
+            const prevTrim = lines[prev].trim();
+            if (!prevTrim) {
+                prev = this.lineParser.skipBlankBck(lines, prev);
+                continue;
+            }
+            if (regex_1.tableRowRx.test(prevTrim)) {
+                prev--;
+                continue;
+            }
+            break;
         }
         if (prev < 0)
             return;

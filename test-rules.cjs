@@ -684,6 +684,41 @@ if (getFiredRules(listColonTablePrevRes.t || []).size > 0) {
     console.log("OK   list-preceded-by-colon skip pipe table prev → clean");
 }
 
+const listColonTableProseErr = `## T
+
+Текст перед таблицей.
+
+| Col | Val |
+| --- | --- |
+| a | b |
+
+1. пункт;
+`;
+const listColonTableProseErrRes = lintStrings({ t: listColonTableProseErr }, ["list-preceded-by-colon", "minimum-h2-heading", "list-blank-line-spacing", "list-items-end-with-semicolon-or-colon", "sentences-end-with-mark"]);
+const listColonTableProseFired = getFiredRules(listColonTableProseErrRes.t || []);
+if (!listColonTableProseFired.has("list-preceded-by-colon") || listColonTableProseFired.size !== 1) {
+    assert(false, "list colon table prose err: expected list-preceded-by-colon only, got " + [...listColonTableProseFired].join(", "));
+} else {
+    console.log("OK   list colon prose above table → list-preceded-by-colon");
+}
+
+const listColonTableGapOk = `## T
+
+| Col | Val |
+
+| --- | --- |
+
+| a | b |
+
+1. пункт;
+`;
+const listColonTableGapOkRes = lintStrings({ t: listColonTableGapOk }, ["list-preceded-by-colon", "minimum-h2-heading", "list-blank-line-spacing", "list-items-end-with-semicolon-or-colon"]);
+if (getFiredRules(listColonTableGapOkRes.t || []).size > 0) {
+    assert(false, "list colon table gap: " + [...getFiredRules(listColonTableGapOkRes.t || [])].join(", "));
+} else {
+    console.log("OK   list-preceded-by-colon skip pipe table with blank gaps → clean");
+}
+
 const codblkAtDocStartOk = `\`\`\`js
 const x = 1;
 \`\`\`
