@@ -1,14 +1,16 @@
 # markdownlint-custom
 
+## Обзор
+
 Кастомные правила [markdownlint](https://github.com/DavidAnson/markdownlint) для VS Code (**vscode-markdownlint**) и локального CLI (**markdownlint-cli2**). Единый конфиг — [`.markdownlint-cli2.jsonc`](.markdownlint-cli2.jsonc) (built-in MD001–MD060 + custom rules).
 
 Исходники — TypeScript в [`src/`](src/); runtime для markdownlint — CommonJS [`.js`](markdownlint-rules.js) в корне репозитория. Entry points: [`markdownlint-rules.js`](markdownlint-rules.js) (правила), [`markdownlint-hlprs.js`](markdownlint-hlprs.js) (compat для тестов).
 
 ## Требования
 
-- Node.js ≥ 22 ([`.nvmrc`](.nvmrc), `engines` в [`package.json`](package.json)); [`.npmrc`](.npmrc) — `engine-strict=true`
-- VS Code + расширение **vscode-markdownlint** (или другое с поддержкой `.markdownlint-cli2.jsonc`)
-- [`.editorconfig`](.editorconfig) — единый LF и отступ 4 пробела в редакторах с поддержкой EditorConfig
+- Node.js ≥ 22 ([`.nvmrc`](.nvmrc), `engines` в [`package.json`](package.json)); [`.npmrc`](.npmrc) — `engine-strict=true`;
+- VS Code + расширение **vscode-markdownlint** (или другое с поддержкой `.markdownlint-cli2.jsonc`);
+- [`.editorconfig`](.editorconfig) — единый LF и отступ 4 пробела в редакторах с поддержкой EditorConfig;
 
 ## Переносы строк (LF)
 
@@ -28,6 +30,8 @@ npm test        # pretest → build, test-rules + test-cli2-config + check-funct
 ## Локальная проверка без IDE
 
 Точки входа, bootstrap, guard без пути — [`.cursor/rules/platform-scripts.mdc`](.cursor/rules/platform-scripts.mdc).
+
+Примеры команд:
 
 ```bash
 npm run lint:md -- ./path/to/docs
@@ -52,21 +56,21 @@ bin\lint-markdown.bat .\path\to\docs    # Windows CMD
 Кастомные правила markdownlint для оформления Markdown-документов. Примеры нарушений и исправлений — в [`markdownlint-examples/<rule-name>/`](markdownlint-examples/).
 
 | `names` | Что проверяет |
-|---------|---------------|
+| --- | --- |
 | `minimum-h2-heading` | В документе есть хотя бы один заголовок H2 (`##`) вне code fence |
 | `list-items-end-with-semicolon-or-colon` | Пункт списка (num/bul, вложенные) заканчивается `;`; перед блоком кода или прямым дочерним пунктом — `:` |
 | `list-blank-line-spacing` | Нумерованные списки: пустая строка до первого и после последнего пункта блока (EOF skip, same-kind skip), единообразно между соседними num-пунктами (включая поднумерацию `1.1`, `1.1.1`); маркированные: пустая строка только до/после блока |
-| `list-preceded-by-colon` | Обычный текст (не пункт списка) перед первым пунктом блока верхнего уровня (num/bul) заканчивается `:`; skip prev: заголовок, пункт списка, code fence; вложенные не проверяются |
-| `codeblock-preceded-by-colon` | Строка перед открывающей `` ``` `` (не пункт списка) заканчивается `:`; skip prev: заголовок, пункт списка, code fence |
+| `list-preceded-by-colon` | Обычный текст (не пункт списка) перед первым пунктом блока верхнего уровня (num/bul) заканчивается `:`; skip prev: заголовок, пункт списка, code fence, pipe-таблица; вложенные не проверяются |
+| `codeblock-preceded-by-colon` | Строка перед открывающей `` ``` `` (не пункт списка) заканчивается `:`; skip prev: заголовок, пункт списка, code fence, pipe-таблица |
 | `no-leading-spaces` | Нет ведущих пробелов у обычного текста, пунктов списка верхнего уровня и строк `` ``` ``; у вложенных пунктов отступ допустим, если не меньше отступа предыдущего пункта |
-| `sentences-end-with-mark` | Обычный текст (не заголовок, blockquote и продолжения, HR, не пункт списка) заканчивается `.`, `!`, `?`, `:` или `;` |
+| `sentences-end-with-mark` | Обычный текст (не заголовок, blockquote и продолжения, HR, не пункт списка, не pipe-таблица) заканчивается `.`, `!`, `?`, `:` или `;` |
 
 Проверки выполняются вне содержимого code fence, кроме строк-обозначений `` ``` `` (для `no-leading-spaces`).
 
 ## Структура репозитория
 
 | Путь | Назначение |
-|------|------------|
+| --- | --- |
 | [`src/`](src/) | Исходники TypeScript (`core/`, `domain/`, `composition/`, `rules/`) |
 | Корневые `*.js`, `core/`, `domain/`, `composition/`, `rules/` | **Артефакты tsc** — коммитить вместе с `src/` |
 | [`markdownlint-examples/`](markdownlint-examples/) | Пары `_err.md` / `_suc.md` на каждое правило |
@@ -88,6 +92,8 @@ bin\lint-markdown.bat .\path\to\docs    # Windows CMD
 Каждое правило — класс `XxxRule extends BaseRule`: метод `check()` вызывает domain-сервисы и сообщает нарушения через `onError`; `toRule()` адаптирует класс к API markdownlint.
 
 Зависимости (парсер списков, обход code fence, checker-ы) собираются в [`AppContext`](src/composition/app-context.ts). [`markdownlint-rules.ts`](src/markdownlint-rules.ts) регистрирует все правила; [`markdownlint-hlprs.js`](markdownlint-hlprs.js) — compat-слой для [`test-rules.cjs`](test-rules.cjs).
+
+Схема:
 
 ```mermaid
 flowchart LR
@@ -111,7 +117,7 @@ flowchart LR
 ## npm-скрипты
 
 | Скрипт | Действие |
-|--------|----------|
+| --- | --- |
 | `npm run build` | `tsc`: `src/` → корень |
 | `npm test` | `pretest` (build) + `test-rules.cjs` + `test-cli2-config.cjs` + `check-function-order.cjs` |
 | `npm run lint:md` | Локальный lint папки/файла (bootstrap в runner) |
@@ -127,8 +133,8 @@ Runtime — CommonJS `.js`, не `.ts` и не ESM.
 
 ## Связанная документация
 
-- [`AGENTS.md`](AGENTS.md) — краткий справочник для AI-агента, workflow
-- [`.cursor/rules/markdownlint-project.mdc`](.cursor/rules/markdownlint-project.mdc) — полные политики lint-правил, `.markdownlint-cli2.jsonc`, CLI
-- [`.cursor/rules/platform-scripts.mdc`](.cursor/rules/platform-scripts.mdc) — bin-скрипты и bootstrap `node_modules`
-- [`.cursor/rules/docs-consistency.mdc`](.cursor/rules/docs-consistency.mdc) — синхронизация кода и документации
-- [markdownlint: Custom Rules](https://github.com/DavidAnson/markdownlint/blob/main/doc/CustomRules.md) — официальная документация
+- [`AGENTS.md`](AGENTS.md) — краткий справочник для AI-агента, workflow;
+- [`.cursor/rules/markdownlint-project.mdc`](.cursor/rules/markdownlint-project.mdc) — полные политики lint-правил, `.markdownlint-cli2.jsonc`, CLI;
+- [`.cursor/rules/platform-scripts.mdc`](.cursor/rules/platform-scripts.mdc) — bin-скрипты и bootstrap `node_modules`;
+- [`.cursor/rules/docs-consistency.mdc`](.cursor/rules/docs-consistency.mdc) — синхронизация кода и документации;
+- [markdownlint: Custom Rules](https://github.com/DavidAnson/markdownlint/blob/main/doc/CustomRules.md) — официальная документация;

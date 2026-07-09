@@ -44,10 +44,10 @@ alwaysApply: true
 | `minimum-h2-heading` | Минимум один заголовок H2 (`##`) вне code fence | `markdownlint-examples/minimum-h2-heading/` |
 | `list-items-end-with-semicolon-or-colon` | Пункт списка: `;`, перед блоком кода или **прямым дочерним** пунктом — `:` | `markdownlint-examples/list-items-end-with-semicolon-or-colon/` |
 | `list-blank-line-spacing` | Numbered: blank до/после (EOF skip, same-kind skip) и единообразно между соседними num-пунктами блока (включая поднумерацию); bulleted: blank до/после блока (между пунктами не проверяется) | `markdownlint-examples/list-blank-line-spacing/` |
-| `list-preceded-by-colon` | Обычный текст (не пункт списка) перед первым пунктом блока верхнего уровня (num/bul) заканчивается `:`; skip prev: заголовок, пункт списка, code fence; вложенные не проверяются | `markdownlint-examples/list-preceded-by-colon/` |
-| `codeblock-preceded-by-colon` | Открывающая `` ``` ``: строка перед ней заканчивается `:` (не пункт списка — те проверяет `list-items-*`) | `markdownlint-examples/codeblock-preceded-by-colon/` |
+| `list-preceded-by-colon` | Обычный текст (не пункт списка) перед первым пунктом блока верхнего уровня (num/bul) заканчивается `:`; skip prev: заголовок, пункт списка, code fence, pipe-таблица; вложенные не проверяются | `markdownlint-examples/list-preceded-by-colon/` |
+| `codeblock-preceded-by-colon` | Открывающая `` ``` ``: строка перед ней заканчивается `:` (не пункт списка — те проверяет `list-items-*`); skip prev: заголовок, пункт списка, code fence, pipe-таблица | `markdownlint-examples/codeblock-preceded-by-colon/` |
 | `no-leading-spaces` | Нет отступа у обычного текста, пунктов списка верхнего уровня и обозначений блока кода (`` ``` ``); вложенные пункты — при `indent >=` предыдущего | `markdownlint-examples/no-leading-spaces/` |
-| `sentences-end-with-mark` | Обычный текст заканчивается `.`, `!`, `?`, `:` или `;`; skip: заголовки, blockquote и продолжения, HR, списки | `markdownlint-examples/sentences-end-with-mark/` |
+| `sentences-end-with-mark` | Обычный текст заканчивается `.`, `!`, `?`, `:` или `;`; skip: заголовки, blockquote и продолжения, HR, списки, pipe-таблицы | `markdownlint-examples/sentences-end-with-mark/` |
 
 ## Конвенция примеров
 
@@ -89,7 +89,7 @@ alwaysApply: true
 - **Scope:** нумерованные и маркированные списки.
 - **Проверка:** только строка перед **первым пунктом блока** верхнего уровня (не перед каждым вложенным).
 - **Skip вложенные:** пункт с отступом (`indent > 0`) или поднумерация (`1.1`, `1.1.1`) — `:` не требуется (`isNestedLstItem`).
-- **Skip prev:** заголовок, пункт списка, code fence (`checkPrecededByColon`); нет непустой строки выше (`prev < 0`) — skip.
+- **Skip prev:** заголовок, пункт списка, code fence, pipe-строки таблицы (подъём вверх через `tableRowRx` в `checkPrecededByColon`); нет непустой строки выше (`prev < 0`) — skip.
 - **Пустые строки:** между целью и prev пропускаются (`skipBlankBck`); `:` ищется на первой непустой строке выше.
 - **Тело пункта:** текст после code fence внутри пункта не считается отдельным блоком (`findNumItemEnd` / `findBulItemEnd`).
 - **lineNumber:** строка **перед** первым пунктом блока (первая непустая выше после `skipBlankBck`).
@@ -98,7 +98,7 @@ alwaysApply: true
 
 - **Scope:** только **открывающие** `` ``` `` (не закрывающие).
 - **Проверка:** строка перед fence должна заканчиваться `:`.
-- **Skip prev:** заголовок, **любой** пункт списка (`isLstItem` / `lstItemRx`), code fence (`checkPrecededByColon`); нет непустой строки выше — skip.
+- **Skip prev:** заголовок, **любой** пункт списка (`isLstItem` / `lstItemRx`), code fence, pipe-строки таблицы (подъём вверх через `tableRowRx` в `checkPrecededByColon`); нет непустой строки выше — skip.
 - **Пустые строки:** между fence и prev пропускаются (`skipBlankBck`); `:` ищется на первой непустой строке выше.
 - **Обход fence:** `CodeWalker.eachOpeningCodeFence` из [`src/domain/code-walker.ts`](../src/domain/code-walker.ts) (не `walkOutsideCode`, который пропускает строки `` ``` ``).
 - **lineNumber:** строка **перед** открывающей `` ``` `` (первая непустая выше после `skipBlankBck`).
@@ -115,8 +115,9 @@ alwaysApply: true
 ### `sentences-end-with-mark` — политика
 
 - **Scope:** непустые строки вне code fence.
-- **Skip:** заголовки, blockquote (`>`) и **продолжения** цитаты (непустые строки сразу после blockquote без пустой строки между), HR (`---` / `***` / `___`), любые пункты списка (`isLstItem`).
+- **Skip:** заголовки, blockquote (`>`) и **продолжения** цитаты (непустые строки сразу после blockquote без пустой строки между), HR (`---` / `***` / `___`), любые пункты списка (`isLstItem`), pipe-таблицы (строка после trim начинается с `|`, `tableRowRx`).
 - **Проверка:** строка заканчивается `.`, `!`, `?`, `:` или `;`.
+- **Ограничения:** только GFM pipe-таблицы, не HTML `<table>`; строка prose с `|` в начале после trim skip-ится (редкий edge case).
 
 ### Публичный API хелперов (`markdownlint-hlprs.js`)
 

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.codeFenceRx = exports.hrRx = exports.endsWithMarkRx = exports.endsWithSemiRx = exports.endsWithColonRx = exports.h2Rx = exports.lstItemRx = exports.topNumPathRx = exports.numItemRx = exports.bulItemRx = exports.subNumPathRx = exports.subNumItemRx = void 0;
+exports.codeFenceRx = exports.tableRowRx = exports.hrRx = exports.endsWithMarkRx = exports.endsWithSemiRx = exports.endsWithColonRx = exports.h2Rx = exports.lstItemRx = exports.topNumPathRx = exports.numItemRx = exports.bulItemRx = exports.subNumPathRx = exports.subNumItemRx = void 0;
 exports.subNumItemRx = /^\d+(?:\.\d+)+\s+/;
 exports.subNumPathRx = /^(\d+(?:\.\d+)+)\s+/;
 exports.bulItemRx = /^[-+*]\s/;
@@ -12,4 +12,5 @@ exports.endsWithColonRx = /:$/;
 exports.endsWithSemiRx = /;$/;
 exports.endsWithMarkRx = /[.!?:;]$/;
 exports.hrRx = /^(-{3,}|\*{3,}|_{3,})$/;
+exports.tableRowRx = /^\|/;
 exports.codeFenceRx = /^```/;

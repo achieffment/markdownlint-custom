@@ -1,5 +1,7 @@
 # AGENTS.md
 
+## Обзор
+
 Краткий справочник для AI-агента при работе с кастомными правилами markdownlint в этом репозитории.
 
 ## Роль
@@ -9,7 +11,7 @@
 ## Scope
 
 | Область | Файлы |
-|---------|-------|
+| --- | --- |
 | Правила | `src/rules/*.ts` (`extends BaseRule`), barrel `src/markdownlint-rules.ts`, `src/details.ts`, `src/regex.ts` |
 | Domain / core | `src/core/`, `src/domain/`, `src/composition/app-context.ts` |
 | Barrels | `src/markdownlint-rules.ts`, `src/markdownlint-hlprs.ts` |
@@ -28,7 +30,7 @@
 ## Правила репозитория
 
 | Файл | Вопрос |
-|------|--------|
+| --- | --- |
 | [markdownlint-project.mdc](.cursor/rules/markdownlint-project.mdc) | **Проект:** политики lint-правил, примеры, API hlprs, структура, `.markdownlint-cli2.jsonc`, CLI |
 | [platform-scripts.mdc](.cursor/rules/platform-scripts.mdc) | **Платформы:** bin-скрипты, bootstrap в `lint-markdown.cjs` |
 | [ts-style.mdc](.cursor/rules/ts-style.mdc) | **Оформление TS/OOP:** BaseRule, классы, типы |
@@ -42,27 +44,27 @@
 ## Каталог правил (кратко)
 
 | `names` | Суть |
-|---------|------|
+| --- | --- |
 | `minimum-h2-heading` | Минимум один `##` вне code fence |
 | `list-items-end-with-semicolon-or-colon` | `;`, перед блоком кода или **прямым дочерним** пунктом — `:` |
 | `list-blank-line-spacing` | Numbered: blank до/после (EOF skip, same-kind skip) и единообразно между соседними num-пунктами блока (включая `1.1`, `1.1.1`); bulleted: blank до/после блока |
-| `list-preceded-by-colon` | Обычный текст (не пункт списка) перед первым пунктом блока верхнего уровня (num/bul) заканчивается `:`; skip prev: заголовок, пункт списка, code fence; вложенные не проверяются |
-| `codeblock-preceded-by-colon` | Открывающая `` ``` ``: строка перед ней заканчивается `:` (обычный текст, не пункт списка); skip prev: заголовок, пункт списка, code fence |
+| `list-preceded-by-colon` | Обычный текст (не пункт списка) перед первым пунктом блока верхнего уровня (num/bul) заканчивается `:`; skip prev: заголовок, пункт списка, code fence, pipe-таблица; вложенные не проверяются |
+| `codeblock-preceded-by-colon` | Открывающая `` ``` ``: строка перед ней заканчивается `:` (обычный текст, не пункт списка); skip prev: заголовок, пункт списка, code fence, pipe-таблица |
 | `no-leading-spaces` | Нет отступа у обычного текста, пунктов списка верхнего уровня и обозначений блока кода (`` ``` ``); вложенные пункты — при `indent >=` предыдущего |
-| `sentences-end-with-mark` | Обычный текст (не заголовок, blockquote и продолжения, HR, не пункт списка) заканчивается `.`, `!`, `?`, `:` или `;` |
+| `sentences-end-with-mark` | Обычный текст (не заголовок, blockquote и продолжения, HR, не пункт списка, не pipe-таблица) заканчивается `.`, `!`, `?`, `:` или `;` |
 
 Подробности и пути к примерам — в [markdownlint-project.mdc](.cursor/rules/markdownlint-project.mdc).
 
 ## Рабочий процесс
 
-1. **Read first** — правило в `src/rules/`, хелперы, `_err.md` / `_suc.md`
-2. **Design check** — одна политика на правило? дублирование вынести **только в рамках задачи**? ([ts-dev.mdc](.cursor/rules/ts-dev.mdc))
-3. **Minimal diff** — без drive-by refactor
-4. **Match conventions** — `extends BaseRule`, `AppContext`, [`src/details.ts`](src/details.ts), стиль как в файле
-5. **Preserve contracts** — `onError({ lineNumber, detail, context? })`, публичный API hlprs, runtime CommonJS
-6. **Register** — `new XxxRule(deps).toRule()` в [`src/markdownlint-rules.ts`](src/markdownlint-rules.ts); новый checker → [`src/composition/app-context.ts`](src/composition/app-context.ts); обновить cli2: `npm run sync:cli2-config` (через `presync:cli2-config` → build; custom keys из `markdownlint-rules.js`)
-7. **Test** — `npm test` (pretest → build; test-rules + test-cli2-config + check-function-order)
-8. **Sync docs** — по [docs-consistency.mdc](.cursor/rules/docs-consistency.mdc): `.mdc` (по матрице) → AGENTS → README
+1. **Read first** — правило в `src/rules/`, хелперы, `_err.md` / `_suc.md`;
+2. **Design check** — одна политика на правило? дублирование вынести **только в рамках задачи**? ([ts-dev.mdc](.cursor/rules/ts-dev.mdc));
+3. **Minimal diff** — без drive-by refactor;
+4. **Match conventions** — `extends BaseRule`, `AppContext`, [`src/details.ts`](src/details.ts), стиль как в файле;
+5. **Preserve contracts** — `onError({ lineNumber, detail, context? })`, публичный API hlprs, runtime CommonJS;
+6. **Register** — `new XxxRule(deps).toRule()` в [`src/markdownlint-rules.ts`](src/markdownlint-rules.ts); новый checker → [`src/composition/app-context.ts`](src/composition/app-context.ts); обновить cli2: `npm run sync:cli2-config` (через `presync:cli2-config` → build; custom keys из `markdownlint-rules.js`);
+7. **Test** — `npm test` (pretest → build; test-rules + test-cli2-config + check-function-order);
+8. **Sync docs** — по [docs-consistency.mdc](.cursor/rules/docs-consistency.mdc): `.mdc` (по матрице) → AGENTS → README;
 
 Локальная проверка **папки или файла**: `npm run lint:md -- <path>`, `./bin/lint-markdown.sh <path>` (см. [platform-scripts.mdc](.cursor/rules/platform-scripts.mdc) для `.bat`/`.command`); **без пути** — `usage` и `exit 1`.
 
@@ -74,12 +76,12 @@
 
 ## Границы
 
-- Не угадывай; спроси при неясности
-- Не коммить/push, не менять конфиги VS Code — без явной просьбы
-- Не раздувать scope; не менять исходники пакета `markdownlint`
-- Runtime custom rules — CommonJS `.js`; не подключать `.ts` или ESM в markdownlint
-- Не padding-ить перед `=` и не переформатировать вне задачи
-- Bin/CLI — следовать [platform-scripts.mdc](.cursor/rules/platform-scripts.mdc)
+- Не угадывай — спроси при неясности;
+- Не коммить/push, не менять конфиги VS Code — без явной просьбы;
+- Не раздувать scope; не менять исходники пакета `markdownlint`;
+- Runtime custom rules — CommonJS `.js`; не подключать `.ts` или ESM в markdownlint;
+- Не padding-ить перед `=` и не переформатировать вне задачи;
+- Bin/CLI — следовать [platform-scripts.mdc](.cursor/rules/platform-scripts.mdc);
 
 ## Коммуникация
 

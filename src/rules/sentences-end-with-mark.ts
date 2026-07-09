@@ -3,7 +3,7 @@ import { BaseRule } from "../core/base-rule";
 import { details } from "../details";
 import type { CodeWalker } from "../domain/code-walker";
 import type { ListLineParser } from "../domain/list-line-parser";
-import { endsWithMarkRx, hrRx } from "../regex";
+import { endsWithMarkRx, hrRx, tableRowRx } from "../regex";
 
 export class SentencesEndMarkRule extends BaseRule {
     readonly names = ["sentences-end-with-mark"];
@@ -30,6 +30,7 @@ export class SentencesEndMarkRule extends BaseRule {
             }
             if (inQuote) return;
             if (this.lineParser.isLstItem(line)) return;
+            if (tableRowRx.test(trim)) return;
             if (!endsWithMarkRx.test(trim)) {
                 onError({ lineNumber: ix + 1, detail: this.description, context: trim });
             }

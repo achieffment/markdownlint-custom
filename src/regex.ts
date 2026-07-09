@@ -20,4 +20,6 @@ export const endsWithMarkRx = /[.!?:;]$/;
 
 export const hrRx = /^(-{3,}|\*{3,}|_{3,})$/;
 
+export const tableRowRx = /^\|/;
+
 export const codeFenceRx = /^```/;

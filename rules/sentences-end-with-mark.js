@@ -28,6 +28,8 @@ class SentencesEndMarkRule extends base_rule_1.BaseRule {
                 return;
             if (this.lineParser.isLstItem(line))
                 return;
+            if (regex_1.tableRowRx.test(trim))
+                return;
             if (!regex_1.endsWithMarkRx.test(trim)) {
                 onError({ lineNumber: ix + 1, detail: this.description, context: trim });
             }

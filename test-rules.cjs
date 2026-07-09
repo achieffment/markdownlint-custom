@@ -669,6 +669,21 @@ if (getFiredRules(listAtDocStartRes.t || []).size > 0) {
     console.log("OK   list at doc start skips list-preceded-by-colon");
 }
 
+const listColonTablePrevOk = `## T
+
+| Col | Val |
+| --- | --- |
+| a | b |
+
+1. пункт;
+`;
+const listColonTablePrevRes = lintStrings({ t: listColonTablePrevOk }, ["list-preceded-by-colon", "minimum-h2-heading", "list-blank-line-spacing", "list-items-end-with-semicolon-or-colon"]);
+if (getFiredRules(listColonTablePrevRes.t || []).size > 0) {
+    assert(false, "list colon table prev: " + [...getFiredRules(listColonTablePrevRes.t || [])].join(", "));
+} else {
+    console.log("OK   list-preceded-by-colon skip pipe table prev → clean");
+}
+
 const codblkAtDocStartOk = `\`\`\`js
 const x = 1;
 \`\`\`
@@ -868,6 +883,25 @@ if (getFiredRules(bareCodOkRes.t || []).size > 0) {
     assert(false, "bare fence ok: " + [...getFiredRules(bareCodOkRes.t || [])].join(", "));
 } else {
     console.log("OK   bare fence with colon → clean");
+}
+
+const codeblockTablePrevOk = `## T
+
+Вводный текст:
+
+| Col | Val |
+| --- | --- |
+| a | b |
+
+\`\`\`js
+const x = 1;
+\`\`\`
+`;
+const codeblockTablePrevRes = lintStrings({ t: codeblockTablePrevOk }, ["codeblock-preceded-by-colon", "minimum-h2-heading"]);
+if (getFiredRules(codeblockTablePrevRes.t || []).size > 0) {
+    assert(false, "codeblock table prev: " + [...getFiredRules(codeblockTablePrevRes.t || [])].join(", "));
+} else {
+    console.log("OK   codeblock-preceded-by-colon skip pipe table prev → clean");
 }
 
 const h2InCodeErr = "```js\n## fake h2\n```";
@@ -1097,6 +1131,50 @@ if (getFiredRules(sentencesInCodeOkRes.t || []).size > 0) {
     assert(false, "sentences in code fence: " + [...getFiredRules(sentencesInCodeOkRes.t || [])].join(", "));
 } else {
     console.log("OK   sentences skip code fence body → clean");
+}
+
+const sentencesSkipTableOk = `## T
+
+| Col | Val |
+| --- | --- |
+| a | b |
+
+Текст с точкой.
+`;
+const sentencesSkipTableOkRes = lintStrings({ t: sentencesSkipTableOk }, ["sentences-end-with-mark", "minimum-h2-heading"]);
+if (getFiredRules(sentencesSkipTableOkRes.t || []).size > 0) {
+    assert(false, "sentences skip table: " + [...getFiredRules(sentencesSkipTableOkRes.t || [])].join(", "));
+} else {
+    console.log("OK   sentences skip pipe table → clean");
+}
+
+const sentencesSkipTableIndentedOk = `## T
+
+  | a | b |
+
+Текст с точкой.
+`;
+const sentencesSkipTableIndentedRes = lintStrings({ t: sentencesSkipTableIndentedOk }, ["sentences-end-with-mark", "minimum-h2-heading"]);
+if (getFiredRules(sentencesSkipTableIndentedRes.t || []).size > 0) {
+    assert(false, "sentences skip indented table: " + [...getFiredRules(sentencesSkipTableIndentedRes.t || [])].join(", "));
+} else {
+    console.log("OK   sentences skip indented pipe table → clean");
+}
+
+const sentencesTableProseErr = `## T
+
+| Col | Val |
+| --- | --- |
+| a | b |
+
+Текст без знака
+`;
+const sentencesTableProseErrRes = lintStrings({ t: sentencesTableProseErr }, ["sentences-end-with-mark", "minimum-h2-heading"]);
+const sentencesTableProseFired = getFiredRules(sentencesTableProseErrRes.t || []);
+if (!sentencesTableProseFired.has("sentences-end-with-mark") || sentencesTableProseFired.size !== 1) {
+    assert(false, "sentences table prose err: expected sentences-end-with-mark only, got " + [...sentencesTableProseFired].join(", "));
+} else {
+    console.log("OK   sentences table + prose without mark → sentences-end-with-mark");
 }
 
 if (failed > 0) {

@@ -8,7 +8,13 @@ class ColonChecker {
         this.lineParser = lineParser;
     }
     checkPrecededByColon(lines, ix, onError, colDet) {
-        const prev = this.lineParser.skipBlankBck(lines, ix);
+        let prev = this.lineParser.skipBlankBck(lines, ix);
+        while (prev >= 0 && regex_1.tableRowRx.test(lines[prev].trim())) {
+            prev--;
+        }
+        if (prev >= 0 && !lines[prev].trim()) {
+            prev = this.lineParser.skipBlankBck(lines, prev);
+        }
         if (prev < 0)
             return;
         const prevTrim = lines[prev].trim();
