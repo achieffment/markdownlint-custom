@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ListBlockAnalyzer = void 0;
+const regex_1 = require("../regex");
 class ListBlockAnalyzer {
     constructor(lineParser, codeWalker) {
         this.lineParser = lineParser;
@@ -15,15 +16,15 @@ class ListBlockAnalyzer {
                 const trim = lines[ix].trim();
                 if (!trim)
                     continue;
-                if (trim.startsWith("#"))
+                if (regex_1.headingRx.test(trim))
                     break;
                 if (shouldBrk(lines[ix]))
                     break;
                 const jInd = this.lineParser.getIndent(lines[ix]);
-                if (trim.startsWith("```")) {
+                if (regex_1.codeFenceRx.test(trim)) {
                     end = ix;
                     ix++;
-                    while (ix < lines.length && !lines[ix].trim().startsWith("```"))
+                    while (ix < lines.length && !regex_1.codeFenceRx.test(lines[ix].trim()))
                         ix++;
                     if (ix < lines.length)
                         end = ix;
@@ -49,7 +50,7 @@ class ListBlockAnalyzer {
                 if (idx >= lines.length)
                     break;
                 const trim = lines[idx].trim();
-                if (trim.startsWith("#") || trim.startsWith("```"))
+                if (regex_1.headingRx.test(trim) || regex_1.codeFenceRx.test(trim))
                     break;
                 if (shouldBrk(lines[idx]))
                     break;

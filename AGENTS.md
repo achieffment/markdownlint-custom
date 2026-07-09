@@ -16,9 +16,8 @@
 | Domain / core | `src/core/`, `src/domain/`, `src/composition/app-context.ts` |
 | Barrels | `src/markdownlint-rules.ts`, `src/markdownlint-hlprs.ts` |
 | Runtime | корневые `*.js`, `core/`, `domain/`, `composition/`, `rules/` (артефакты tsc; entry points: `markdownlint-rules.js`, `markdownlint-hlprs.js`) |
-| Конфиг lint | `.markdownlint-cli2.jsonc`, `load-cli2-config.cjs`, `schema/`, `scripts/sync-cli2-config.cjs`, `scripts/cli2-overrides.cjs` |
+| Конфиг lint | `.markdownlint-cli2.jsonc`, `load-cli2-config.cjs`, `schema/`, `scripts/` (`sync-cli2-config.cjs`, `cli2-overrides.cjs`) |
 | CLI / bin | `bin/lint-markdown.cjs`, `bin/lint-markdown.{sh,bat,command}` |
-| Scripts | `scripts/sync-cli2-config.cjs` |
 | Примеры | `markdownlint-examples/**/*.md` |
 | Тесты | `test-rules.cjs`, `test-cli2-config.cjs`, `check-function-order.cjs` |
 | Cursor rules | `.cursor/rules/*.mdc` |

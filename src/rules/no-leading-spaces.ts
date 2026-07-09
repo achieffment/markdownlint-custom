@@ -3,6 +3,7 @@ import { BaseRule } from "../core/base-rule";
 import { details } from "../details";
 import type { CodeWalker } from "../domain/code-walker";
 import type { ListLineParser } from "../domain/list-line-parser";
+import { headingRx } from "../regex";
 
 export class NoLeadingSpacesRule extends BaseRule {
     readonly names = ["no-leading-spaces"];
@@ -25,7 +26,7 @@ export class NoLeadingSpacesRule extends BaseRule {
                 }
             },
             onOutside: (line, ix, trim) => {
-                if (trim.startsWith("#")) return;
+                if (headingRx.test(trim)) return;
                 const currInd = this.lineParser.getIndent(line);
                 if (this.lineParser.isLstItem(line)) {
                     if (currInd > 0) {

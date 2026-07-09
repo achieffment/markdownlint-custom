@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.codeFenceRx = exports.tableRowRx = exports.hrRx = exports.endsWithMarkRx = exports.endsWithSemiRx = exports.endsWithColonRx = exports.h2Rx = exports.lstItemRx = exports.topNumPathRx = exports.numItemRx = exports.bulItemRx = exports.subNumPathRx = exports.subNumItemRx = void 0;
+exports.codeFenceRx = exports.tableRowRx = exports.hrRx = exports.endsWithMarkRx = exports.endsWithSemiRx = exports.endsWithColonRx = exports.headingRx = exports.h2Rx = exports.lstItemRx = exports.topNumPathRx = exports.numItemRx = exports.bulItemRx = exports.subNumPathRx = exports.subNumItemRx = void 0;
 exports.subNumItemRx = /^\d+(?:\.\d+)+\s+/;
 exports.subNumPathRx = /^(\d+(?:\.\d+)+)\s+/;
 exports.bulItemRx = /^[-+*]\s/;
@@ -8,6 +8,7 @@ exports.numItemRx = /^\d+(?:\.\d+)+\s+|\d+\.\s+/;
 exports.topNumPathRx = /^(\d+)\.\s+/;
 exports.lstItemRx = /^([-+*]\s|\d+(?:\.\d+)+\s|\d+\.\s)/;
 exports.h2Rx = /^##(?!\#)\s+\S/;
+exports.headingRx = /^#/;
 exports.endsWithColonRx = /:$/;
 exports.endsWithSemiRx = /;$/;
 exports.endsWithMarkRx = /[.!?:;]$/;

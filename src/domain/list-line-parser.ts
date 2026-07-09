@@ -1,4 +1,4 @@
-import { bulItemRx, lstItemRx, numItemRx, subNumItemRx, subNumPathRx, topNumPathRx } from "../regex";
+import { bulItemRx, codeFenceRx, headingRx, lstItemRx, numItemRx, subNumItemRx, subNumPathRx, topNumPathRx } from "../regex";
 
 export class ListLineParser {
     get lstItemRx(): RegExp {
@@ -69,9 +69,9 @@ export class ListLineParser {
                 prev--;
                 continue;
             }
-            if (prevTrim.startsWith("```")) {
+            if (codeFenceRx.test(prevTrim)) {
                 prev--;
-                while (prev >= 0 && !lines[prev].trim().startsWith("```")) prev--;
+                while (prev >= 0 && !codeFenceRx.test(lines[prev].trim())) prev--;
                 if (prev >= 0) prev--;
                 continue;
             }
@@ -80,7 +80,7 @@ export class ListLineParser {
                 break;
             }
             const lineInd = this.getIndent(lines[prev]);
-            if (lineInd >= currInd && !prevTrim.startsWith("#")) {
+            if (lineInd >= currInd && !headingRx.test(prevTrim)) {
                 prev--;
                 continue;
             }

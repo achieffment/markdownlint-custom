@@ -47,7 +47,7 @@ Windows CMD: пути с пробелами передавать в кавычк
 - `--no-globs` + glob целевой папки/файла (`:rel/path` для одного файла)
 - `cwd` = корень repo
 - `--help` / `-h` — справка; без `targetPath` первым аргументом — `usage()` и `exit 1` (в т.ч. флаги cli2 до path)
-- Passthrough: `lint-markdown <path> -- <extra cli2 args>`
+- Passthrough: `lint-markdown <path> -- <extra cli2 args>` или `lint-markdown -- <path> <extra>`; `--` после path отрезается как разделитель
 - Конфиг и `customRules` — всегда из корня этого репозитория (`cwd` = repoRoot), в т.ч. для внешнего `<path>`
 - Исключение `node_modules`, `vendor`: в [`.markdownlint-cli2.jsonc`](../.markdownlint-cli2.jsonc) — `!node_modules`, `!vendor` (IDE/workspace); в [`lint-markdown.cjs`](../bin/lint-markdown.cjs) для папок — `#node_modules`, `#vendor` (cli2 glob при `--no-globs`)
 
@@ -57,4 +57,4 @@ Windows CMD: пути с пробелами передавать в кавычк
 
 - Все три оболочки (`.sh`, `.bat`, `.command`) + npm-скрипт
 - LF в index ([`.gitattributes`](../.gitattributes)); shebang для Unix
-- Синхронизация: [`docs-consistency.mdc`](docs-consistency.mdc) → README, AGENTS, `markdownlint-project.mdc`
+- Синхронизация: [`docs-consistency.mdc`](docs-consistency.mdc) → README, AGENTS, `markdownlint-project.mdc`, `platform-scripts.mdc`

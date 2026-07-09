@@ -24,7 +24,7 @@ class ColonChecker {
         if (prev < 0)
             return;
         const prevTrim = lines[prev].trim();
-        if (!prevTrim || prevTrim.startsWith("#") || prevTrim.startsWith("```") || this.lineParser.isLstItem(lines[prev])) {
+        if (!prevTrim || regex_1.headingRx.test(prevTrim) || regex_1.codeFenceRx.test(prevTrim) || this.lineParser.isLstItem(lines[prev])) {
             return;
         }
         if (!regex_1.endsWithColonRx.test(prevTrim)) {

@@ -67,9 +67,9 @@ class ListLineParser {
                 prev--;
                 continue;
             }
-            if (prevTrim.startsWith("```")) {
+            if (regex_1.codeFenceRx.test(prevTrim)) {
                 prev--;
-                while (prev >= 0 && !lines[prev].trim().startsWith("```"))
+                while (prev >= 0 && !regex_1.codeFenceRx.test(lines[prev].trim()))
                     prev--;
                 if (prev >= 0)
                     prev--;
@@ -80,7 +80,7 @@ class ListLineParser {
                 break;
             }
             const lineInd = this.getIndent(lines[prev]);
-            if (lineInd >= currInd && !prevTrim.startsWith("#")) {
+            if (lineInd >= currInd && !regex_1.headingRx.test(prevTrim)) {
                 prev--;
                 continue;
             }

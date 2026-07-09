@@ -20,7 +20,7 @@ class SentencesEndMarkRule extends base_rule_1.BaseRule {
                 inQuote = false;
                 return;
             }
-            if (trim.startsWith("#") || trim.startsWith(">") || regex_1.hrRx.test(trim)) {
+            if (regex_1.headingRx.test(trim) || trim.startsWith(">") || regex_1.hrRx.test(trim)) {
                 inQuote = trim.startsWith(">");
                 return;
             }

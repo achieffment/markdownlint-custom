@@ -1,4 +1,5 @@
 import type { FindItemEnd, LinePredicate, ListBlockHandler } from "../types";
+import { codeFenceRx, headingRx } from "../regex";
 import type { CodeWalker } from "./code-walker";
 import type { ListLineParser } from "./list-line-parser";
 
@@ -23,13 +24,13 @@ export class ListBlockAnalyzer {
             for (let ix = beg + 1; ix < lines.length; ix++) {
                 const trim = lines[ix].trim();
                 if (!trim) continue;
-                if (trim.startsWith("#")) break;
+                if (headingRx.test(trim)) break;
                 if (shouldBrk(lines[ix])) break;
                 const jInd = this.lineParser.getIndent(lines[ix]);
-                if (trim.startsWith("```")) {
+                if (codeFenceRx.test(trim)) {
                     end = ix;
                     ix++;
-                    while (ix < lines.length && !lines[ix].trim().startsWith("```")) ix++;
+                    while (ix < lines.length && !codeFenceRx.test(lines[ix].trim())) ix++;
                     if (ix < lines.length) end = ix;
                     aftFence = true;
                     continue;
@@ -57,7 +58,7 @@ export class ListBlockAnalyzer {
                 while (idx < lines.length && lines[idx].trim() === "") idx++;
                 if (idx >= lines.length) break;
                 const trim = lines[idx].trim();
-                if (trim.startsWith("#") || trim.startsWith("```")) break;
+                if (headingRx.test(trim) || codeFenceRx.test(trim)) break;
                 if (shouldBrk(lines[idx])) break;
                 if (!isItem(lines[idx])) {
                     if (items.length === 0) break;

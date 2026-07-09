@@ -102,6 +102,9 @@ const parseArgs = (argv) => {
     } else {
         passthrough = rest;
     }
+    if (passthrough[0] === "--") {
+        passthrough = passthrough.slice(1);
+    }
     return { target, passthrough };
 };
 

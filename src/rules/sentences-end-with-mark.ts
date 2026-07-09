@@ -3,7 +3,7 @@ import { BaseRule } from "../core/base-rule";
 import { details } from "../details";
 import type { CodeWalker } from "../domain/code-walker";
 import type { ListLineParser } from "../domain/list-line-parser";
-import { endsWithMarkRx, hrRx, tableRowRx } from "../regex";
+import { endsWithMarkRx, headingRx, hrRx, tableRowRx } from "../regex";
 
 export class SentencesEndMarkRule extends BaseRule {
     readonly names = ["sentences-end-with-mark"];
@@ -24,7 +24,7 @@ export class SentencesEndMarkRule extends BaseRule {
                 inQuote = false;
                 return;
             }
-            if (trim.startsWith("#") || trim.startsWith(">") || hrRx.test(trim)) {
+            if (headingRx.test(trim) || trim.startsWith(">") || hrRx.test(trim)) {
                 inQuote = trim.startsWith(">");
                 return;
             }

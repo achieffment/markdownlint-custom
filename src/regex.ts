@@ -12,6 +12,8 @@ export const lstItemRx = /^([-+*]\s|\d+(?:\.\d+)+\s|\d+\.\s)/;
 
 export const h2Rx = /^##(?!\#)\s+\S/;
 
+export const headingRx = /^#/;
+
 export const endsWithColonRx = /:$/;
 
 export const endsWithSemiRx = /;$/;

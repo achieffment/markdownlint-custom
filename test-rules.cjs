@@ -221,6 +221,19 @@ if (failed === 0) {
     console.log("OK   list-blank-line-spacing/_err sub-details");
 }
 
+const listItemsErrPath = path.join(examplesDir, "list-items-end-with-semicolon-or-colon", "_err.md");
+const listItemsViol = getViolations(listItemsErrPath);
+const itemsDets = [details.listItemsEmpty, details.listItemsColon, details.listItemsSemi];
+const foundItemsDets = new Set(listItemsViol.map(v => v.errorDetail));
+itemsDets.forEach(det => {
+    if (!foundItemsDets.has(det)) {
+        assert(false, `list-items-end-with-semicolon-or-colon/_err.md missing sub-detail: ${det}`);
+    }
+});
+if (failed === 0) {
+    console.log("OK   list-items-end-with-semicolon-or-colon/_err sub-details");
+}
+
 if (failed > 0) {
     console.error(`\n${failed} example(s) failed`);
     process.exit(1);
@@ -383,6 +396,28 @@ if (!semiChildFired.has("list-items-end-with-semicolon-or-colon") || semiChildFi
         assert(false, `semicolon before child detail: expected listItemsColon got "${semiChildDet || "none"}"`);
     } else {
         console.log("OK   semicolon before child → list-items on line 3");
+    }
+}
+
+const codFenceSemiErr = `## T
+
+- перед кодом;
+
+\`\`\`js
+const x = 1;
+\`\`\`
+`;
+const codFenceSemiErrRes = lintStrings({ t: codFenceSemiErr }, ["list-items-end-with-semicolon-or-colon", "minimum-h2-heading"]);
+const codFenceSemiViol = codFenceSemiErrRes.t || [];
+const codFenceSemiFired = getFiredRules(codFenceSemiViol);
+if (!codFenceSemiFired.has("list-items-end-with-semicolon-or-colon") || codFenceSemiFired.size !== 1) {
+    assert(false, "semicolon before code fence err: expected list-items-end-with-semicolon-or-colon only, got " + [...codFenceSemiFired].join(", "));
+} else {
+    const codFenceSemiDet = codFenceSemiViol[0]?.errorDetail;
+    if (codFenceSemiDet !== details.listItemsColon) {
+        assert(false, `semicolon before code fence detail: expected listItemsColon got "${codFenceSemiDet || "none"}"`);
+    } else {
+        console.log("OK   semicolon before code fence → listItemsColon");
     }
 }
 
@@ -574,6 +609,13 @@ if (!listColonErrFired.has("list-preceded-by-colon")) {
         assert(false, "list colon err: extra rules " + extra.join(", "));
     } else {
         console.log("OK   list colon err → list-preceded-by-colon");
+    }
+    const listColonLine = (listColonErrRes.t || [])
+        .find(v => v.ruleNames.includes("list-preceded-by-colon"))?.lineNumber;
+    if (listColonLine !== 3) {
+        assert(false, `list colon err line: expected 3 got ${listColonLine ?? "none"}`);
+    } else if (failed === 0) {
+        console.log("OK   list colon err lineNumber on prose");
     }
 }
 
@@ -791,6 +833,22 @@ if (!listAfterHeadingFired.has("list-blank-line-spacing") || listAfterHeadingFir
     }
 }
 
+const bulBlankBefErr = `## T
+- пункт;
+`;
+const bulBlankBefRes = lintStrings({ t: bulBlankBefErr }, ["list-blank-line-spacing", "minimum-h2-heading"]);
+const bulBlankBefFired = getFiredRules(bulBlankBefRes.t || []);
+if (!bulBlankBefFired.has("list-blank-line-spacing") || bulBlankBefFired.size !== 1) {
+    assert(false, "bul blank bef err: expected list-blank-line-spacing only, got " + [...bulBlankBefFired].join(", "));
+} else {
+    const bulBefDet = (bulBlankBefRes.t || []).find(v => v.errorDetail === details.listBlankBef);
+    if (!bulBefDet || bulBefDet.lineNumber !== 2) {
+        assert(false, `bul blank bef detail: expected listBlankBef on line 2 got ${bulBefDet?.lineNumber || "none"}`);
+    } else {
+        console.log("OK   bulleted blank bef → listBlankBef on line 2");
+    }
+}
+
 const numThenBulNoBlankErr = `## T
 
 1. num;
@@ -916,6 +974,13 @@ if (!bareCodFired.has("codeblock-preceded-by-colon") || bareCodFired.size !== 1)
     assert(false, "bare fence err: expected codeblock-preceded-by-colon only, got " + [...bareCodFired].join(", "));
 } else {
     console.log("OK   bare fence without lang → codeblock-preceded-by-colon");
+}
+const bareCodLine = (bareCodRes.t || [])
+    .find(v => v.ruleNames.includes("codeblock-preceded-by-colon"))?.lineNumber;
+if (bareCodLine !== 3) {
+    assert(false, `bare fence err line: expected 3 got ${bareCodLine ?? "none"}`);
+} else if (failed === 0) {
+    console.log("OK   bare fence err lineNumber on prose");
 }
 
 const bareCodOk = `## T

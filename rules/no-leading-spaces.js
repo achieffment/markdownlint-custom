@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.NoLeadingSpacesRule = void 0;
 const base_rule_1 = require("../core/base-rule");
 const details_1 = require("../details");
+const regex_1 = require("../regex");
 class NoLeadingSpacesRule extends base_rule_1.BaseRule {
     constructor(codeWalker, lineParser) {
         super();
@@ -21,7 +22,7 @@ class NoLeadingSpacesRule extends base_rule_1.BaseRule {
                 }
             },
             onOutside: (line, ix, trim) => {
-                if (trim.startsWith("#"))
+                if (regex_1.headingRx.test(trim))
                     return;
                 const currInd = this.lineParser.getIndent(line);
                 if (this.lineParser.isLstItem(line)) {

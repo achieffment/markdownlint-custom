@@ -31,11 +31,12 @@ npm test        # pretest → build, test-rules + test-cli2-config + check-funct
 
 Точки входа, bootstrap, guard без пути — [`.cursor/rules/platform-scripts.mdc`](.cursor/rules/platform-scripts.mdc).
 
-Примеры команд:
+Примеры команд (`--help`, passthrough `-- <cli2 args>` — см. [`.cursor/rules/platform-scripts.mdc`](.cursor/rules/platform-scripts.mdc)):
 
 ```bash
 npm run lint:md -- ./path/to/docs
 ./bin/lint-markdown.sh ./path/to/docs   # Linux / WSL / macOS
+./bin/lint-markdown.command ./path/to/docs   # macOS Finder
 bin\lint-markdown.bat .\path\to\docs    # Windows CMD
 ```
 
@@ -127,7 +128,7 @@ flowchart LR
 
 ## Разработка и тестирование
 
-Workflow — [`AGENTS.md`](AGENTS.md) (шаги 1–8). Кратко: правки → `npm test` → sync docs по [`.cursor/rules/docs-consistency.mdc`](.cursor/rules/docs-consistency.mdc).
+Workflow — [`AGENTS.md`](AGENTS.md) (шаги 1–8). Кратко: правки → при новом/удалённом правиле `npm run sync:cli2-config` → `npm test` → sync docs по [`.cursor/rules/docs-consistency.mdc`](.cursor/rules/docs-consistency.mdc).
 
 Runtime — CommonJS `.js`, не `.ts` и не ESM.
 
