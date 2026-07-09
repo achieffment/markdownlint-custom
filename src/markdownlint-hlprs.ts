@@ -1,5 +1,6 @@
 import type { RuleOnError } from "markdownlint";
 import { appContext } from "./composition/app-context";
+import type { OutsideCodeCallback } from "./types";
 
 const { lineParser, codeWalker, spacingChecker, colonChecker } = appContext;
 
@@ -10,7 +11,7 @@ module.exports = {
     isChildLstItem: (parentLine: string, childLine: string) =>
         lineParser.isChildLstItem(parentLine, childLine),
     skipBlankFwd: (lines: readonly string[], ix: number) => lineParser.skipBlankFwd(lines, ix),
-    eachLineOutsideCode: (lines: readonly string[], fn: (line: string, ix: number, trim: string) => void) =>
+    eachLineOutsideCode: (lines: readonly string[], fn: OutsideCodeCallback) =>
         codeWalker.eachLineOutsideCode(lines, fn),
     findPrevListInd: (lines: readonly string[], ix: number) => lineParser.findPrevListInd(lines, ix),
     checkPrecededByColon: (

@@ -21,6 +21,7 @@ alwaysApply: true
 | [`load-cli2-config.cjs`](../load-cli2-config.cjs) | Загрузка `config` из cli2 для [`test-rules.cjs`](../test-rules.cjs) |
 | [`test-cli2-config.cjs`](../test-cli2-config.cjs) | Parity cli2 `config` ↔ [`schema/.markdownlint.jsonc`](../schema/.markdownlint.jsonc) |
 | [`scripts/sync-cli2-config.cjs`](../scripts/sync-cli2-config.cjs) | Регенерация `.markdownlint-cli2.jsonc` из schema + custom keys из `markdownlint-rules.js` (`presync:cli2-config` → build) |
+| [`scripts/cli2-overrides.cjs`](../scripts/cli2-overrides.cjs) | Единый список built-in overrides (`MD013`…`MD046`) для sync и `test-cli2-config.cjs` |
 | [`schema/.markdownlint.jsonc`](../schema/.markdownlint.jsonc) | Snapshot official schema для тестов |
 | [`bin/`](../bin/) | `lint-markdown.cjs`; `.sh` / `.bat` / `.command` |
 | [`markdownlint-hlprs.js`](../markdownlint-hlprs.js) | **Артефакт tsc:** публичный API для `test-rules.cjs` (compat); правила — DI через `AppContext` |
@@ -55,14 +56,14 @@ alwaysApply: true
 - `_err.md` — нарушает **только** целевое custom-правило (`npm test` проверяет exclusivity при полном конфиге из `.markdownlint-cli2.jsonc`).
 - `_err.md` (кроме `minimum-h2-heading`) содержит `##`, чтобы не срабатывал `minimum-h2-heading`; прочий текст и списки оформлены под остальные правила.
 - `_suc.md` — проходит все custom rules.
-- **`_err.md` и `_suc.md` — один и тот же текст:** в `_suc` исправлены только нарушения целевого правила (и минимальные правки для exclusivity в `_err`, например `;` / `:` у пунктов списка). Не менять порядок блоков, не подменять сценарии «успешным» вариантом. Исключение: `list-blank-line-spacing` — непустые строки идентичны, отличаются только пустые строки (сама правка — blank lines). `test-rules.cjs`: `checkExamplePair`, допустимые отличия строк — `allowedLineDiff` (например `.`→`:` у пунктов списка, `trimStart` для `no-leading-spaces`).
+- **`_err.md` и `_suc.md` — один и тот же текст:** в `_suc` исправлены только нарушения целевого правила (и минимальные правки для exclusivity в `_err`, например `;` / `:` у пунктов списка). Не менять порядок блоков, не подменять сценарии «успешным» вариантом. Исключение: `list-blank-line-spacing` — непустые строки идентичны, отличаются только пустые строки (сама правка — blank lines). `test-rules.cjs`: `checkExamplePair`, допустимые отличия строк — `allowedLineDiff`: суффикс `;`/`:`/`.`/`!`/`?`; `.` или `;` → `:`; `trimStart` для `no-leading-spaces`; пустой bullet → `- текст;`; пустой numbered `1.  ` → `1. текст;`.
 - **`minimum-h2-heading`:** в `_suc` добавляется строка `## …` **в конце** документа (не между блоками), чтобы строки 1…N совпадали с `_err`; `npm test` проверяет это (`checkExamplePair`).
 - **Code fence в примерах:** открывающая `` ``` `` с идентификатором языка (`js`, `pr`, …); голый `` ``` `` допустим только в inline-кейсах `test-rules.cjs`.
 - Вложенные нумерованные пункты: поднумерация с отступом — `1.1`, `1.1.1`, `1.1.1.1` и глубже (не повторный маркер `1.`).
 
 ### `minimum-h2-heading` — политика
 
-- **Scope:** строки вне code fence (`eachLineOutsideCode`).
+- **Scope:** строки вне code fence (`CodeWalker.walkOutsideCode`).
 - **Проверка:** хотя бы одна строка с `##` (не `###+`), пробелом и непустым текстом после (`/^##(?!\#)\s+\S/` на trim).
 - **Ошибка:** строка 1, если заголовка H2 нет.
 
@@ -159,7 +160,13 @@ alwaysApply: true
 
 `globs`: `["**/*.{md,markdown}", "!node_modules", "!vendor"]` — workspace/IDE: весь markdown, кроме `node_modules` и `vendor`; в [`bin/lint-markdown.cjs`](../bin/lint-markdown.cjs) для папок — `#node_modules`, `#vendor` (явный путь, `--no-globs`).
 
-Синхронизация config с upstream schema: `npm run sync:cli2-config` (сохраняет overrides, custom keys из `markdownlint-rules.js`, `globs`).
+Синхронизация config с upstream schema: `npm run sync:cli2-config` (сохраняет overrides из [`scripts/cli2-overrides.cjs`](../scripts/cli2-overrides.cjs), custom keys из `markdownlint-rules.js`, `globs`).
+
+**Обновление snapshot schema** (при bump `markdownlint` в `package.json`):
+
+1. Скопировать [upstream schema](https://github.com/DavidAnson/markdownlint/blob/main/schema/.markdownlint.jsonc) в [`schema/.markdownlint.jsonc`](../schema/.markdownlint.jsonc) (версия в URL — тег пакета).
+2. `npm run sync:cli2-config`
+3. `npm test`
 
 ## Scope lint
 

@@ -9,16 +9,9 @@ const schemaPath = path.join(repoRoot, "schema", ".markdownlint.jsonc");
 const cli2Path = path.join(repoRoot, ".markdownlint-cli2.jsonc");
 const customRules = require("./markdownlint-rules.js");
 
-const ruleNames = customRules.flatMap(rule => rule.names);
+const { ovrdRules } = require("./scripts/cli2-overrides.cjs");
 
-const ovrdRules = new Set([
-    "MD013",
-    "MD007",
-    "MD029",
-    "MD032",
-    "MD043",
-    "MD046"
-]);
+const ruleNames = customRules.flatMap(rule => rule.names);
 
 const loadJsonc = (fp) => {
     const raw = fs.readFileSync(fp, "utf8");

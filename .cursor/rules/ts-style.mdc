@@ -34,6 +34,8 @@ alwaysApply: false
 
 - `parser: "none"` через `BaseRule.toRule()`
 - `onError({ lineNumber, detail, context? })`, `lineNumber` с 1
+- **`detail`:** `this.description` для основного сообщения; `details.*` для sub-detail (`listItemsColon`, `listBlankBef`, …)
+- **`context`:** полная `line` — indent-правила (`no-leading-spaces`, `colon-checker`); `trim` — prose
 - Runtime — **CommonJS**
 
 ## Чего не делать

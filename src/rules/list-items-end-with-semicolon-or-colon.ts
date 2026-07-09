@@ -3,7 +3,7 @@ import { BaseRule } from "../core/base-rule";
 import { details } from "../details";
 import type { CodeWalker } from "../domain/code-walker";
 import type { ListLineParser } from "../domain/list-line-parser";
-import { codeFenceRx, endsWithColonRx, endsWithSemiRx, lstItemRx } from "../regex";
+import { codeFenceRx, endsWithColonRx, endsWithSemiRx } from "../regex";
 
 export class ListItemsEndRule extends BaseRule {
     readonly names = ["list-items-end-with-semicolon-or-colon"];
@@ -21,7 +21,7 @@ export class ListItemsEndRule extends BaseRule {
         this.codeWalker.eachLineOutsideCode(lines, (line, ix, trim) => {
             if (!this.lineParser.isLstItem(line)) return;
             const lineStart = this.lineParser.trimStart(line);
-            let cont = lineStart.replace(lstItemRx, "");
+            let cont = lineStart.replace(this.lineParser.lstItemRx, "");
             cont = cont.trim();
             const next = this.lineParser.skipBlankFwd(lines, ix);
             const folcod = next < lines.length && codeFenceRx.test(lines[next].trim());

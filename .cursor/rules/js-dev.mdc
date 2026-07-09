@@ -33,7 +33,7 @@ alwaysApply: false
 
 ## Порядок функций
 
-Top-level `const`-хелперы и вложенные `const`-стрелки — **callee перед caller** (как в [ts-dev.mdc](ts-dev.mdc)). Проверка: `npm run check:order` (входит в `npm test` и `npm run check`).
+Top-level `const`-хелперы и вложенные `const`-стрелки — **callee перед caller** (как в [ts-dev.mdc](ts-dev.mdc)). Проверка: `npm run check:order` (входит в `npm test` и `npm run check`). Scope: `src/**/*.ts`, `test-rules.cjs`.
 
 ## Функции и модули
 

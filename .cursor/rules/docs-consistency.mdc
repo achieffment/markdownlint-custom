@@ -35,13 +35,13 @@ alwaysApply: true
 | **Публичный экспорт hlprs** | [`markdownlint-hlprs.ts`](../src/markdownlint-hlprs.ts), `npm test` | Таблица API в `markdownlint-project.mdc` |
 | **Архитектура / новый domain-модуль** | `src/domain/`, `AppContext`, `npm test` | Таблицы модулей в `ts-dev.mdc`, структура в `markdownlint-project.mdc`, scope в `AGENTS.md`, «Структура» / mermaid в README |
 | **Изменение BaseRule / контракта `onError`** | `src/core/` | `ts-style.mdc`, «Контракты» в `markdownlint-project.mdc`, шаги 5–6 в `AGENTS.md` |
-| **Конвенции стиля TS** | `src/**/*.ts` | `ts-style.mdc`; перекрёстные ссылки в `ts-dev.mdc` при необходимости |
+| **Конвенции стиля TS** | `src/**/*.ts` | `ts-style.mdc` (в т.ч. контракт `onError` detail/context); перекрёстные ссылки в `ts-dev.mdc` при необходимости |
 | **Конвенции test-rules** | [`test-rules.cjs`](../test-rules.cjs) | `js-style.mdc`, `js-dev.mdc`; конвенции примеров в `markdownlint-project.mdc` при пересечении |
 | **Порядок функций / check-function-order** | `src/`, `test-rules.cjs`, [`check-function-order.cjs`](../check-function-order.cjs) | `ts-dev.mdc`, `js-dev.mdc` |
 | **Структура репозитория** | — | `markdownlint-project.mdc`, `AGENTS.md` scope; README «Структура» (кратко + ссылка на `.mdc`) |
 | **npm-скрипты** | [`package.json`](../package.json) | README «npm-скрипты»; «Верификация» в `AGENTS.md` |
 | **CLI / bin / конфиг lint** | [`.markdownlint-cli2.jsonc`](../.markdownlint-cli2.jsonc), [`load-cli2-config.cjs`](../load-cli2-config.cjs), [`test-cli2-config.cjs`](../test-cli2-config.cjs), [`bin/`](../bin/), `package.json` `lint:md` | `platform-scripts.mdc`, `markdownlint-project.mdc`, `AGENTS.md`, README; `globs`/overrides → examples + test-rules |
-| **Schema / sync cli2** | [`schema/.markdownlint.jsonc`](../schema/.markdownlint.jsonc), [`scripts/sync-cli2-config.cjs`](../scripts/sync-cli2-config.cjs), `.markdownlint-cli2.jsonc`, [`test-cli2-config.cjs`](../test-cli2-config.cjs) | `markdownlint-project.mdc` (overrides, sync); `npm run sync:cli2-config` (`presync:cli2-config`); `npm test` |
+| **Schema / sync cli2** | [`schema/.markdownlint.jsonc`](../schema/.markdownlint.jsonc), [`scripts/sync-cli2-config.cjs`](../scripts/sync-cli2-config.cjs), [`scripts/cli2-overrides.cjs`](../scripts/cli2-overrides.cjs), `.markdownlint-cli2.jsonc`, [`test-cli2-config.cjs`](../test-cli2-config.cjs) | `markdownlint-project.mdc` (overrides, sync, schema bump); `npm run sync:cli2-config` (`presync:cli2-config`); `npm test` |
 | **Новое/удаление `.mdc`** | — | Каталог в [AGENTS.md](../AGENTS.md); строка «`.cursor/rules/`» в `markdownlint-project.mdc`; роли в этом файле |
 | **Удаление lint-правила** | `src/`, examples, `test-rules.cjs` | Обратный чеклист: все docs + `npm run sync:cli2-config` для `.markdownlint-cli2.jsonc` |
 

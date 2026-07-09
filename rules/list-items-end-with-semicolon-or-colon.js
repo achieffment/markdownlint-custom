@@ -18,7 +18,7 @@ class ListItemsEndRule extends base_rule_1.BaseRule {
             if (!this.lineParser.isLstItem(line))
                 return;
             const lineStart = this.lineParser.trimStart(line);
-            let cont = lineStart.replace(regex_1.lstItemRx, "");
+            let cont = lineStart.replace(this.lineParser.lstItemRx, "");
             cont = cont.trim();
             const next = this.lineParser.skipBlankFwd(lines, ix);
             const folcod = next < lines.length && regex_1.codeFenceRx.test(lines[next].trim());

@@ -6,7 +6,7 @@
 
 ## Роль
 
-Эксперт по custom rules markdownlint (TypeScript → CommonJS) и кроссплатформенному запуску (Windows CMD, Linux, macOS, WSL): точные правки в правилах и хелперах, минимальный bootstrap в [`bin/lint-markdown.cjs`](bin/lint-markdown.cjs) (`node_modules`, `markdownlint-rules.js`, `markdownlint-hlprs.js`), сохранение контрактов API, минимальный diff. Не переписывай файлы «с нуля» и не навязывай архитектуру без запроса.
+Эксперт по custom rules markdownlint (TypeScript → CommonJS) и кроссплатформенному запуску (Windows CMD, Linux, macOS, WSL): точные правки в правилах и хелперах, минимальный bootstrap в [`bin/lint-markdown.cjs`](bin/lint-markdown.cjs) (`node_modules`, stale build артефактов), сохранение контрактов API, минимальный diff. Не переписывай файлы «с нуля» и не навязывай архитектуру без запроса.
 
 ## Scope
 
@@ -16,7 +16,7 @@
 | Domain / core | `src/core/`, `src/domain/`, `src/composition/app-context.ts` |
 | Barrels | `src/markdownlint-rules.ts`, `src/markdownlint-hlprs.ts` |
 | Runtime | корневые `*.js`, `core/`, `domain/`, `composition/`, `rules/` (артефакты tsc; entry points: `markdownlint-rules.js`, `markdownlint-hlprs.js`) |
-| Конфиг lint | `.markdownlint-cli2.jsonc`, `load-cli2-config.cjs`, `schema/`, `scripts/sync-cli2-config.cjs` |
+| Конфиг lint | `.markdownlint-cli2.jsonc`, `load-cli2-config.cjs`, `schema/`, `scripts/sync-cli2-config.cjs`, `scripts/cli2-overrides.cjs` |
 | CLI / bin | `bin/lint-markdown.cjs`, `bin/lint-markdown.{sh,bat,command}` |
 | Scripts | `scripts/sync-cli2-config.cjs` |
 | Примеры | `markdownlint-examples/**/*.md` |
@@ -70,7 +70,7 @@
 
 ## Верификация
 
-См. шаг 7 workflow. Дополнительно — `npm run check` (`precheck` → build), `npm run lint:md -- <path>`, `npm run sync:cli2-config` (через `presync:cli2-config` → build: schema + overrides + custom keys из `markdownlint-rules.js`, `globs`).
+См. шаг 7 workflow. Дополнительно — `npm run check` (`precheck` → build, без cli2 parity), `npm run lint:md -- <path>`, `npm run sync:cli2-config` (через `presync:cli2-config` → build: schema + overrides + custom keys из `markdownlint-rules.js`, `globs`). **Parity cli2 ↔ schema** — только `npm test` (`test-cli2-config.cjs`).
 
 После правки примеров — `_err` срабатывает **только** на целевое custom-правило (полный конфиг); inline-кейсы в `test-rules.cjs` обязаны проходить.
 

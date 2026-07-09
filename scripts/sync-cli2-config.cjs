@@ -1,6 +1,8 @@
 const fs = require("fs");
 const path = require("path");
 
+const { ovrdRules } = require("./cli2-overrides.cjs");
+
 const repoRoot = path.join(__dirname, "..");
 const schemaPath = process.argv[2] || path.join(repoRoot, "schema", ".markdownlint.jsonc");
 const outPath = process.argv[3] || path.join(repoRoot, ".markdownlint-cli2.jsonc");
@@ -64,4 +66,12 @@ ${indented}
 }
 `;
 fs.writeFileSync(outPath, out.endsWith("\n") ? out : out + "\n");
+const { parse } = require("jsonc-parser");
+const written = parse(fs.readFileSync(outPath, "utf8"));
+ovrdRules.forEach(key => {
+    if (!written?.config || written.config[key] !== false) {
+        console.error(`Override ${key} must be false (sync regex ↔ cli2-overrides.cjs)`);
+        process.exit(1);
+    }
+});
 console.log("written", outPath);

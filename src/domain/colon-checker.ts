@@ -1,5 +1,5 @@
+import type { RuleOnError } from "markdownlint";
 import { endsWithColonRx, tableRowRx } from "../regex";
-import type { OnErrorFn } from "../types";
 import type { ListBlockAnalyzer } from "./list-block-analyzer";
 import type { ListLineParser } from "./list-line-parser";
 
@@ -12,7 +12,7 @@ export class ColonChecker {
     checkPrecededByColon(
         lines: readonly string[],
         ix: number,
-        onError: OnErrorFn,
+        onError: RuleOnError,
         colDet: string
     ): void {
         let prev = this.lineParser.skipBlankBck(lines, ix);
@@ -38,7 +38,7 @@ export class ColonChecker {
         }
     }
 
-    checkListPrecededByColon(lines: readonly string[], onError: OnErrorFn, colDet: string): void {
+    checkListPrecededByColon(lines: readonly string[], onError: RuleOnError, colDet: string): void {
         this.listAnalyzer.walkListBlocks(lines, (items) => {
             if (this.lineParser.isNestedLstItem(lines[items[0]])) return;
             this.checkPrecededByColon(lines, items[0], onError, colDet);

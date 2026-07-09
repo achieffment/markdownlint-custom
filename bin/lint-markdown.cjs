@@ -45,8 +45,35 @@ const ensureNodeModules = () => {
     runNpm(["install"]);
 };
 
+const srcDir = path.join(repoRoot, "src");
+
+const newestMtime = (dir) => {
+    let newest = 0;
+    for (const ent of fs.readdirSync(dir, { withFileTypes: true })) {
+        const fp = path.join(dir, ent.name);
+        if (ent.isDirectory()) {
+            newest = Math.max(newest, newestMtime(fp));
+            continue;
+        }
+        if (ent.name.endsWith(".ts")) {
+            newest = Math.max(newest, fs.statSync(fp).mtimeMs);
+        }
+    }
+    return newest;
+};
+
+const artifactsStale = () => {
+    if (!fs.existsSync(rulesJs) || !fs.existsSync(hlprsJs)) return true;
+    const srcNewest = newestMtime(srcDir);
+    const artMtime = Math.min(
+        fs.statSync(rulesJs).mtimeMs,
+        fs.statSync(hlprsJs).mtimeMs
+    );
+    return srcNewest > artMtime;
+};
+
 const ensureBuild = () => {
-    if (fs.existsSync(rulesJs) && fs.existsSync(hlprsJs)) return;
+    if (!artifactsStale()) return;
     console.log("Building custom rules (npm run build)…");
     runNpm(["run", "build"]);
 };
@@ -98,22 +125,9 @@ const targetToGlobs = (target) => {
     ];
 };
 
-const hasExplicitTarget = (argv) => {
-    const args = argv.slice(2);
-    for (let ix = 0; ix < args.length; ix++) {
-        const arg = args[ix];
-        if (arg === "--help" || arg === "-h") return false;
-        if (arg === "--") {
-            return args.slice(ix + 1).some(a => !a.startsWith("-"));
-        }
-        if (!arg.startsWith("-")) return true;
-    }
-    return false;
-};
-
 const main = () => {
     const { target, passthrough } = parseArgs(process.argv);
-    if (!hasExplicitTarget(process.argv)) {
+    if (!target) {
         usage();
         process.exit(1);
     }

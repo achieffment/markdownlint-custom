@@ -30,9 +30,9 @@ alwaysApply: true
 | Проверка | Действие |
 |----------|----------|
 | нет `node_modules` | `npm ci` (lock) / `npm install` |
-| нет `markdownlint-rules.js` или `markdownlint-hlprs.js` | `npm run build` |
+| нет `markdownlint-rules.js` / `markdownlint-hlprs.js` или `src/**/*.ts` новее артефактов | `npm run build` |
 
-Оболочки (`.sh` / `.bat` / `.command`) — только `cd` + `node bin/lint-markdown.cjs`. `.sh` — `set -euo pipefail`; `.command` (Finder) — без strict-mode. **Без явного пути** — guard в [`lint-markdown.cjs`](../bin/lint-markdown.cjs): `usage()` и `exit 1` (не lint всего репо); `.command` дублирует проверку `$#` для Finder.
+Оболочки (`.sh` / `.bat` / `.command`) — только `cd` + `node bin/lint-markdown.cjs`. `.sh` — `set -euo pipefail`; `.command` (Finder) — без strict-mode, без дублирования guard. **Без явного пути** (первый аргумент не path) — guard в [`lint-markdown.cjs`](../bin/lint-markdown.cjs): `usage()` и `exit 1` (не lint всего репо); флаги cli2 до path (`--fix ./docs`) — тоже `usage`.
 
 Windows CMD: пути с пробелами передавать в кавычках (`bin\lint-markdown.bat ".\my docs"`).
 
@@ -46,8 +46,9 @@ Windows CMD: пути с пробелами передавать в кавычк
 - `markdownlint-cli2` из `node_modules/.bin`
 - `--no-globs` + glob целевой папки/файла (`:rel/path` для одного файла)
 - `cwd` = корень repo
-- `--help` / `-h` — справка; без явного `targetPath` — `usage()` и `exit 1`
+- `--help` / `-h` — справка; без `targetPath` первым аргументом — `usage()` и `exit 1` (в т.ч. флаги cli2 до path)
 - Passthrough: `lint-markdown <path> -- <extra cli2 args>`
+- Конфиг и `customRules` — всегда из корня этого репозитория (`cwd` = repoRoot), в т.ч. для внешнего `<path>`
 - Исключение `node_modules`, `vendor`: в [`.markdownlint-cli2.jsonc`](../.markdownlint-cli2.jsonc) — `!node_modules`, `!vendor` (IDE/workspace); в [`lint-markdown.cjs`](../bin/lint-markdown.cjs) для папок — `#node_modules`, `#vendor` (cli2 glob при `--no-globs`)
 
 ## Новые исполняемые артефакты

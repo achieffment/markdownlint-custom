@@ -208,6 +208,19 @@ exampleCases.forEach(({ ruleName, kind, filePath }) => {
     }
 });
 
+const listBlankErrPath = path.join(examplesDir, "list-blank-line-spacing", "_err.md");
+const listBlankViol = getViolations(listBlankErrPath);
+const blankDets = [details.listBlankBef, details.listBlankAft, details.listBlankGap];
+const foundBlankDets = new Set(listBlankViol.map(v => v.errorDetail));
+blankDets.forEach(det => {
+    if (!foundBlankDets.has(det)) {
+        assert(false, `list-blank-line-spacing/_err.md missing sub-detail: ${det}`);
+    }
+});
+if (failed === 0) {
+    console.log("OK   list-blank-line-spacing/_err sub-details");
+}
+
 if (failed > 0) {
     console.error(`\n${failed} example(s) failed`);
     process.exit(1);
@@ -958,6 +971,42 @@ if (!h3OnlyFired.has("minimum-h2-heading") || h3OnlyFired.size !== 1) {
     assert(false, "H3 without H2 err: expected minimum-h2-heading only, got " + [...h3OnlyFired].join(", "));
 } else {
     console.log("OK   H3 without H2 → minimum-h2-heading");
+}
+
+const h3OnlyViol = h3OnlyRes.t || [];
+if (!h3OnlyViol.some(v => v.lineNumber === 1)) {
+    assert(false, "minimum-h2-heading: expected lineNumber 1");
+} else {
+    console.log("OK   minimum-h2-heading lineNumber 1");
+}
+
+const h2EmptyErr = `## 
+
+Текст.
+`;
+const h2EmptyRes = lintStrings({ t: h2EmptyErr }, ["minimum-h2-heading", "sentences-end-with-mark"]);
+const h2EmptyFired = getFiredRules(h2EmptyRes.t || []);
+if (!h2EmptyFired.has("minimum-h2-heading") || h2EmptyFired.size !== 1) {
+    assert(false, "H2 without text: expected minimum-h2-heading only, got " + [...h2EmptyFired].join(", "));
+} else {
+    console.log("OK   H2 without text → minimum-h2-heading");
+}
+
+const emptyNumErr = `## T
+
+1.  
+`;
+const emptyNumRes = lintStrings({ t: emptyNumErr }, ["list-items-end-with-semicolon-or-colon", "minimum-h2-heading"]);
+const emptyNumFired = getFiredRules(emptyNumRes.t || []);
+if (!emptyNumFired.has("list-items-end-with-semicolon-or-colon") || emptyNumFired.size !== 1) {
+    assert(false, "empty numbered item: expected list-items-end-with-semicolon-or-colon only, got " + [...emptyNumFired].join(", "));
+} else {
+    const emptyNumDet = (emptyNumRes.t || [])[0]?.errorDetail;
+    if (emptyNumDet !== details.listItemsEmpty) {
+        assert(false, `empty numbered item detail: expected listItemsEmpty got ${emptyNumDet || "none"}`);
+    } else {
+        console.log("OK   empty numbered list item → list-items-end-with-semicolon-or-colon");
+    }
 }
 
 const noLeadingNestedOk = `## T

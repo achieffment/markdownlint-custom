@@ -39,7 +39,7 @@ npm run lint:md -- ./path/to/docs
 bin\lint-markdown.bat .\path\to\docs    # Windows CMD
 ```
 
-В IDE lint весь markdown workspace (кроме `node_modules`, `vendor`). Внешняя документация — `npm run lint:md -- <path>`. macOS Finder: drag-and-drop на `bin/lint-markdown.command`.
+В IDE lint весь markdown workspace (кроме `node_modules`, `vendor`). Внешняя документация — `npm run lint:md -- <path>`; конфиг и custom rules — из корня этого репозитория. macOS Finder: drag-and-drop на `bin/lint-markdown.command`.
 
 Конфиг — [`.markdownlint-cli2.jsonc`](.markdownlint-cli2.jsonc). Built-in: `default: true`; намеренные overrides — таблица в [`.cursor/rules/markdownlint-project.mdc`](.cursor/rules/markdownlint-project.mdc) (`MD013`, `MD007`, `MD029`, `MD032`, `MD043`, `MD046`).
 
@@ -65,7 +65,7 @@ bin\lint-markdown.bat .\path\to\docs    # Windows CMD
 | `no-leading-spaces` | Нет ведущих пробелов у обычного текста, пунктов списка верхнего уровня и строк `` ``` ``; у вложенных пунктов отступ допустим, если не меньше отступа предыдущего пункта |
 | `sentences-end-with-mark` | Обычный текст (не заголовок, blockquote и продолжения, HR, не пункт списка, не pipe-таблица) заканчивается `.`, `!`, `?`, `:` или `;` |
 
-Проверки выполняются вне содержимого code fence, кроме строк-обозначений `` ``` `` (для `no-leading-spaces`).
+Проверки выполняются вне содержимого code fence, кроме строк-обозначений `` ``` `` (для `no-leading-spaces`). Вложенные списки в примерах: **3 пробела** на уровень (`1.1`, `1.1.1`).
 
 ## Структура репозитория
 
@@ -80,7 +80,7 @@ bin\lint-markdown.bat .\path\to\docs    # Windows CMD
 | [`.markdownlint-cli2.jsonc`](.markdownlint-cli2.jsonc), [`load-cli2-config.cjs`](load-cli2-config.cjs) | Единый конфиг lint; загрузчик для test |
 | [`bin/`](bin/) | CLI: `lint-markdown.cjs`, `.sh` / `.bat` / `.command` |
 | [`schema/`](schema/) | Snapshot [official schema](https://github.com/DavidAnson/markdownlint/blob/main/schema/.markdownlint.jsonc) для `test-cli2-config.cjs` |
-| [`scripts/`](scripts/) | `sync-cli2-config.cjs` — регенерация cli2 из schema + custom keys из `markdownlint-rules.js` |
+| [`scripts/`](scripts/) | `sync-cli2-config.cjs`, `cli2-overrides.cjs` — регенерация cli2 из schema + overrides + custom keys |
 | [`.cursor/rules/`](.cursor/rules/) | Правила Cursor; каталог — [`AGENTS.md`](AGENTS.md) |
 | `.gitignore`, `.gitattributes`, `.editorconfig`, `.nvmrc`, `.npmrc` | Git, EditorConfig, Node/npm (подробнее в `.mdc`) |
 | [`AGENTS.md`](AGENTS.md) | Краткий справочник для AI-агента |
@@ -119,10 +119,10 @@ flowchart LR
 | Скрипт | Действие |
 | --- | --- |
 | `npm run build` | `tsc`: `src/` → корень |
-| `npm test` | `pretest` (build) + `test-rules.cjs` + `test-cli2-config.cjs` + `check-function-order.cjs` |
+| `npm test` | `pretest` (build) + `test-rules.cjs` + `test-cli2-config.cjs` + `check-function-order.cjs` (cli2 parity — только здесь) |
 | `npm run lint:md` | Локальный lint папки/файла (bootstrap в runner) |
-| `npm run sync:cli2-config` | Регенерация `.markdownlint-cli2.jsonc` из schema + overrides + custom keys из `markdownlint-rules.js` + `globs` (`presync:cli2-config` → build) |
-| `npm run check` | `precheck` (build) + `tsc --noEmit` + `node --check` (см. `package.json`) + порядок функций |
+| `npm run sync:cli2-config` | Регенерация `.markdownlint-cli2.jsonc` из schema + overrides + custom keys из `markdownlint-rules.js` + `globs` (`presync:cli2-config` → build). При bump `markdownlint` — обновить `schema/` (см. `.mdc`) |
+| `npm run check` | `precheck` (build) + `tsc --noEmit` + `node --check` + порядок функций (без запуска `test-cli2-config`) |
 | `npm run check:order` | Только проверка порядка функций |
 
 ## Разработка и тестирование
@@ -135,6 +135,6 @@ Runtime — CommonJS `.js`, не `.ts` и не ESM.
 
 - [`AGENTS.md`](AGENTS.md) — краткий справочник для AI-агента, workflow;
 - [`.cursor/rules/markdownlint-project.mdc`](.cursor/rules/markdownlint-project.mdc) — полные политики lint-правил, `.markdownlint-cli2.jsonc`, CLI;
-- [`.cursor/rules/platform-scripts.mdc`](.cursor/rules/platform-scripts.mdc) — bin-скрипты и bootstrap `node_modules`;
+- [`.cursor/rules/platform-scripts.mdc`](.cursor/rules/platform-scripts.mdc) — bin-скрипты, bootstrap в runner (`node_modules`, stale build);
 - [`.cursor/rules/docs-consistency.mdc`](.cursor/rules/docs-consistency.mdc) — синхронизация кода и документации;
 - [markdownlint: Custom Rules](https://github.com/DavidAnson/markdownlint/blob/main/doc/CustomRules.md) — официальная документация;
