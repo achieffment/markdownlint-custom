@@ -444,6 +444,23 @@ if (!codFenceSemiFired.has("list-items-end-with-semicolon-or-colon") || codFence
     }
 }
 
+const starBulSemiErr = `## T
+
+* пункт без точки с запятой
+`;
+const starBulSemiErrRes = lintStrings({ t: starBulSemiErr }, ["list-items-end-with-semicolon-or-colon", "minimum-h2-heading"]);
+const starBulSemiFired = getFiredRules(starBulSemiErrRes.t || []);
+if (!starBulSemiFired.has("list-items-end-with-semicolon-or-colon") || starBulSemiFired.size !== 1) {
+    assert(false, "star bullet semi err: expected list-items-end-with-semicolon-or-colon only, got " + [...starBulSemiFired].join(", "));
+} else {
+    const starBulSemiDet = (starBulSemiErrRes.t || [])[0]?.errorDetail;
+    if (starBulSemiDet !== details.listItemsSemi) {
+        assert(false, `star bullet semi detail: expected listItemsSemi got "${starBulSemiDet || "none"}"`);
+    } else {
+        console.log("OK   star bullet without semicolon → listItemsSemi");
+    }
+}
+
 const subNumSiblingOk = `## T
 
 1. root:
@@ -871,6 +888,24 @@ if (!bulBlankBefFired.has("list-blank-line-spacing") || bulBlankBefFired.size !=
         assert(false, `bul blank bef detail: expected listBlankBef on line 2 got ${bulBefDet?.lineNumber || "none"}`);
     } else {
         console.log("OK   bulleted blank bef → listBlankBef on line 2");
+    }
+}
+
+const numProseBlankBefErr = `## T
+
+Текст:
+1. пункт;
+`;
+const numProseBlankBefRes = lintStrings({ t: numProseBlankBefErr }, ["list-blank-line-spacing", "minimum-h2-heading"]);
+const numProseBlankBefFired = getFiredRules(numProseBlankBefRes.t || []);
+if (!numProseBlankBefFired.has("list-blank-line-spacing") || numProseBlankBefFired.size !== 1) {
+    assert(false, "num prose blank bef err: expected list-blank-line-spacing only, got " + [...numProseBlankBefFired].join(", "));
+} else {
+    const numProseBefDet = (numProseBlankBefRes.t || []).find(v => v.errorDetail === details.listBlankBef);
+    if (!numProseBefDet || numProseBefDet.lineNumber !== 4) {
+        assert(false, `num prose blank bef detail: expected listBlankBef on line 4 got ${numProseBefDet?.lineNumber || "none"}`);
+    } else {
+        console.log("OK   num prose blank bef → listBlankBef on line 4");
     }
 }
 

@@ -15,6 +15,7 @@ const cli2Bin = path.join(
 
 const usage = () => {
     console.log("Usage: lint-markdown <targetPath> [-- extra cli2 args]");
+    console.log("       lint-markdown -- <targetPath> [extra cli2 args]");
     console.log("  targetPath — обязательный: файл или папка с markdown");
     console.log("  --help, -h — справка");
 };

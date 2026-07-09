@@ -77,6 +77,7 @@
 
 - `npm test` и `npm run check` — зелёные;
 - `npm run lint:md -- README.md AGENTS.md` — 0 ошибок;
+- `.cursor/rules/*.mdc` **намеренно** вне lint globs (`**/*.{md,markdown}` в [`.markdownlint-cli2.jsonc`](.markdownlint-cli2.jsonc)); аудит `.mdc` — статическая сверка с кодом/docs, не lint-fix каталога;
 - Каталог 7 `names` идентичен в коде, cli2, AGENTS, README, `.mdc`;
 - Каждый sub-detail в [`src/details.ts`](src/details.ts) семантически соответствует политике в `markdownlint-project.mdc`;
 - `test-rules.cjs` использует `regex.js` / `hlprs` вместо дублирующих inline-regex там, где есть канон;
