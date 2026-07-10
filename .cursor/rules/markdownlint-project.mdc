@@ -154,11 +154,11 @@ alwaysApply: true
 |----------|----------|
 | `default` | `true` — все built-in включены |
 | `MD013` | `false` — как дефолт vscode-markdownlint |
-| `MD029` | `false` — fenced code в examples разрывает списки; nested `1.` — style one |
-| `MD046` | `false` — намеренно (fenced code в examples) |
-| `MD032` | `false` — заменено custom `list-blank-line-spacing` |
 | `MD007` | `false` — пересекается с custom `no-leading-spaces` |
+| `MD029` | `false` — fenced code в examples разрывает списки; nested `1.` — style one |
+| `MD032` | `false` — заменено custom `list-blank-line-spacing` |
 | `MD043` | `false` — дефолт schema с пустым `headings` некорректен |
+| `MD046` | `false` — намеренно (fenced code в examples) |
 | 7 custom `names` | `true` |
 
 Полный список MD001–MD060 — в [`config`](../.markdownlint-cli2.jsonc) (на базе [official schema](https://github.com/DavidAnson/markdownlint/blob/main/schema/.markdownlint.jsonc)). Отключения MD029/MD046 документированы комментарием с закомментированным дефолтом.

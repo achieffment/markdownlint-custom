@@ -139,6 +139,7 @@ const checkExamplePair = (ruleName, errPath, sucPath) => {
         const sucLines = suc.split("\n");
         const lastLine = sucLines[sucLines.length - 1].trim();
         assert(h2Rx.test(lastLine), `${rel}: _suc must add ## heading`);
+        assert(hasMinimumH2(parseMicromarkTokens(sucRaw.split("\n"))), `${rel}: _suc must have H2 per micromark`);
         const sucBody = sucLines.slice(0, -1).join("\n");
         assert(err === sucBody, `${rel}: _suc must differ from _err only by added ## heading`);
         return;
@@ -248,6 +249,62 @@ const lintStrings = (strings, rules) => {
     });
     return markdownlint.lint({ strings, customRules, config });
 };
+
+const lintStringsFull = (strings) => {
+    return markdownlint.lint({ strings, customRules, config: lintConfig });
+};
+
+const spacingFullBefErr = `# Документ
+
+## Раздел
+
+Текст перед маркированным списком:
+- пункт один;
+`;
+const spacingFullBefRes = lintStringsFull({ t: spacingFullBefErr });
+const spacingFullBefViol = spacingFullBefRes.t || [];
+const spacingFullBefFired = getFiredRules(spacingFullBefViol);
+if (!spacingFullBefFired.has("list-blank-line-spacing")) {
+    assert(false, "spacing full config bef: expected list-blank-line-spacing, got " + ([...spacingFullBefFired].join(", ") || "none"));
+} else {
+    const extra = [...spacingFullBefFired].filter(n => n !== "list-blank-line-spacing");
+    const befDet = spacingFullBefViol.find(v => v.errorDetail === details.listBlankBef);
+    if (extra.length > 0) {
+        assert(false, "spacing full config bef: extra rules " + extra.join(", "));
+    } else if (!befDet || befDet.lineNumber !== 6) {
+        assert(false, `spacing full config bef: expected listBlankBef on line 6 got ${befDet?.lineNumber || "none"}`);
+    } else {
+        console.log("OK   spacing full config bef → listBlankBef on line 6");
+    }
+}
+
+const spacingFullGapErr = `# Документ
+
+## Раздел
+
+Текст перед списком без blank между пунктами:
+
+1. один;
+2. два;
+
+3. три;
+`;
+const spacingFullGapRes = lintStringsFull({ t: spacingFullGapErr });
+const spacingFullGapViol = spacingFullGapRes.t || [];
+const spacingFullGapFired = getFiredRules(spacingFullGapViol);
+if (!spacingFullGapFired.has("list-blank-line-spacing")) {
+    assert(false, "spacing full config gap: expected list-blank-line-spacing, got " + ([...spacingFullGapFired].join(", ") || "none"));
+} else {
+    const extra = [...spacingFullGapFired].filter(n => n !== "list-blank-line-spacing");
+    const gapDet = spacingFullGapViol.find(v => v.errorDetail === details.listBlankGap);
+    if (extra.length > 0) {
+        assert(false, "spacing full config gap: extra rules " + extra.join(", "));
+    } else if (!gapDet || gapDet.lineNumber !== 8) {
+        assert(false, `spacing full config gap: expected listBlankGap on line 8 got ${gapDet?.lineNumber || "none"}`);
+    } else {
+        console.log("OK   spacing full config gap → listBlankGap on line 8");
+    }
+}
 
 const expectedHlprsKeys = [
     "lstItemRx",

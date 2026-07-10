@@ -2,7 +2,7 @@ import type { MicromarkToken, RuleOnError } from "markdownlint";
 import { endsWithColonRx, endsWithSemiRx } from "../regex";
 import type { ListLineParser } from "./list-line-parser";
 import { eachListItemPrefix } from "./micromark-lists";
-import { isOpeningCodeFenceAt } from "./outside-code-lines";
+import { eachOpeningCodeFenceLine } from "./outside-code-lines";
 
 export class ListItemsChecker {
     constructor(private readonly lineParser: ListLineParser) {}
@@ -23,13 +23,17 @@ export class ListItemsChecker {
             semi: string;
         }
     ): void {
+        const openingFences = new Set<number>();
+        eachOpeningCodeFenceLine(lines, (fenceIx) => {
+            openingFences.add(fenceIx);
+        });
         eachListItemPrefix(tokens, (prefix) => {
             const ix = prefix.startLine - 1;
             const line = lines[ix] ?? "";
             const trim = line.trim();
             const cont = this.getItemContent(lines, prefix);
             const next = this.lineParser.skipBlankFwd(lines, ix);
-            const folcod = next < lines.length && isOpeningCodeFenceAt(lines, next);
+            const folcod = next < lines.length && openingFences.has(next);
             const folsub = next < lines.length && this.lineParser.isChildLstItem(line, lines[next]);
             const needsColon = folcod || folsub;
             const endsOk = needsColon ? endsWithColonRx.test(cont) : endsWithSemiRx.test(cont);

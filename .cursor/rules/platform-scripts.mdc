@@ -30,7 +30,7 @@ alwaysApply: true
 | Проверка | Действие |
 |----------|----------|
 | нет `node_modules` | `npm ci` (lock) / `npm install` |
-| нет `markdownlint-rules.js` / `markdownlint-hlprs.js` или `src/**/*.ts` новее артефактов | `npm run build` |
+| нет `markdownlint-rules.js` / `markdownlint-hlprs.js` или `src/**/*.ts` новее любого tsc-артефакта (`domain/`, `rules/`, `core/`, `composition/`, entry-points, `details.js`, `regex.js`, `types.js`) | `npm run build` |
 
 Оболочки (`.sh` / `.bat` / `.command`) — только `cd` + `node bin/lint-markdown.cjs`. `.sh` — `set -euo pipefail`; `.command` (Finder) — без strict-mode, без дублирования guard. **Без явного пути** (первый аргумент не path) — guard в [`lint-markdown.cjs`](../bin/lint-markdown.cjs): `usage()` и `exit 1` (не lint всего репо); флаги cli2 до path (`--fix ./docs`) — тоже `usage`.
 

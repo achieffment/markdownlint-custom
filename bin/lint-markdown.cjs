@@ -63,14 +63,44 @@ const newestMtime = (dir) => {
     return newest;
 };
 
+const artifactDirs = ["domain", "rules", "core", "composition"];
+const rootArtifacts = [
+    rulesJs,
+    hlprsJs,
+    path.join(repoRoot, "details.js"),
+    path.join(repoRoot, "regex.js"),
+    path.join(repoRoot, "types.js")
+];
+
+const oldestArtifactMtime = () => {
+    let oldest = Infinity;
+    const track = (fp) => {
+        if (!fs.existsSync(fp)) {
+            oldest = 0;
+            return;
+        }
+        oldest = Math.min(oldest, fs.statSync(fp).mtimeMs);
+    };
+    rootArtifacts.forEach(track);
+    artifactDirs.forEach((dirName) => {
+        const dirPath = path.join(repoRoot, dirName);
+        if (!fs.existsSync(dirPath)) {
+            oldest = 0;
+            return;
+        }
+        for (const ent of fs.readdirSync(dirPath, { withFileTypes: true })) {
+            if (ent.isFile() && ent.name.endsWith(".js")) {
+                track(path.join(dirPath, ent.name));
+            }
+        }
+    });
+    return oldest === Infinity ? 0 : oldest;
+};
+
 const artifactsStale = () => {
     if (!fs.existsSync(rulesJs) || !fs.existsSync(hlprsJs)) return true;
     const srcNewest = newestMtime(srcDir);
-    const artMtime = Math.min(
-        fs.statSync(rulesJs).mtimeMs,
-        fs.statSync(hlprsJs).mtimeMs
-    );
-    return srcNewest > artMtime;
+    return srcNewest > oldestArtifactMtime();
 };
 
 const ensureBuild = () => {

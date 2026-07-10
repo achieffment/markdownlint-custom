@@ -123,7 +123,7 @@ flowchart LR
 | `npm test` | `pretest` (build) + `test-rules.cjs` + `test-cli2-config.cjs` + `check-function-order.cjs` (cli2 parity — только здесь) |
 | `npm run lint:md` | Локальный lint папки/файла (bootstrap в runner); несколько файлов: `lint:md -- file1.md file2.md` |
 | `npm run sync:cli2-config` | Регенерация `.markdownlint-cli2.jsonc` из schema + overrides + custom keys из `markdownlint-rules.js` + `globs` (`presync:cli2-config` → build). При bump `markdownlint` — обновить `schema/` (см. `.mdc`) |
-| `npm run check` | `precheck` (build) + `tsc --noEmit` + `node --check` + порядок функций (без запуска `test-cli2-config`) |
+| `npm run check` | `precheck` (build) + `tsc --noEmit` + `node --check` на 9 `.js`/`.cjs` + порядок функций (без запуска `test-cli2-config`) |
 | `npm run check:order` | Только проверка порядка функций |
 
 ## Разработка и тестирование

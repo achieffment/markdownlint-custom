@@ -14,13 +14,17 @@ class ListItemsChecker {
         return lineStart.replace(this.lineParser.lstItemRx, "").trim();
     }
     checkMicromark(lines, tokens, onError, itemDets) {
+        const openingFences = new Set();
+        (0, outside_code_lines_1.eachOpeningCodeFenceLine)(lines, (fenceIx) => {
+            openingFences.add(fenceIx);
+        });
         (0, micromark_lists_1.eachListItemPrefix)(tokens, (prefix) => {
             const ix = prefix.startLine - 1;
             const line = lines[ix] ?? "";
             const trim = line.trim();
             const cont = this.getItemContent(lines, prefix);
             const next = this.lineParser.skipBlankFwd(lines, ix);
-            const folcod = next < lines.length && (0, outside_code_lines_1.isOpeningCodeFenceAt)(lines, next);
+            const folcod = next < lines.length && openingFences.has(next);
             const folsub = next < lines.length && this.lineParser.isChildLstItem(line, lines[next]);
             const needsColon = folcod || folsub;
             const endsOk = needsColon ? regex_1.endsWithColonRx.test(cont) : regex_1.endsWithSemiRx.test(cont);
