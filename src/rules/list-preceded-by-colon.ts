@@ -1,4 +1,4 @@
-import type { RuleOnError } from "markdownlint";
+import type { RuleOnError, RuleParams } from "markdownlint";
 import { BaseRule } from "../core/base-rule";
 import { details } from "../details";
 import type { ColonChecker } from "../domain/colon-checker";
@@ -12,7 +12,11 @@ export class ListPrecededByColonRule extends BaseRule {
         super();
     }
 
-    check(lines: readonly string[], onError: RuleOnError): void {
-        this.colonChecker.checkListPrecededByColon(lines, onError, this.description);
+    protected override get parser(): "micromark" {
+        return "micromark";
+    }
+
+    checkMicromark(params: RuleParams, onError: RuleOnError): void {
+        this.colonChecker.checkListPrecededByColon(params.lines, onError, this.description);
     }
 }

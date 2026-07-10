@@ -15,7 +15,7 @@ SRP/DRY — те же принципы, что в [js-dev.mdc](js-dev.mdc) (дл
 | Каталог | SRP |
 |---------|-----|
 | [`core/`](../src/core/) | `ICustomRule`, `abstract BaseRule` (Template Method `toRule()`) |
-| [`domain/`](../src/domain/) | `ListLineParser`, `CodeWalker`, `ListBlockAnalyzer`, `ListSpacingChecker`, `ColonChecker` |
+| [`domain/`](../src/domain/) | `ListLineParser`, `outside-code-lines`, `line-list-walker`, `micromark-token-utils`, `micromark-lists`, `micromark-heading`, `micromark-parse`, `ListSpacingChecker`, `ColonChecker`, `micromark-list-checkers`, `no-leading-spaces-checker`, `sentences-end-mark-checker` |
 | [`composition/`](../src/composition/) | `AppContext` — wiring singleton-ов |
 | [`rules/`](../src/rules/) | Класс `XxxRule extends BaseRule` — одна политика |
 | `regex.ts`, `details.ts` | Константы (не классы) |
@@ -28,12 +28,13 @@ SRP/DRY — те же принципы, что в [js-dev.mdc](js-dev.mdc) (дл
 - **Наследование:** только `extends BaseRule`; без цепочек `ListRule → NumListRule`
 - **Composition:** правила получают checker/parser/walker через `constructor(private readonly ...)`
 - **Domain-классы** не наследуют друг друга; делегируют через поля
-- **`onError`** — на границе `check()` / методов checker-ов
+- **≥3 связанных методов с общим state** (`lines`, parser) — **class**, не closure factory (`createHelpers`); stateless utility-модули (`outside-code-lines`, `micromark-lists`) — функции
+- **`onError`** — на границе `checkMicromark()` / `check()` / методов checker-ов
 - **Composition root** — `app-context.ts`, barrels; не создавать `new` в domain вне root
 
 ## Порядок функций
 
-В каждой области видимости (модуль, class body, блок с `const`-стрелками) **вызываемая идёт раньше вызывающей**: прямой вызов `foo()`, `this.foo()` между siblings. Проверка: `npm run check:order` (входит в `npm test` и `npm run check`). Scope: `src/**/*.ts`, `test-rules.cjs` (не `bin/`, `scripts/`). Эталон — [`list-block-analyzer.ts`](../src/domain/list-block-analyzer.ts) (`createHelpers`).
+В каждой области видимости (модуль, class body, блок с `const`-стрелками) **вызываемая идёт раньше вызывающей**: прямой вызов `foo()`, `this.foo()` между siblings. Проверка: `npm run check:order` (входит в `npm test` и `npm run check`). Scope: `src/**/*.ts`, `test-rules.cjs` (не `bin/`, `scripts/`). Эталон — [`line-list-walker.ts`](../src/domain/line-list-walker.ts) (`LineListBlockWalker` class body).
 
 ## Workflow
 

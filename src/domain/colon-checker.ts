@@ -1,13 +1,11 @@
 import type { RuleOnError } from "markdownlint";
 import { endsWithColonRx, headingRx, codeFenceRx, tableRowRx } from "../regex";
-import type { ListBlockAnalyzer } from "./list-block-analyzer";
+import { walkLineBasedListBlocks } from "./line-list-walker";
 import type { ListLineParser } from "./list-line-parser";
+import { eachOpeningCodeFenceLine } from "./outside-code-lines";
 
 export class ColonChecker {
-    constructor(
-        private readonly listAnalyzer: ListBlockAnalyzer,
-        private readonly lineParser: ListLineParser
-    ) {}
+    constructor(private readonly lineParser: ListLineParser) {}
 
     checkPrecededByColon(
         lines: readonly string[],
@@ -39,9 +37,15 @@ export class ColonChecker {
     }
 
     checkListPrecededByColon(lines: readonly string[], onError: RuleOnError, colDet: string): void {
-        this.listAnalyzer.walkListBlocks(lines, (items) => {
+        walkLineBasedListBlocks(lines, this.lineParser, (items) => {
             if (this.lineParser.isNestedLstItem(lines[items[0]])) return;
             this.checkPrecededByColon(lines, items[0], onError, colDet);
+        });
+    }
+
+    checkOpeningCodeFences(lines: readonly string[], onError: RuleOnError, colDet: string): void {
+        eachOpeningCodeFenceLine(lines, (ix) => {
+            this.checkPrecededByColon(lines, ix, onError, colDet);
         });
     }
 }

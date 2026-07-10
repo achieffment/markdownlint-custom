@@ -1,4 +1,3 @@
-import type { Rule } from "markdownlint";
 import { appContext } from "./composition/app-context";
 import { CodeblockPrecededByColonRule } from "./rules/codeblock-preceded-by-colon";
 import { ListBlankSpacingRule } from "./rules/list-blank-line-spacing";
@@ -8,16 +7,16 @@ import { MinimumH2Rule } from "./rules/minimum-h2-heading";
 import { NoLeadingSpacesRule } from "./rules/no-leading-spaces";
 import { SentencesEndMarkRule } from "./rules/sentences-end-with-mark";
 
-const { lineParser, codeWalker, spacingChecker, colonChecker } = appContext;
+const { colonChecker, spacingChecker, listItemsChecker, indentChecker, proseChecker } = appContext;
 
-const rules: Rule[] = [
-    new MinimumH2Rule(codeWalker).toRule(),
-    new ListItemsEndRule(codeWalker, lineParser).toRule(),
+const rules = [
+    new MinimumH2Rule().toRule(),
+    new ListItemsEndRule(listItemsChecker).toRule(),
     new ListBlankSpacingRule(spacingChecker).toRule(),
     new ListPrecededByColonRule(colonChecker).toRule(),
-    new CodeblockPrecededByColonRule(colonChecker, codeWalker).toRule(),
-    new NoLeadingSpacesRule(codeWalker, lineParser).toRule(),
-    new SentencesEndMarkRule(codeWalker, lineParser).toRule()
+    new CodeblockPrecededByColonRule(colonChecker).toRule(),
+    new NoLeadingSpacesRule(indentChecker).toRule(),
+    new SentencesEndMarkRule(proseChecker).toRule()
 ];
 
 module.exports = rules;

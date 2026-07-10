@@ -25,6 +25,7 @@ alwaysApply: false
 - `readonly string[]` для `lines`
 - `as const` в `details.ts`
 - `module.exports` в barrels
+- **Thin arrow/method wrappers** — одна строка (делегат без ветвлений); многострочные тела — только при циклах/ветвлениях
 
 ## Симметрия имён и конвейер
 
@@ -32,7 +33,8 @@ alwaysApply: false
 
 ## Markdownlint
 
-- `parser: "none"` через `BaseRule.toRule()`
+- `parser: "none" | "micromark"` через override `protected get parser()` в [`BaseRule`](../src/core/base-rule.ts); `check(params, onError)` для line-based; `checkMicromark(params, onError)` для micromark
+- **Checker entry:** `checkMicromark` — tokens + lines; `checkLines` — только `params.lines` (line-only checker’ы: `NoLeadingSpacesChecker`, `SentencesEndMarkChecker`; alias `ListSpacingChecker.checkLines` для hlprs)
 - `onError({ lineNumber, detail, context? })`, `lineNumber` с 1
 - **`detail`:** `this.description` для основного сообщения; `details.*` для sub-detail (`listItemsColon`, `listBlankBef`, …)
 - **`context`:** полная `line` — indent-правила (`no-leading-spaces`, `colon-checker`); `trim` — prose и spacing-checker (`ListSpacingChecker`)

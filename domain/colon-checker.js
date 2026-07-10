@@ -2,9 +2,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ColonChecker = void 0;
 const regex_1 = require("../regex");
+const line_list_walker_1 = require("./line-list-walker");
+const outside_code_lines_1 = require("./outside-code-lines");
 class ColonChecker {
-    constructor(listAnalyzer, lineParser) {
-        this.listAnalyzer = listAnalyzer;
+    constructor(lineParser) {
         this.lineParser = lineParser;
     }
     checkPrecededByColon(lines, ix, onError, colDet) {
@@ -32,10 +33,15 @@ class ColonChecker {
         }
     }
     checkListPrecededByColon(lines, onError, colDet) {
-        this.listAnalyzer.walkListBlocks(lines, (items) => {
+        (0, line_list_walker_1.walkLineBasedListBlocks)(lines, this.lineParser, (items) => {
             if (this.lineParser.isNestedLstItem(lines[items[0]]))
                 return;
             this.checkPrecededByColon(lines, items[0], onError, colDet);
+        });
+    }
+    checkOpeningCodeFences(lines, onError, colDet) {
+        (0, outside_code_lines_1.eachOpeningCodeFenceLine)(lines, (ix) => {
+            this.checkPrecededByColon(lines, ix, onError, colDet);
         });
     }
 }

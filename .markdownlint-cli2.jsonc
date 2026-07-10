@@ -122,7 +122,7 @@
     "MD028": true,
 
     // MD029/ol-prefix — дефолт: { "style": "one_or_ordered" }
-    // Намеренно отключено: поднумерация 1.1 / 1.1.1 в custom rules
+    // Намеренно отключено: fenced code в examples разрывает списки; nested 1. — style one
     "MD029": false,
 
     // MD030/list-marker-space : Spaces after list markers : https://github.com/DavidAnson/markdownlint/blob/v0.41.0/doc/md030.md

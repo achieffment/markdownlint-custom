@@ -13,7 +13,7 @@ alwaysApply: true
 |----------------|------------|
 | [`src/`](../src/) | Исходники TypeScript (правила, хелперы, типы) |
 | [`src/core/`](../src/core/) | `ICustomRule`, `abstract BaseRule` |
-| [`src/domain/`](../src/domain/) | `ListLineParser`, `CodeWalker`, `ListBlockAnalyzer`, `ListSpacingChecker`, `ColonChecker` |
+| [`src/domain/`](../src/domain/) | `ListLineParser`, `outside-code-lines`, `line-list-walker`, `micromark-token-utils`, `micromark-lists`, `micromark-heading`, `micromark-list-checkers`, `no-leading-spaces-checker`, `micromark-parse`, `ListSpacingChecker`, `ColonChecker`, `sentences-end-mark-checker` |
 | [`src/composition/`](../src/composition/) | `AppContext` — wiring зависимостей |
 | [`src/rules/`](../src/rules/) | Класс `XxxRule extends BaseRule` |
 | [`markdownlint-rules.js`](../markdownlint-rules.js) | **Артефакт tsc:** массив правил (`module.exports = [...]`) |
@@ -44,7 +44,7 @@ alwaysApply: true
 |---------|---------------|---------|
 | `minimum-h2-heading` | Минимум один заголовок H2 (`##`) вне code fence | `markdownlint-examples/minimum-h2-heading/` |
 | `list-items-end-with-semicolon-or-colon` | Пункт списка (num/bul, вложенные): `;`, перед открывающей `` ``` `` или **прямым дочерним** пунктом — `:` | `markdownlint-examples/list-items-end-with-semicolon-or-colon/` |
-| `list-blank-line-spacing` | Numbered: blank до/после (EOF skip, same-kind skip) и единообразно между соседними num-пунктами блока (включая поднумерацию `1.1`, `1.1.1`); bulleted: blank до/после блока (между пунктами не проверяется) | `markdownlint-examples/list-blank-line-spacing/` |
+| `list-blank-line-spacing` | Numbered: blank до/после (EOF skip, same-kind skip) и единообразно между соседними num-пунктами блока (вложенные `1.`); bulleted: blank до/после блока (между пунктами не проверяется) | `markdownlint-examples/list-blank-line-spacing/` |
 | `list-preceded-by-colon` | Обычный текст (не пункт списка) перед первым пунктом блока верхнего уровня (num/bul) заканчивается `:`; skip prev: заголовок, пункт списка, code fence, pipe-таблица; вложенные не проверяются | `markdownlint-examples/list-preceded-by-colon/` |
 | `codeblock-preceded-by-colon` | Открывающая `` ``` ``: строка перед ней заканчивается `:` (не пункт списка — те проверяет `list-items-*`); skip prev: заголовок, пункт списка, code fence, pipe-таблица | `markdownlint-examples/codeblock-preceded-by-colon/` |
 | `no-leading-spaces` | Нет отступа у обычного текста, пунктов списка верхнего уровня и обозначений блока кода (`` ``` ``); вложенные пункты — при `indent >=` предыдущего | `markdownlint-examples/no-leading-spaces/` |
@@ -59,40 +59,41 @@ alwaysApply: true
 - **`_err.md` и `_suc.md` — один и тот же текст:** в `_suc` исправлены только нарушения целевого правила (и минимальные правки для exclusivity в `_err`, например `;` / `:` у пунктов списка). Не менять порядок блоков, не подменять сценарии «успешным» вариантом. Исключение: `list-blank-line-spacing` — непустые строки идентичны, отличаются только пустые строки (сама правка — blank lines). `test-rules.cjs`: `checkExamplePair`, допустимые отличия строк — `allowedLineDiff`: суффикс `;`/`:`/`.`/`!`/`?`; `.` или `;` → `:`; `trimStart` для `no-leading-spaces`; пустой bullet → `- текст;`; пустой numbered `1.  ` → `1. текст;`.
 - **`minimum-h2-heading`:** в `_suc` добавляется строка `## …` **в конце** документа (не между блоками), чтобы строки 1…N совпадали с `_err`; `npm test` проверяет это (`checkExamplePair`).
 - **Code fence в примерах:** открывающая `` ``` `` с идентификатором языка (`js`, `pr`, …); голый `` ``` `` допустим только в inline-кейсах `test-rules.cjs`.
-- Вложенные нумерованные пункты: поднумерация с отступом — `1.1`, `1.1.1`, `1.1.1.1` и глубже (не повторный маркер `1.`).
+- Вложенные нумерованные пункты: **3 пробела** на уровень, маркер **`1.`** (CommonMark); не использовать поднумерацию `1.1` в маркере.
 
 ### `minimum-h2-heading` — политика
 
-- **Scope:** строки вне code fence (`CodeWalker.walkOutsideCode`).
-- **Проверка:** хотя бы одна строка с `##` (не `###+`), пробелом и непустым текстом после (`/^##(?!\#)\s+\S/` на trim).
+- **Parser:** `micromark` (`params.parsers.micromark.tokens`).
+- **Проверка:** хотя бы один `atxHeading` или `setextHeading` уровня 2 с непустым текстом (`hasMinimumH2` в [`src/domain/micromark-heading.ts`](../src/domain/micromark-heading.ts)).
 - **Ошибка:** строка 1, если заголовка H2 нет.
 
 ### `list-items-end-with-semicolon-or-colon` — политика
 
-- **Scope:** все пункты списка (num/bul, вложенные), вне code fence.
-- **Проверка:** текст пункта заканчивается `;`; если следующая непустая строка — открывающая `` ``` `` или **прямой** дочерний пункт (больший отступ; поднумерация `1.` → `1.1`, `1.1` → `1.1.1`, не sibling `1.1` → `1.2`), то `:`.
+- **Parser:** `micromark` (`listItemPrefix` через `eachListItemPrefix`); контент и `folcod`/`folsub` — `params.lines[]`.
+- **Проверка:** текст пункта заканчивается `;`; если следующая непустая строка — открывающая `` ``` `` или **прямой** дочерний пункт (больший отступ; sibling на том же indent — `;`), то `:`.
 - **Пустой пункт** (только маркер) — ошибка с `detail: listItemsEmpty`; контент после маркера — через `ListLineParser.trimStart`, не `line.trim()` (иначе `- ` теряет пробел маркера).
 - **Sub-detail:** `listItemsColon` — перед открывающей `` ``` `` или прямым дочерним пунктом нужен `:`; `listItemsSemi` — в остальных случаях нужен `;`.
 - **lineNumber:** строка с нарушением пункта.
 
 ### `list-blank-line-spacing` — политика
 
-- **Numbered** (`isNumItem`: `1.`, `1.1`, …): blank перед первым и после последнего пункта блока; единообразные blank между **каждой парой** соседних numbered-пунктов в блоке (включая поднумерацию `1.1`, `1.1.1` на любом отступе — `findNumItemEnd` останавливается на следующем num-маркере). Если хотя бы один переход с blank — все должны иметь; если ни у одного нет — OK.
+- **Parser:** `micromark` + `params.lines[]` (границы/gaps — line-based там, где `list.endLine` захватывает prose после списка).
+- **Numbered** (`isNumItem`: `1.`): blank перед первым и после последнего пункта блока; единообразные blank между **каждой парой** соседних numbered-пунктов в subtree (`collectPrefixesInList` + `findPrefixItemEnd`). Если хотя бы один переход с blank — все должны иметь; если ни у одного нет — OK.
 - **Bulleted** (`isBulItem`: `-`, `*`, `+`): только blank до первого и после последнего пункта блока; между пунктами **не проверяется**.
 - **Границы (bounds):** blank до/после проверяется только при реальной границе блока — перед контентом **другого типа** (не same-kind); after не проверяется в EOF; blank после `##` перед списком **обязателен**.
-- **Блок numbered:** все numbered-пункты подряд до абзаца на уровне первого пункта, заголовка или code fence; тело пункта включает вложенный code fence и **текст после fence** на том же отступе до sibling num-маркера (`findNumItemEnd`).
-- **Блок bulleted:** все bullet-пункты подряд до numbered-пункта, абзаца на `baseInd`, заголовка или code fence; тело пункта включает code fence и текст после fence на том же отступе до sibling-маркера (`findBulItemEnd`).
+- **Блок:** top-level `listOrdered` / `listUnordered` из micromark; конец последнего пункта — `findPrefixItemEnd` (не `list.endLine`).
 - **Sub-detail:** `listBlankBef` — нет blank перед первым пунктом блока; `listBlankAft` — нет blank после последнего; `listBlankGap` — неединообразные blank между соседними num-пунктами.
 - **lineNumber:** `listBlankBef` — первый пункт блока; `listBlankAft` — строка после последнего пункта; `listBlankGap` — следующий пункт в паре с нарушением.
 
 ### `list-preceded-by-colon` — политика
 
+- **Parser:** `micromark`; первый пункт блока — `line-list-walker` (line-based: micromark разрывает список на fence).
 - **Scope:** нумерованные и маркированные списки.
 - **Проверка:** только строка перед **первым пунктом блока** верхнего уровня (не перед каждым вложенным).
-- **Skip вложенные:** пункт с отступом (`indent > 0`) или поднумерация (`1.1`, `1.1.1`) — `:` не требуется (`isNestedLstItem`).
+- **Skip вложенные:** пункт с отступом (`indent > 0`) — `:` не требуется (`isNestedLstItem`).
 - **Skip prev:** заголовок, пункт списка, code fence, pipe-строки таблицы (подъём вверх через `tableRowRx` в `checkPrecededByColon`, включая пустые строки между pipe-строками); нет непустой строки выше (`prev < 0`) — skip.
 - **Пустые строки:** между целью и prev пропускаются (`skipBlankBck`); `:` ищется на первой непустой prose-строке выше после skip blank + pipe-блока.
-- **Тело пункта:** текст после code fence внутри пункта не считается отдельным блоком (`findNumItemEnd` / `findBulItemEnd`).
+- **Тело пункта:** текст после code fence внутри пункта не считается отдельным блоком (`line-list-walker` / `LineListBlockWalker` / `findPrefixItemEnd`).
 - **lineNumber:** строка prose **перед** первым пунктом блока (первая непустая выше после skip blank + pipe-блока; не pipe-строка).
 
 ### `codeblock-preceded-by-colon` — политика
@@ -101,16 +102,16 @@ alwaysApply: true
 - **Проверка:** строка перед fence должна заканчиваться `:`.
 - **Skip prev:** заголовок, **любой** пункт списка (`isLstItem` / `lstItemRx`), code fence, pipe-строки таблицы (подъём вверх через `tableRowRx` в `checkPrecededByColon`, включая пустые строки между pipe-строками); нет непустой строки выше — skip.
 - **Пустые строки:** между fence и prev пропускаются (`skipBlankBck`); `:` ищется на первой непустой prose-строке выше после skip blank + pipe-блока.
-- **Обход fence:** `CodeWalker.eachOpeningCodeFence` из [`src/domain/code-walker.ts`](../src/domain/code-walker.ts) (не `walkOutsideCode`, который пропускает строки `` ``` ``).
+- **Обход fence:** `eachOpeningCodeFenceLine` из [`src/domain/outside-code-lines.ts`](../src/domain/outside-code-lines.ts) (regex; покрывает indented fence, которые micromark не парсит как `codeFenced`).
 - **lineNumber:** строка prose **перед** открывающей `` ``` `` (первая непустая выше после skip blank + pipe-блока; не pipe-строка).
 
 ### `no-leading-spaces` — политика
 
 - **Scope:** строки вне code fence и строки-обозначения блока (opening/closing `` ``` ``).
-- **Обход:** `CodeWalker.walkCodeFenceAware` из [`src/domain/code-walker.ts`](../src/domain/code-walker.ts) (строки fence не пропускаются; не `eachLineOutsideCode`).
+- **Обход:** `walkCodeFenceAware` из [`src/domain/outside-code-lines.ts`](../src/domain/outside-code-lines.ts) (строки fence не пропускаются; не `eachLineOutsideCode`).
 - **Skip:** заголовки (`#`); содержимое между fence не проверяется.
 - **Fence:** отступ 0 у opening/closing `` ``` ``.
-- **Пункт списка:** отступ 0; вложенный допустим при `indent > 0` и `indent >=` отступа предыдущего пункта списка (`findPrevListInd`; соседи на одном уровне — с тем же отступом); при поиске предыдущего пункта пропускаются блоки code fence (как тело пункта в `findNumItemEnd`). При `indent > 0` ошибка на **первом** пункте блока (`prevInd < 0`); siblings с тем же отступом (`currInd >= prevInd`) допустимы — осознанная ленивость.
+- **Пункт списка:** отступ 0; вложенный допустим при `indent > 0` и `indent >=` отступа предыдущего пункта списка (`findPrevListInd`; соседи на одном уровне — с тем же отступом); при поиске предыдущего пункта пропускаются блоки code fence. При `indent > 0` ошибка на **первом** пункте блока (`prevInd < 0`); siblings с тем же отступом (`currInd >= prevInd`) допустимы — осознанная ленивость.
 - **Обычный текст:** отступ 0.
 
 ### `sentences-end-with-mark` — политика
@@ -128,7 +129,7 @@ alwaysApply: true
 |---------|------------|
 | `lstItemRx` | Regex пункта списка (num/bul) на `trimStart` строки |
 | `isLstItem` | Пункт списка по строке |
-| `isChildLstItem` | Следующий пункт — прямой дочерний (отступ или поднумерация `1.` → `1.1`) |
+| `isChildLstItem` | Следующий пункт — прямой дочерний (больший indent) |
 | `getIndent` | Длина ведущих пробелов |
 | `skipBlankFwd` | Индекс следующей непустой строки |
 | `eachLineOutsideCode` | Колбэк по строкам вне code fence |
@@ -137,7 +138,9 @@ alwaysApply: true
 | `checkListBlankSpacing` | Политика `list-blank-line-spacing` (третий аргумент — `blankDets`: `bef`/`aft`/`gap`) |
 | `checkListPrecededByColon` | Политика `list-preceded-by-colon` (третий аргумент — `colDet`) |
 
-Внутренние (не экспортируются): `ListLineParser` (`trimStart`, `isNumItem`, `isBulItem`, `isNestedLstItem`, `getNumPath`, `skipBlankBck`), `ListBlockAnalyzer` (`createHelpers`, `walkListBlocks`, `findNumItemEnd`, `findBulItemEnd`, `collectNumBlock`, `collectBulBlock`; `findItemEnd`/`collectBlock` — closure внутри `createHelpers`), `ListSpacingChecker` (`hasBlankGap`, `boundBefIdx`, `boundAftIdx`), `CodeWalker` (`walkOutsideCode`, `walkCodeFenceAware`, `eachOpeningCodeFence`; `eachLineOutsideCode` — публичный через hlprs).
+Внутренние (не экспортируются): `ListLineParser` (`trimStart`, `isNumItem`, `isBulItem`, `isNestedLstItem`, `skipBlankBck`), `line-list-walker` (`LineListBlockWalker`, `walkLineBasedListBlocks` — fence-in-list для `list-preceded-by-colon`), `ListSpacingChecker` (`hasBlankGap`, `boundBefIdx`, `boundAftIdx`, `findPrefixItemEnd`), `outside-code-lines` (`walkOutsideCode`, `walkCodeFenceAware`, `eachOpeningCodeFenceLine`; `eachLineOutsideCode` — публичный через hlprs), `micromark-token-utils` (`require("markdownlint/helpers")` + `path.join(helpersDir, "micromark-helpers.cjs")`: `filterByTypes`, `getParentOfType`, `isBlankLine`, …), `micromark-lists` (`eachTopLevelList`, `collectPrefixesInList`, `eachListItemPrefix`), `micromark-heading` (`hasMinimumH2`), `micromark-list-checkers` (`ListItemsChecker`), `no-leading-spaces-checker` (`NoLeadingSpacesChecker`), `sentences-end-mark-checker` (`SentencesEndMarkChecker`), `ColonChecker` (`checkOpeningCodeFences`, `checkListPrecededByColon`), `micromark-parse` (tokens для hlprs API).
+
+**Parser custom rules:** все 7 правил — `parser: "micromark"` в [`BaseRule`](../src/core/base-rule.ts). `minimum-h2-heading` и `list-items-end-with-semicolon-or-colon` используют `params.parsers.micromark.tokens`; остальные — гибрид tokens + `params.lines[]` (line-based там, где micromark разрывает списки на fence или не парсит indented fence).
 
 ## Конфигурация lint (`.markdownlint-cli2.jsonc`)
 
@@ -147,7 +150,7 @@ alwaysApply: true
 |----------|----------|
 | `default` | `true` — все built-in включены |
 | `MD013` | `false` — как дефолт vscode-markdownlint |
-| `MD029` | `false` — намеренно (поднумерация `1.1` в custom) |
+| `MD029` | `false` — fenced code в examples разрывает списки; nested `1.` — style one |
 | `MD046` | `false` — намеренно (fenced code в examples) |
 | `MD032` | `false` — заменено custom `list-blank-line-spacing` |
 | `MD007` | `false` — пересекается с custom `no-leading-spaces` |
@@ -197,7 +200,7 @@ alwaysApply: true
 | `insertFinalNewline` | `MD047` |
 | `trimTrailingWhitespace: false` | `[*.md]` в EditorConfig; иначе срежутся 2 пробела hard break (`MD009`, `br_spaces: 2`) |
 | `tabSize: 4` | EditorConfig `indent_size = 4`; Tab вставляет 4 пробела |
-| Вложенные списки | В examples шаг **3** пробела на уровень (`1.1`, `1.1.1`); не полагаться на один Tab = один уровень |
+| Вложенные списки | В examples шаг **3** пробела на уровень, маркер **`1.`**; не полагаться на один Tab = один уровень |
 | `wordWrap` / `wrappingIndent` | Только UI; `MD013` отключён |
 
 ## Подключение в VS Code

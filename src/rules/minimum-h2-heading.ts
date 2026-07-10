@@ -1,28 +1,20 @@
-import type { RuleOnError } from "markdownlint";
+import type { RuleOnError, RuleParams } from "markdownlint";
 import { BaseRule } from "../core/base-rule";
 import { details } from "../details";
-import type { CodeWalker } from "../domain/code-walker";
-import { h2Rx } from "../regex";
+import { hasMinimumH2 } from "../domain/micromark-heading";
 
 export class MinimumH2Rule extends BaseRule {
     readonly names = ["minimum-h2-heading"];
     readonly description = details.minimumH2;
     readonly tags = ["headings"];
 
-    constructor(private readonly codeWalker: CodeWalker) {
-        super();
+    protected override get parser(): "micromark" {
+        return "micromark";
     }
 
-    check(lines: readonly string[], onError: RuleOnError): void {
-        let hasH2 = false;
-        this.codeWalker.walkOutsideCode(lines, (_ix, trim) => {
-            if (h2Rx.test(trim)) {
-                hasH2 = true;
-                return lines.length;
-            }
-            return undefined;
-        });
-        if (!hasH2) {
+    checkMicromark(params: RuleParams, onError: RuleOnError): void {
+        const tokens = params.parsers.micromark?.tokens ?? [];
+        if (!hasMinimumH2(tokens)) {
             onError({ lineNumber: 1, detail: this.description });
         }
     }

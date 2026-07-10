@@ -3,25 +3,20 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.MinimumH2Rule = void 0;
 const base_rule_1 = require("../core/base-rule");
 const details_1 = require("../details");
-const regex_1 = require("../regex");
+const micromark_heading_1 = require("../domain/micromark-heading");
 class MinimumH2Rule extends base_rule_1.BaseRule {
-    constructor(codeWalker) {
-        super();
-        this.codeWalker = codeWalker;
+    constructor() {
+        super(...arguments);
         this.names = ["minimum-h2-heading"];
         this.description = details_1.details.minimumH2;
         this.tags = ["headings"];
     }
-    check(lines, onError) {
-        let hasH2 = false;
-        this.codeWalker.walkOutsideCode(lines, (_ix, trim) => {
-            if (regex_1.h2Rx.test(trim)) {
-                hasH2 = true;
-                return lines.length;
-            }
-            return undefined;
-        });
-        if (!hasH2) {
+    get parser() {
+        return "micromark";
+    }
+    checkMicromark(params, onError) {
+        const tokens = params.parsers.micromark?.tokens ?? [];
+        if (!(0, micromark_heading_1.hasMinimumH2)(tokens)) {
             onError({ lineNumber: 1, detail: this.description });
         }
     }

@@ -1,4 +1,4 @@
-import type { Rule, RuleOnError } from "markdownlint";
+import type { Rule, RuleOnError, RuleParams } from "markdownlint";
 import type { ICustomRule } from "./icustom-rule";
 
 export abstract class BaseRule implements ICustomRule {
@@ -6,16 +6,27 @@ export abstract class BaseRule implements ICustomRule {
     abstract readonly description: string;
     abstract readonly tags: readonly string[];
 
-    abstract check(lines: readonly string[], onError: RuleOnError): void;
+    protected get parser(): "none" | "micromark" {
+        return "none";
+    }
+
+    check(_params: RuleParams, _onError: RuleOnError): void {}
+
+    checkMicromark(_params: RuleParams, _onError: RuleOnError): void {}
 
     toRule(): Rule {
+        const parser = this.parser;
         return {
             names: [...this.names],
             description: this.description,
             tags: [...this.tags],
-            parser: "none",
+            parser,
             function: (params, onError) => {
-                this.check(params.lines, onError);
+                if (parser === "micromark") {
+                    this.checkMicromark(params, onError);
+                } else {
+                    this.check(params, onError);
+                }
             }
         };
     }

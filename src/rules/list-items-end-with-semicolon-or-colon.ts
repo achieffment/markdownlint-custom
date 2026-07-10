@@ -1,41 +1,27 @@
-import type { RuleOnError } from "markdownlint";
+import type { RuleOnError, RuleParams } from "markdownlint";
 import { BaseRule } from "../core/base-rule";
 import { details } from "../details";
-import type { CodeWalker } from "../domain/code-walker";
-import type { ListLineParser } from "../domain/list-line-parser";
-import { codeFenceRx, endsWithColonRx, endsWithSemiRx } from "../regex";
+import type { ListItemsChecker } from "../domain/micromark-list-checkers";
 
 export class ListItemsEndRule extends BaseRule {
     readonly names = ["list-items-end-with-semicolon-or-colon"];
     readonly description = details.listItemsEnd;
     readonly tags = ["lists"];
 
-    constructor(
-        private readonly codeWalker: CodeWalker,
-        private readonly lineParser: ListLineParser
-    ) {
+    constructor(private readonly listItemsChecker: ListItemsChecker) {
         super();
     }
 
-    check(lines: readonly string[], onError: RuleOnError): void {
-        this.codeWalker.eachLineOutsideCode(lines, (line, ix, trim) => {
-            if (!this.lineParser.isLstItem(line)) return;
-            const lineStart = this.lineParser.trimStart(line);
-            let cont = lineStart.replace(this.lineParser.lstItemRx, "");
-            cont = cont.trim();
-            const next = this.lineParser.skipBlankFwd(lines, ix);
-            const folcod = next < lines.length && codeFenceRx.test(lines[next].trim());
-            const folsub = next < lines.length && this.lineParser.isChildLstItem(line, lines[next]);
-            const needsColon = folcod || folsub;
-            const endsOk = needsColon ? endsWithColonRx.test(cont) : endsWithSemiRx.test(cont);
-            const lstDet = needsColon ? details.listItemsColon : details.listItemsSemi;
-            if (!cont) {
-                onError({ lineNumber: ix + 1, detail: details.listItemsEmpty, context: trim });
-                return;
-            }
-            if (!endsOk) {
-                onError({ lineNumber: ix + 1, detail: lstDet, context: trim });
-            }
+    protected override get parser(): "micromark" {
+        return "micromark";
+    }
+
+    checkMicromark(params: RuleParams, onError: RuleOnError): void {
+        const tokens = params.parsers.micromark?.tokens ?? [];
+        this.listItemsChecker.checkMicromark(params.lines, tokens, onError, {
+            empty: details.listItemsEmpty,
+            colon: details.listItemsColon,
+            semi: details.listItemsSemi
         });
     }
 }

@@ -1,18 +1,21 @@
-import type { RuleOnError } from "markdownlint";
-import type { BlankDets, FindItemEnd, LinePredicate } from "../types";
-import type { ListBlockAnalyzer } from "./list-block-analyzer";
+import type { MicromarkToken, RuleOnError } from "markdownlint";
+import type { BlankDets, LinePredicate } from "../types";
+import { codeFenceRx, headingRx } from "../regex";
+import {
+    collectPrefixesInList,
+    eachTopLevelList
+} from "./micromark-lists";
+import { parseMicromarkTokens } from "./micromark-parse";
+import { isBlankLine } from "./micromark-token-utils";
 import type { ListLineParser } from "./list-line-parser";
 
 export class ListSpacingChecker {
-    constructor(
-        private readonly listAnalyzer: ListBlockAnalyzer,
-        private readonly lineParser: ListLineParser
-    ) {}
+    constructor(private readonly lineParser: ListLineParser) {}
 
     private hasBlankGap(lines: readonly string[], beg: number, end: number): boolean {
         if (beg > end) return false;
         for (let ix = beg; ix <= end; ix++) {
-            if (lines[ix].trim() === "") return true;
+            if (isBlankLine(lines[ix])) return true;
         }
         return false;
     }
@@ -33,41 +36,66 @@ export class ListSpacingChecker {
         return next;
     }
 
-    checkLines(lines: readonly string[], onError: RuleOnError, blankDets: BlankDets): void {
+    private findPrefixItemEnd(lines: readonly string[], begIx: number, maxIx: number): number {
+        const ind = this.lineParser.getIndent(lines[begIx]);
+        let end = begIx;
+        for (let ix = begIx + 1; ix < maxIx; ix++) {
+            const trim = lines[ix].trim();
+            if (!trim) continue;
+            if (headingRx.test(trim) || codeFenceRx.test(trim)) break;
+            if (this.lineParser.isLstItem(lines[ix])) break;
+            const jInd = this.lineParser.getIndent(lines[ix]);
+            if (jInd > ind) end = ix;
+            else break;
+        }
+        return end;
+    }
+
+    checkMicromark(
+        lines: readonly string[],
+        tokens: readonly MicromarkToken[],
+        onError: RuleOnError,
+        blankDets: BlankDets
+    ): void {
         const befDet = blankDets.bef;
         const aftDet = blankDets.aft;
         const gapDet = blankDets.gap;
-        const checkBlockBounds = (items: number[], findEnd: FindItemEnd, isSameKind: LinePredicate): void => {
-            if (items.length === 0) return;
-            const fstBeg = items[0];
+        eachTopLevelList(tokens, (list) => {
+            const isNum = list.type === "listOrdered";
+            const prefixes = collectPrefixesInList(list);
+            if (prefixes.length === 0) return;
+            const isSameKind: LinePredicate = isNum
+                ? (line) => this.lineParser.isNumItem(line)
+                : (line) => this.lineParser.isBulItem(line);
+            const fstBeg = prefixes[0].startLine - 1;
+            const lastPrefix = prefixes[prefixes.length - 1];
+            const visualEnd = this.findPrefixItemEnd(lines, lastPrefix.startLine - 1, lines.length);
             const befIdx = this.boundBefIdx(lines, fstBeg, isSameKind);
             if (befIdx >= 0) {
                 onError({ lineNumber: befIdx + 1, detail: befDet, context: lines[fstBeg].trim() });
             }
-            const lstEnd = findEnd(items[items.length - 1]);
-            const aftIdx = this.boundAftIdx(lines, lstEnd, isSameKind);
+            const aftIdx = this.boundAftIdx(lines, visualEnd, isSameKind);
             if (aftIdx >= 0) {
-                onError({ lineNumber: aftIdx + 1, detail: aftDet, context: lines[lstEnd].trim() });
+                onError({ lineNumber: aftIdx + 1, detail: aftDet, context: lines[visualEnd].trim() });
             }
-        };
-        const checkBlockGaps = (items: number[], findEnd: FindItemEnd): void => {
-            if (items.length < 2) return;
-            const gaps = items.slice(0, -1).map((beg, i) => {
-                const end = findEnd(beg);
-                const nxtBeg = items[i + 1];
+            if (!isNum || prefixes.length < 2) return;
+            const gaps = prefixes.slice(0, -1).map((prefix, i) => {
+                const begIx = prefix.startLine - 1;
+                const nxtBeg = prefixes[i + 1].startLine - 1;
+                const end = this.findPrefixItemEnd(lines, begIx, nxtBeg);
                 return { nxtBeg, hasBlank: this.hasBlankGap(lines, end + 1, nxtBeg - 1) };
             });
-            const anyBlank = gaps.some(gap => gap.hasBlank);
+            const anyBlank = gaps.some((gap) => gap.hasBlank);
             if (!anyBlank) return;
-            gaps.forEach(gap => {
+            gaps.forEach((gap) => {
                 if (!gap.hasBlank) {
                     onError({ lineNumber: gap.nxtBeg + 1, detail: gapDet, context: lines[gap.nxtBeg].trim() });
                 }
             });
-        };
-        this.listAnalyzer.walkListBlocks(lines, (items, findEnd, isSameKind, isNum) => {
-            checkBlockBounds(items, findEnd, isSameKind);
-            if (isNum) checkBlockGaps(items, findEnd);
         });
+    }
+
+    checkLines(lines: readonly string[], onError: RuleOnError, blankDets: BlankDets): void {
+        this.checkMicromark(lines, parseMicromarkTokens(lines), onError, blankDets);
     }
 }

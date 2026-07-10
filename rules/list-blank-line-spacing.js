@@ -11,8 +11,12 @@ class ListBlankSpacingRule extends base_rule_1.BaseRule {
         this.description = details_1.details.listBlankSpacing;
         this.tags = ["lists"];
     }
-    check(lines, onError) {
-        this.spacingChecker.checkLines(lines, onError, {
+    get parser() {
+        return "micromark";
+    }
+    checkMicromark(params, onError) {
+        const tokens = params.parsers.micromark?.tokens ?? [];
+        this.spacingChecker.checkMicromark(params.lines, tokens, onError, {
             bef: details_1.details.listBlankBef,
             aft: details_1.details.listBlankAft,
             gap: details_1.details.listBlankGap

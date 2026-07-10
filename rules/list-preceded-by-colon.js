@@ -11,8 +11,11 @@ class ListPrecededByColonRule extends base_rule_1.BaseRule {
         this.description = details_1.details.listPrecededByColon;
         this.tags = ["lists"];
     }
-    check(lines, onError) {
-        this.colonChecker.checkListPrecededByColon(lines, onError, this.description);
+    get parser() {
+        return "micromark";
+    }
+    checkMicromark(params, onError) {
+        this.colonChecker.checkListPrecededByColon(params.lines, onError, this.description);
     }
 }
 exports.ListPrecededByColonRule = ListPrecededByColonRule;

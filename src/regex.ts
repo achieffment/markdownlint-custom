@@ -1,14 +1,8 @@
-export const subNumItemRx = /^\d+(?:\.\d+)+\s+/;
-
-export const subNumPathRx = /^(\d+(?:\.\d+)+)\s+/;
-
 export const bulItemRx = /^[-+*]\s/;
 
-export const numItemRx = /^\d+(?:\.\d+)+\s+|\d+\.\s+/;
+export const numItemRx = /^\d+\.\s+/;
 
-export const topNumPathRx = /^(\d+)\.\s+/;
-
-export const lstItemRx = /^([-+*]\s|\d+(?:\.\d+)+\s|\d+\.\s)/;
+export const lstItemRx = /^([-+*]\s|\d+\.\s)/;
 
 export const h2Rx = /^##(?!\#)\s+\S/;
 

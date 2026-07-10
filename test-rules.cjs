@@ -5,8 +5,8 @@ const customRules = require("./markdownlint-rules.js");
 const { loadLintConfig } = require("./load-cli2-config.cjs");
 const hlprs = require("./markdownlint-hlprs");
 const { details } = require("./details.js");
-const { h2Rx } = require("./regex.js");
-const { lstItemRx, isLstItem, eachLineOutsideCode } = hlprs;
+const { codeFenceRx, h2Rx, bulItemRx, numItemRx } = require("./regex.js");
+const { lstItemRx, isLstItem, eachLineOutsideCode, getIndent, isChildLstItem, skipBlankFwd, findPrevListInd } = hlprs;
 
 const { config: lintConfig } = loadLintConfig();
 
@@ -121,8 +121,8 @@ const allowedLineDiff = (errLine, sucLine) => {
     if (errLine.endsWith(".") && sucLine === errLine.slice(0, -1) + ":") return true;
     if (errLine.endsWith(";") && sucLine === errLine.slice(0, -1) + ":") return true;
     if (sucLine === errLine.trimStart() && errLine.length > sucLine.length) return true;
-    if (/^-\s*$/.test(errLine.trim()) && /^- .+;/.test(sucLine)) return true;
-    if (/^\d+\.\s{2,}$/.test(errLine) && /^\d+\. .+;/.test(sucLine)) return true;
+    if (bulItemRx.test(errLine) && errLine.replace(bulItemRx, "").trim() === "" && /^[-+*] .+;/.test(sucLine)) return true;
+    if (numItemRx.test(errLine) && errLine.replace(numItemRx, "").trim() === "" && /^\d+\. .+;/.test(sucLine)) return true;
     return false;
 };
 
@@ -137,9 +137,11 @@ const checkExamplePair = (ruleName, errPath, sucPath) => {
         return;
     }
     if (ruleName === "minimum-h2-heading") {
-        const sucBody = suc.replace(/\n##(?!\#)\s+\S[^\n]*$/, "");
+        const sucLines = suc.split("\n");
+        const lastLine = sucLines[sucLines.length - 1].trim();
+        assert(h2Rx.test(lastLine), `${rel}: _suc must add ## heading`);
+        const sucBody = sucLines.slice(0, -1).join("\n");
         assert(err === sucBody, `${rel}: _suc must differ from _err only by added ## heading`);
-        assert(h2Rx.test(suc.split("\n").pop().trim()), `${rel}: _suc must add ## heading`);
         return;
     }
     const errLines = err.split("\n");
@@ -172,7 +174,7 @@ const checkExampleFenceLang = (filePath) => {
     lines.forEach((line, ix) => {
         const trim = line.trim();
         if (!trim.startsWith("```")) return;
-        if (!inCodeB && !/^```\S+/.test(trim)) {
+        if (!inCodeB && (!codeFenceRx.test(trim) || trim === "```")) {
             assert(false, `${rel}:${ix + 1}: opening fence must have language tag (e.g. js, pr)`);
         }
         inCodeB = !inCodeB;
@@ -274,29 +276,50 @@ if (failed === 0) {
     console.log(`OK   hlprs API (${expectedHlprsKeys.length} exports)`);
 }
 
-const deepMarks = ["1.1", "1.1.1", "1.1.1.1", "1.1.1.1.1", "1.1.1.1.1.1"];
-deepMarks.forEach(mark => {
-    const line = `   ${mark} пункт;`;
+if (!isChildLstItem("1. родитель;", "   1. дочерний;")) {
+    assert(false, "isChildLstItem: nested should be child");
+}
+if (isChildLstItem("1. пункт;", "1. sibling;")) {
+    assert(false, "isChildLstItem: sibling should not be child");
+}
+if (getIndent("   текст") !== 3) {
+    assert(false, "getIndent: expected 3");
+}
+const skipLines = ["a", "", "", "b"];
+if (skipBlankFwd(skipLines, 0) !== 3) {
+    assert(false, "skipBlankFwd: expected index 3");
+}
+const prevLines = ["1. пункт;", "", "2. второй;"];
+if (findPrevListInd(prevLines, 2) !== 0) {
+    assert(false, "findPrevListInd: expected indent 0");
+}
+if (failed === 0) {
+    console.log("OK   hlprs behavior (isChildLstItem, getIndent, skipBlankFwd, findPrevListInd)");
+}
+
+const deepIndents = [3, 6, 9, 12, 15];
+deepIndents.forEach(sp => {
+    const line = `${" ".repeat(sp)}1. пункт;`;
     const trim = line.trim();
     if (!lstItemRx.test(trim) || !isLstItem(line)) {
-        assert(false, `deep regex: "${trim}" not recognized as list item`);
+        assert(false, `nested num regex: "${trim}" not recognized as list item`);
     }
 });
 if (failed === 0) {
-    console.log(`OK   deep regex (${deepMarks.length} marks)`);
+    console.log(`OK   nested num regex (${deepIndents.length} levels)`);
 }
 
 const deepOk = `## T
 
 1. корень:
 
-   1.1 второй:
+   1. второй:
 
-      1.1.1 третий:
+      1. третий:
 
-         1.1.1.1 четвёртый:
+         1. четвёртый:
 
-            1.1.1.1.1 пятый;
+            1. пятый;
 `;
 const deepOkRes = lintStrings({ deep: deepOk }, ruleNames);
 if (getFiredRules(deepOkRes.deep || []).size > 0) {
@@ -309,11 +332,11 @@ const deepErr = `## T
 
 1. корень;
 
-   1.1 без точки с запятой
+   1. без точки с запятой
 
-      1.1.1 тоже без
+      1. тоже без
 
-         1.1.1.1 и глубже без
+         1. и глубже без
 `;
 const emptyItemErr = `## T
 
@@ -380,7 +403,7 @@ const semiChildErr = `## T
 
 1. root;
 
-   1.1 child;
+   1. child;
 `;
 const semiChildErrRes = lintStrings({ t: semiChildErr }, ["list-items-end-with-semicolon-or-colon", "minimum-h2-heading"]);
 const semiChildViol = semiChildErrRes.t || [];
@@ -461,39 +484,56 @@ if (!starBulSemiFired.has("list-items-end-with-semicolon-or-colon") || starBulSe
     }
 }
 
-const subNumSiblingOk = `## T
+const plusBulSemiErr = `## T
 
-1. root:
-   1.1 first;
-   1.2 second;
++ пункт без точки с запятой
 `;
-const subNumSiblingOkRes = lintStrings({ t: subNumSiblingOk }, ["list-items-end-with-semicolon-or-colon", "minimum-h2-heading"]);
-if (getFiredRules(subNumSiblingOkRes.t || []).size > 0) {
-    assert(false, "subnum sibling ok: " + [...getFiredRules(subNumSiblingOkRes.t || [])].join(", "));
+const plusBulSemiErrRes = lintStrings({ t: plusBulSemiErr }, ["list-items-end-with-semicolon-or-colon", "minimum-h2-heading"]);
+const plusBulSemiFired = getFiredRules(plusBulSemiErrRes.t || []);
+if (!plusBulSemiFired.has("list-items-end-with-semicolon-or-colon") || plusBulSemiFired.size !== 1) {
+    assert(false, "plus bullet semi err: expected list-items-end-with-semicolon-or-colon only, got " + [...plusBulSemiFired].join(", "));
 } else {
-    console.log("OK   subnum sibling → clean");
+    const plusBulSemiDet = (plusBulSemiErrRes.t || [])[0]?.errorDetail;
+    if (plusBulSemiDet !== details.listItemsSemi) {
+        assert(false, `plus bullet semi detail: expected listItemsSemi got "${plusBulSemiDet || "none"}"`);
+    } else {
+        console.log("OK   plus bullet without semicolon → listItemsSemi");
+    }
 }
 
-const orphanSubNumOk = `## T
+const nestedNumSiblingOk = `## T
+
+1. root:
+   1. first;
+   1. second;
+`;
+const nestedNumSiblingOkRes = lintStrings({ t: nestedNumSiblingOk }, ["list-items-end-with-semicolon-or-colon", "minimum-h2-heading"]);
+if (getFiredRules(nestedNumSiblingOkRes.t || []).size > 0) {
+    assert(false, "nested num sibling ok: " + [...getFiredRules(nestedNumSiblingOkRes.t || [])].join(", "));
+} else {
+    console.log("OK   nested num sibling → clean");
+}
+
+const orphanNumOk = `## T
 
 1. first;
-2.1 not child of one;
+2. not child of one;
 `;
-const orphanSubNumOkRes = lintStrings({ t: orphanSubNumOk }, ["list-items-end-with-semicolon-or-colon", "minimum-h2-heading"]);
-if (getFiredRules(orphanSubNumOkRes.t || []).size > 0) {
-    assert(false, "orphan subnum ok: " + [...getFiredRules(orphanSubNumOkRes.t || [])].join(", "));
+const orphanNumOkRes = lintStrings({ t: orphanNumOk }, ["list-items-end-with-semicolon-or-colon", "minimum-h2-heading"]);
+if (getFiredRules(orphanNumOkRes.t || []).size > 0) {
+    assert(false, "orphan num ok: " + [...getFiredRules(orphanNumOkRes.t || [])].join(", "));
 } else {
-    console.log("OK   orphan subnum not child → clean");
+    console.log("OK   orphan num not child → clean");
 }
 
 const nestedSpacingErr = `## T
 
 1. родитель:
 
-   1.1 вложенный;
-      1.1.1 третий уровень;
+   1. вложенный;
+      1. третий уровень;
 
-         1.1.1.1 четвёртый уровень;
+         1. четвёртый уровень;
 `;
 const nestedSpacingRes = lintStrings({ t: nestedSpacingErr }, ["list-blank-line-spacing", "minimum-h2-heading"]);
 const nestedSpacingViol = nestedSpacingRes.t || [];
@@ -692,7 +732,7 @@ const listColonNestedOk = `## T
 
 Текст без двоеточия.
 
-   1.1 вложенный;
+   1. вложенный;
 `;
 const listColonNestedOkRes = lintStrings({ t: listColonNestedOk }, ["list-preceded-by-colon", "minimum-h2-heading"]);
 const listColonNestedFired = getFiredRules(listColonNestedOkRes.t || []);
@@ -857,6 +897,29 @@ if (getFiredRules(fenceContinuationOkRes.t || []).size > 0) {
     assert(false, "fence continuation ok: " + [...getFiredRules(fenceContinuationOkRes.t || [])].join(", "));
 } else {
     console.log("OK   num item fence continuation → clean");
+}
+
+const listFenceSplitErr = `## T
+
+Вводный:
+
+1. первый;
+
+Второй блок без двоеточия;
+
+1. второй;
+`;
+const listFenceSplitErrRes = lintStrings({ t: listFenceSplitErr }, ["list-preceded-by-colon", "minimum-h2-heading", "list-blank-line-spacing", "list-items-end-with-semicolon-or-colon", "sentences-end-with-mark"]);
+const listFenceSplitErrFired = getFiredRules(listFenceSplitErrRes.t || []);
+if (!listFenceSplitErrFired.has("list-preceded-by-colon") || listFenceSplitErrFired.size !== 1) {
+    assert(false, "list fence split err: expected list-preceded-by-colon only, got " + [...listFenceSplitErrFired].join(", "));
+} else {
+    const listFenceSplitLine = (listFenceSplitErrRes.t || [])[0]?.lineNumber;
+    if (listFenceSplitLine !== 7) {
+        assert(false, `list fence split err lineNumber: expected 7 got ${listFenceSplitLine || "none"}`);
+    } else {
+        console.log("OK   second list block without colon → list-preceded-by-colon");
+    }
 }
 
 const listAfterHeadingNoBlankErr = `## T
@@ -1120,6 +1183,26 @@ if (getFiredRules(codeblockTablePrevRes.t || []).size > 0) {
     console.log("OK   codeblock-preceded-by-colon skip pipe table prev → clean");
 }
 
+const codeblockTableProseErr = `## T
+
+Текст перед таблицей.
+
+| Col | Val |
+| --- | --- |
+| a | b |
+
+\`\`\`js
+const x = 1;
+\`\`\`
+`;
+const codeblockTableProseErrRes = lintStrings({ t: codeblockTableProseErr }, ["codeblock-preceded-by-colon", "minimum-h2-heading", "list-blank-line-spacing", "list-items-end-with-semicolon-or-colon", "sentences-end-with-mark"]);
+const codeblockTableProseFired = getFiredRules(codeblockTableProseErrRes.t || []);
+if (!codeblockTableProseFired.has("codeblock-preceded-by-colon") || codeblockTableProseFired.size !== 1) {
+    assert(false, "codeblock table prose err: expected codeblock-preceded-by-colon only, got " + [...codeblockTableProseFired].join(", "));
+} else {
+    console.log("OK   codeblock prose above table → codeblock-preceded-by-colon");
+}
+
 const h2InCodeErr = "```js\n## fake h2\n```";
 const h2InCodeRes = lintStrings({ t: h2InCodeErr }, ["minimum-h2-heading"]);
 const h2InCodeFired = getFiredRules(h2InCodeRes.t || []);
@@ -1160,6 +1243,41 @@ if (!h2EmptyFired.has("minimum-h2-heading") || h2EmptyFired.size !== 1) {
     console.log("OK   H2 without text → minimum-h2-heading");
 }
 
+const setextH2Ok = `Заголовок
+---
+
+Текст.
+`;
+const setextH2OkRes = lintStrings({ t: setextH2Ok }, ["minimum-h2-heading", "sentences-end-with-mark"]);
+if (getFiredRules(setextH2OkRes.t || []).has("minimum-h2-heading")) {
+    assert(false, "setext H2 ok: expected clean minimum-h2-heading, got " + [...getFiredRules(setextH2OkRes.t || [])].join(", "));
+} else {
+    console.log("OK   setext H2 → clean");
+}
+
+const setextH1OnlyErr = `Заголовок
+===
+`;
+const setextH1OnlyErrRes = lintStrings({ t: setextH1OnlyErr }, ["minimum-h2-heading"]);
+const setextH1OnlyFired = getFiredRules(setextH1OnlyErrRes.t || []);
+if (!setextH1OnlyFired.has("minimum-h2-heading") || setextH1OnlyFired.size !== 1) {
+    assert(false, "setext H1 only err: expected minimum-h2-heading only, got " + [...setextH1OnlyFired].join(", "));
+} else {
+    console.log("OK   setext H1 without H2 → minimum-h2-heading");
+}
+
+const atxH1OnlyErr = `# Заголовок H1
+
+Текст.
+`;
+const atxH1OnlyErrRes = lintStrings({ t: atxH1OnlyErr }, ["minimum-h2-heading", "sentences-end-with-mark"]);
+const atxH1OnlyFired = getFiredRules(atxH1OnlyErrRes.t || []);
+if (!atxH1OnlyFired.has("minimum-h2-heading") || atxH1OnlyFired.size !== 1) {
+    assert(false, "ATX H1 only err: expected minimum-h2-heading only, got " + [...atxH1OnlyFired].join(", "));
+} else {
+    console.log("OK   ATX H1 without H2 → minimum-h2-heading");
+}
+
 const emptyNumErr = `## T
 
 1.  
@@ -1181,7 +1299,7 @@ const noLeadingNestedOk = `## T
 
 1. родитель:
 
-   1.1 вложенный;
+   1. вложенный;
 `;
 const noLeadingNestedOkRes = lintStrings({ t: noLeadingNestedOk }, ["no-leading-spaces", "minimum-h2-heading", "list-items-end-with-semicolon-or-colon", "list-blank-line-spacing"]);
 if (getFiredRules(noLeadingNestedOkRes.t || []).size > 0) {
@@ -1193,8 +1311,8 @@ if (getFiredRules(noLeadingNestedOkRes.t || []).size > 0) {
 const noLeadingDedntErr = `## T
 
 1. parent:
-   1.1 ok;
- 1.2 bad;
+   1. ok;
+ 1. bad;
 `;
 const noLeadingDedntErrRes = lintStrings({ t: noLeadingDedntErr }, ["no-leading-spaces", "minimum-h2-heading", "list-items-end-with-semicolon-or-colon", "list-blank-line-spacing"]);
 const noLeadingDedntViol = noLeadingDedntErrRes.t || [];
@@ -1233,7 +1351,7 @@ const noLeadingFenceNestedOk = `## T
 code
 \`\`\`
 
-   1.1 child;
+   1. child;
 `;
 const noLeadingFenceNestedOkRes = lintStrings({ t: noLeadingFenceNestedOk }, ["no-leading-spaces", "minimum-h2-heading", "list-items-end-with-semicolon-or-colon", "list-blank-line-spacing", "codeblock-preceded-by-colon"]);
 if (getFiredRules(noLeadingFenceNestedOkRes.t || []).size > 0) {
@@ -1254,9 +1372,20 @@ if (!noLeadingTopErrFired.has("no-leading-spaces") || noLeadingTopErrFired.size 
     console.log("OK   top-level indent → no-leading-spaces");
 }
 
+const noLeadingSkipHeadingOk = ` ## T
+
+Текст с точкой.
+`;
+const noLeadingSkipHeadingRes = lintStrings({ t: noLeadingSkipHeadingOk }, ["no-leading-spaces", "minimum-h2-heading", "sentences-end-with-mark"]);
+if (getFiredRules(noLeadingSkipHeadingRes.t || []).has("no-leading-spaces")) {
+    assert(false, "skip heading: expected clean no-leading-spaces, got " + [...getFiredRules(noLeadingSkipHeadingRes.t || [])].join(", "));
+} else {
+    console.log("OK   no-leading-spaces skip heading → clean");
+}
+
 const noLeadingFirstIndentedErr = `## T
 
-   1.1 первый без родителя;
+   1. первый без родителя;
 `;
 const noLeadingFirstIndentedRes = lintStrings({ t: noLeadingFirstIndentedErr }, ["no-leading-spaces", "minimum-h2-heading", "list-items-end-with-semicolon-or-colon"]);
 const noLeadingFirstIndentedFired = getFiredRules(noLeadingFirstIndentedRes.t || []);
@@ -1280,6 +1409,27 @@ if (!noLeadingFenceIndentErrFired.has("no-leading-spaces") || noLeadingFenceInde
     assert(false, "indented fence err: expected no-leading-spaces only, got " + [...noLeadingFenceIndentErrFired].join(", "));
 } else {
     console.log("OK   indented fence → no-leading-spaces");
+}
+
+const codblkIndentedFenceErr = `## T
+
+Строка перед кодом;
+
+    \`\`\`js
+    const x = 1;
+    \`\`\`
+`;
+const codblkIndentedFenceErrRes = lintStrings({ t: codblkIndentedFenceErr }, ["codeblock-preceded-by-colon", "minimum-h2-heading"]);
+const codblkIndentedFenceErrFired = getFiredRules(codblkIndentedFenceErrRes.t || []);
+if (!codblkIndentedFenceErrFired.has("codeblock-preceded-by-colon") || codblkIndentedFenceErrFired.size !== 1) {
+    assert(false, "indented fence colon err: expected codeblock-preceded-by-colon only, got " + [...codblkIndentedFenceErrFired].join(", "));
+} else {
+    const codblkIndentedFenceLine = (codblkIndentedFenceErrRes.t || [])[0]?.lineNumber;
+    if (codblkIndentedFenceLine !== 3) {
+        assert(false, `indented fence colon err lineNumber: expected 3 got ${codblkIndentedFenceLine || "none"}`);
+    } else {
+        console.log("OK   indented opening fence without colon → codeblock-preceded-by-colon");
+    }
 }
 
 const noLeadingClosingFenceIndentErr = `## T
@@ -1390,6 +1540,20 @@ if (getFiredRules(sentencesSkipQuoteHrRes.t || []).size > 0) {
     assert(false, "sentences skip quote/hr: " + [...getFiredRules(sentencesSkipQuoteHrRes.t || [])].join(", "));
 } else {
     console.log("OK   sentences skip blockquote/HR → clean");
+}
+
+const sentencesQuoteBlankProseErr = `## T
+
+> цитата.
+
+Текст без маркера
+`;
+const sentencesQuoteBlankProseErrRes = lintStrings({ t: sentencesQuoteBlankProseErr }, ["sentences-end-with-mark", "minimum-h2-heading"]);
+const sentencesQuoteBlankProseFired = getFiredRules(sentencesQuoteBlankProseErrRes.t || []);
+if (!sentencesQuoteBlankProseFired.has("sentences-end-with-mark") || sentencesQuoteBlankProseFired.size !== 1) {
+    assert(false, "quote blank prose err: expected sentences-end-with-mark only, got " + [...sentencesQuoteBlankProseFired].join(", "));
+} else {
+    console.log("OK   blockquote + blank + prose without mark → sentences-end-with-mark");
 }
 
 const sentencesInCodeOk = `## T

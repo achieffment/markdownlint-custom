@@ -1,4 +1,5 @@
-import { bulItemRx, codeFenceRx, headingRx, lstItemRx, numItemRx, subNumItemRx, subNumPathRx, topNumPathRx } from "../regex";
+import { bulItemRx, codeFenceRx, headingRx, lstItemRx, numItemRx } from "../regex";
+import { isBlankLine } from "./micromark-token-utils";
 
 export class ListLineParser {
     get lstItemRx(): RegExp {
@@ -26,36 +27,23 @@ export class ListLineParser {
     }
 
     isNestedLstItem(line: string): boolean {
-        if (this.getIndent(line) > 0) return true;
-        return subNumItemRx.test(this.trimStart(line));
-    }
-
-    private getNumPath(line: string): string | null {
-        if (!this.isNumItem(line)) return null;
-        const t = this.trimStart(line);
-        const top = t.match(topNumPathRx);
-        if (top) return top[1];
-        const sub = t.match(subNumPathRx);
-        return sub ? sub[1] : null;
+        return this.getIndent(line) > 0;
     }
 
     isChildLstItem(parentLine: string, childLine: string): boolean {
         if (!this.isLstItem(parentLine) || !this.isLstItem(childLine)) return false;
-        if (this.getIndent(childLine) > this.getIndent(parentLine)) return true;
-        const parentPath = this.getNumPath(parentLine);
-        const childPath = this.getNumPath(childLine);
-        return Boolean(parentPath && childPath && childPath.startsWith(parentPath + "."));
+        return this.getIndent(childLine) > this.getIndent(parentLine);
     }
 
     skipBlankFwd(lines: readonly string[], ix: number): number {
         let next = ix + 1;
-        while (next < lines.length && lines[next].trim() === "") next++;
+        while (next < lines.length && isBlankLine(lines[next])) next++;
         return next;
     }
 
     skipBlankBck(lines: readonly string[], ix: number): number {
         let prev = ix - 1;
-        while (prev >= 0 && lines[prev].trim() === "") prev--;
+        while (prev >= 0 && isBlankLine(lines[prev])) prev--;
         return prev;
     }
 
