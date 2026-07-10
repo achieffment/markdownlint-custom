@@ -4,6 +4,7 @@ exports.walkLineBasedListBlocks = void 0;
 const regex_1 = require("../regex");
 const outside_code_lines_1 = require("./outside-code-lines");
 const list_item_body_end_1 = require("./list-item-body-end");
+const micromark_token_utils_1 = require("./micromark-token-utils");
 class LineListBlockWalker {
     constructor(lines, lineParser) {
         this.lines = lines;
@@ -30,7 +31,7 @@ class LineListBlockWalker {
         const items = [];
         let idx = fstBeg;
         while (idx < this.lines.length) {
-            while (idx < this.lines.length && this.lines[idx].trim() === "")
+            while (idx < this.lines.length && (0, micromark_token_utils_1.isBlankLine)(this.lines[idx]))
                 idx++;
             if (idx >= this.lines.length)
                 break;

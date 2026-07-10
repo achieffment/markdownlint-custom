@@ -21,18 +21,21 @@ const walkLines = (
     }
 };
 
-export const isOpeningCodeFenceAt = (lines: readonly string[], ix: number): boolean => {
-    let inCodeB = false;
-    for (let i = 0; i <= ix; i++) {
-        const trim = lines[i].trim();
-        if (codeFenceRx.test(trim)) {
-            if (i === ix) {
-                return !inCodeB;
-            }
-            inCodeB = !inCodeB;
-        }
-    }
-    return false;
+export const skipFenceBlockFwd = (lines: readonly string[], ix: number): number => {
+    if (ix < 0 || ix >= lines.length) return ix;
+    if (!codeFenceRx.test(lines[ix].trim())) return ix;
+    let next = ix + 1;
+    while (next < lines.length && !codeFenceRx.test(lines[next].trim())) next++;
+    return next;
+};
+
+export const skipFenceBlockBck = (lines: readonly string[], ix: number): number => {
+    if (ix < 0 || ix >= lines.length) return ix;
+    if (!codeFenceRx.test(lines[ix].trim())) return ix;
+    let prev = ix - 1;
+    while (prev >= 0 && !codeFenceRx.test(lines[prev].trim())) prev--;
+    if (prev >= 0) return prev - 1;
+    return prev;
 };
 
 export const eachLineOutsideCode = (lines: readonly string[], fn: OutsideCodeCallback): void => {
@@ -67,6 +70,23 @@ export const walkCodeFenceAware = (lines: readonly string[], handlers: CodeFence
             return undefined;
         }
     );
+};
+
+export const isOpeningCodeFenceAt = (lines: readonly string[], ix: number): boolean => {
+    if (ix < 0 || ix >= lines.length) return false;
+    if (!codeFenceRx.test(lines[ix].trim())) return false;
+    let opening = false;
+    let found = false;
+    walkCodeFenceAware(lines, {
+        onFence: (_line, fenceIx, _trim, isOpening) => {
+            if (fenceIx === ix) {
+                opening = isOpening;
+                found = true;
+            }
+        },
+        onOutside: () => {}
+    });
+    return found && opening;
 };
 
 export const eachOpeningCodeFenceLine = (lines: readonly string[], fn: (ix: number) => void): void => {

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.eachOpeningCodeFenceLine = exports.walkCodeFenceAware = exports.walkOutsideCode = exports.eachLineOutsideCode = exports.isOpeningCodeFenceAt = void 0;
+exports.eachOpeningCodeFenceLine = exports.isOpeningCodeFenceAt = exports.walkCodeFenceAware = exports.walkOutsideCode = exports.eachLineOutsideCode = exports.skipFenceBlockBck = exports.skipFenceBlockFwd = void 0;
 const regex_1 = require("../regex");
 const walkLines = (lines, onFence, onOutside) => {
     let inCodeB = false;
@@ -19,20 +19,30 @@ const walkLines = (lines, onFence, onOutside) => {
             ix = jump;
     }
 };
-const isOpeningCodeFenceAt = (lines, ix) => {
-    let inCodeB = false;
-    for (let i = 0; i <= ix; i++) {
-        const trim = lines[i].trim();
-        if (regex_1.codeFenceRx.test(trim)) {
-            if (i === ix) {
-                return !inCodeB;
-            }
-            inCodeB = !inCodeB;
-        }
-    }
-    return false;
+const skipFenceBlockFwd = (lines, ix) => {
+    if (ix < 0 || ix >= lines.length)
+        return ix;
+    if (!regex_1.codeFenceRx.test(lines[ix].trim()))
+        return ix;
+    let next = ix + 1;
+    while (next < lines.length && !regex_1.codeFenceRx.test(lines[next].trim()))
+        next++;
+    return next;
 };
-exports.isOpeningCodeFenceAt = isOpeningCodeFenceAt;
+exports.skipFenceBlockFwd = skipFenceBlockFwd;
+const skipFenceBlockBck = (lines, ix) => {
+    if (ix < 0 || ix >= lines.length)
+        return ix;
+    if (!regex_1.codeFenceRx.test(lines[ix].trim()))
+        return ix;
+    let prev = ix - 1;
+    while (prev >= 0 && !regex_1.codeFenceRx.test(lines[prev].trim()))
+        prev--;
+    if (prev >= 0)
+        return prev - 1;
+    return prev;
+};
+exports.skipFenceBlockBck = skipFenceBlockBck;
 const eachLineOutsideCode = (lines, fn) => {
     walkLines(lines, () => { }, (_line, ix, trim) => {
         fn(lines[ix], ix, trim);
@@ -55,6 +65,25 @@ const walkCodeFenceAware = (lines, handlers) => {
     });
 };
 exports.walkCodeFenceAware = walkCodeFenceAware;
+const isOpeningCodeFenceAt = (lines, ix) => {
+    if (ix < 0 || ix >= lines.length)
+        return false;
+    if (!regex_1.codeFenceRx.test(lines[ix].trim()))
+        return false;
+    let opening = false;
+    let found = false;
+    (0, exports.walkCodeFenceAware)(lines, {
+        onFence: (_line, fenceIx, _trim, isOpening) => {
+            if (fenceIx === ix) {
+                opening = isOpening;
+                found = true;
+            }
+        },
+        onOutside: () => { }
+    });
+    return found && opening;
+};
+exports.isOpeningCodeFenceAt = isOpeningCodeFenceAt;
 const eachOpeningCodeFenceLine = (lines, fn) => {
     (0, exports.walkCodeFenceAware)(lines, {
         onFence: (_line, ix, _trim, opening) => {

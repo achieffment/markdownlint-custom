@@ -1,6 +1,7 @@
 import type { LinePredicate } from "../types";
 import { codeFenceRx, headingRx } from "../regex";
 import type { ListLineParser } from "./list-line-parser";
+import { skipFenceBlockFwd } from "./outside-code-lines";
 
 export type ListItemBodyEndOpts = {
     maxIx?: number;
@@ -27,9 +28,9 @@ export const findListItemBodyEnd = (
         if (codeFenceRx.test(trim)) {
             if (!opts.traverseFence) break;
             end = ix;
-            ix++;
-            while (ix < lines.length && !codeFenceRx.test(lines[ix].trim())) ix++;
-            if (ix < lines.length) end = ix;
+            const closeIx = skipFenceBlockFwd(lines, ix);
+            if (closeIx < lines.length && codeFenceRx.test(lines[closeIx].trim())) end = closeIx;
+            ix = closeIx;
             aftFence = true;
             continue;
         }

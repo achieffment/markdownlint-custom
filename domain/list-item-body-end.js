@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.findListItemBodyEnd = void 0;
 const regex_1 = require("../regex");
+const outside_code_lines_1 = require("./outside-code-lines");
 const findListItemBodyEnd = (lines, begIx, lineParser, opts) => {
     const maxIx = opts.maxIx ?? lines.length;
     const ind = lineParser.getIndent(lines[begIx]);
@@ -19,11 +20,10 @@ const findListItemBodyEnd = (lines, begIx, lineParser, opts) => {
             if (!opts.traverseFence)
                 break;
             end = ix;
-            ix++;
-            while (ix < lines.length && !regex_1.codeFenceRx.test(lines[ix].trim()))
-                ix++;
-            if (ix < lines.length)
-                end = ix;
+            const closeIx = (0, outside_code_lines_1.skipFenceBlockFwd)(lines, ix);
+            if (closeIx < lines.length && regex_1.codeFenceRx.test(lines[closeIx].trim()))
+                end = closeIx;
+            ix = closeIx;
             aftFence = true;
             continue;
         }

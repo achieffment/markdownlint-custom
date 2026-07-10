@@ -1,4 +1,5 @@
 import { bulItemRx, codeFenceRx, headingRx, lstItemRx, numItemRx } from "../regex";
+import { skipFenceBlockBck } from "./outside-code-lines";
 import { isBlankLine } from "./micromark-token-utils";
 
 export class ListLineParser {
@@ -53,14 +54,12 @@ export class ListLineParser {
         let prevInd = -1;
         while (prev >= 0) {
             const prevTrim = lines[prev].trim();
-            if (!prevTrim) {
+            if (isBlankLine(lines[prev])) {
                 prev--;
                 continue;
             }
             if (codeFenceRx.test(prevTrim)) {
-                prev--;
-                while (prev >= 0 && !codeFenceRx.test(lines[prev].trim())) prev--;
-                if (prev >= 0) prev--;
+                prev = skipFenceBlockBck(lines, prev);
                 continue;
             }
             if (this.isLstItem(lines[prev])) {

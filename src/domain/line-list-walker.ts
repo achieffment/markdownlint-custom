@@ -3,6 +3,7 @@ import { codeFenceRx, headingRx } from "../regex";
 import { walkOutsideCode } from "./outside-code-lines";
 import type { ListLineParser } from "./list-line-parser";
 import { findListItemBodyEnd } from "./list-item-body-end";
+import { isBlankLine } from "./micromark-token-utils";
 
 class LineListBlockWalker {
     constructor(
@@ -39,7 +40,7 @@ class LineListBlockWalker {
         const items: number[] = [];
         let idx = fstBeg;
         while (idx < this.lines.length) {
-            while (idx < this.lines.length && this.lines[idx].trim() === "") idx++;
+            while (idx < this.lines.length && isBlankLine(this.lines[idx])) idx++;
             if (idx >= this.lines.length) break;
             const trim = this.lines[idx].trim();
             if (headingRx.test(trim) || codeFenceRx.test(trim)) break;

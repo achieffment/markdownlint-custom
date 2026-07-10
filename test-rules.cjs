@@ -288,12 +288,20 @@ const skipLines = ["a", "", "", "b"];
 if (skipBlankFwd(skipLines, 0) !== 3) {
     assert(false, "skipBlankFwd: expected index 3");
 }
+const outsideMd = ["before", "```js", "inside", "```", "after"];
+const outsideIxs = [];
+eachLineOutsideCode(outsideMd, (_line, ix) => {
+    outsideIxs.push(ix);
+});
+if (outsideIxs.length !== 2 || outsideIxs[0] !== 0 || outsideIxs[1] !== 4) {
+    assert(false, "eachLineOutsideCode: expected outside lines 0 and 4 only");
+}
 const prevLines = ["1. пункт;", "", "2. второй;"];
 if (findPrevListInd(prevLines, 2) !== 0) {
     assert(false, "findPrevListInd: expected indent 0");
 }
 if (failed === 0) {
-    console.log("OK   hlprs behavior (isChildLstItem, getIndent, skipBlankFwd, findPrevListInd)");
+    console.log("OK   hlprs behavior (isChildLstItem, getIndent, skipBlankFwd, eachLineOutsideCode, findPrevListInd)");
 }
 
 const collectErrs = (fn) => {

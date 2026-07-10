@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ListLineParser = void 0;
 const regex_1 = require("../regex");
+const outside_code_lines_1 = require("./outside-code-lines");
 const micromark_token_utils_1 = require("./micromark-token-utils");
 class ListLineParser {
     get lstItemRx() {
@@ -48,16 +49,12 @@ class ListLineParser {
         let prevInd = -1;
         while (prev >= 0) {
             const prevTrim = lines[prev].trim();
-            if (!prevTrim) {
+            if ((0, micromark_token_utils_1.isBlankLine)(lines[prev])) {
                 prev--;
                 continue;
             }
             if (regex_1.codeFenceRx.test(prevTrim)) {
-                prev--;
-                while (prev >= 0 && !regex_1.codeFenceRx.test(lines[prev].trim()))
-                    prev--;
-                if (prev >= 0)
-                    prev--;
+                prev = (0, outside_code_lines_1.skipFenceBlockBck)(lines, prev);
                 continue;
             }
             if (this.isLstItem(lines[prev])) {
