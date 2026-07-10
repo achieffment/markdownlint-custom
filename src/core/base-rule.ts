@@ -1,4 +1,4 @@
-import type { Rule, RuleOnError, RuleParams } from "markdownlint";
+import type { MicromarkToken, Rule, RuleOnError, RuleParams } from "markdownlint";
 import type { ICustomRule } from "./icustom-rule";
 
 export abstract class BaseRule implements ICustomRule {
@@ -13,6 +13,10 @@ export abstract class BaseRule implements ICustomRule {
     check(_params: RuleParams, _onError: RuleOnError): void {}
 
     checkMicromark(_params: RuleParams, _onError: RuleOnError): void {}
+
+    protected getMicromarkTokens(params: RuleParams): MicromarkToken[] {
+        return params.parsers.micromark?.tokens ?? [];
+    }
 
     toRule(): Rule {
         const parser = this.parser;

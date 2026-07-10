@@ -98,6 +98,7 @@ alwaysApply: true
 
 ### `codeblock-preceded-by-colon` — политика
 
+- **Parser:** `none` (line-based: `eachOpeningCodeFenceLine` / regex; micromark не парсит indented fence как `codeFenced`).
 - **Scope:** только **открывающие** `` ``` `` (не закрывающие).
 - **Проверка:** строка перед fence должна заканчиваться `:`.
 - **Skip prev:** заголовок, **любой** пункт списка (`isLstItem` / `lstItemRx`), code fence, pipe-строки таблицы (подъём вверх через `tableRowRx` в `checkPrecededByColon`, включая пустые строки между pipe-строками); нет непустой строки выше — skip.
@@ -107,6 +108,7 @@ alwaysApply: true
 
 ### `no-leading-spaces` — политика
 
+- **Parser:** `none` (line-based: `walkCodeFenceAware`; проверяет сами строки `` ``` ``, не только контент).
 - **Scope:** строки вне code fence и строки-обозначения блока (opening/closing `` ``` ``).
 - **Обход:** `walkCodeFenceAware` из [`src/domain/outside-code-lines.ts`](../src/domain/outside-code-lines.ts) (строки fence не пропускаются; не `eachLineOutsideCode`).
 - **Skip:** заголовки (`#`); содержимое между fence не проверяется.
@@ -116,6 +118,7 @@ alwaysApply: true
 
 ### `sentences-end-with-mark` — политика
 
+- **Parser:** `none` (line-based: blockquote continuation state, skip HR/table/list проще построчно).
 - **Scope:** непустые строки вне code fence.
 - **Skip:** заголовки, blockquote (`>`) и **продолжения** цитаты (непустые строки сразу после blockquote без пустой строки между), HR (`---` / `***` / `___`), любые пункты списка (`isLstItem`), pipe-таблицы (строка после trim начинается с `|`, `tableRowRx`).
 - **Проверка:** строка заканчивается `.`, `!`, `?`, `:` или `;`.
@@ -134,7 +137,7 @@ alwaysApply: true
 | `skipBlankFwd` | Индекс следующей непустой строки |
 | `eachLineOutsideCode` | Колбэк по строкам вне code fence |
 | `findPrevListInd` | Отступ предыдущего пункта списка |
-| `checkPrecededByColon` | `:` у обычного текста перед строкой `ix` |
+| `checkPrecededByColon` | `:` у обычного текста перед строкой `ix`; 4-й аргумент `colDet` — `details.codeblockColon` или `details.listPrecededByColon` |
 | `checkListBlankSpacing` | Политика `list-blank-line-spacing` (третий аргумент — `blankDets`: `bef`/`aft`/`gap`) |
 | `checkListPrecededByColon` | Политика `list-preceded-by-colon` (третий аргумент — `colDet`) |
 

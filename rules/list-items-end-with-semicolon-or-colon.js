@@ -15,7 +15,7 @@ class ListItemsEndRule extends base_rule_1.BaseRule {
         return "micromark";
     }
     checkMicromark(params, onError) {
-        const tokens = params.parsers.micromark?.tokens ?? [];
+        const tokens = this.getMicromarkTokens(params);
         this.listItemsChecker.checkMicromark(params.lines, tokens, onError, {
             empty: details_1.details.listItemsEmpty,
             colon: details_1.details.listItemsColon,

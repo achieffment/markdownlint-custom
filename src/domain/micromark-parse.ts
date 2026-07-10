@@ -1,7 +1,7 @@
 import path from "path";
 import type { MicromarkToken } from "markdownlint";
 
-const mmRoot = path.join(__dirname, "..", "node_modules", "markdownlint");
+const mmRoot = path.join(path.dirname(require.resolve("markdownlint/helpers")), "..");
 
 // Только для hlprs API (checkListBlankSpacing в test-rules); production rules получают tokens от markdownlint.
 // eslint-disable-next-line @typescript-eslint/no-require-imports

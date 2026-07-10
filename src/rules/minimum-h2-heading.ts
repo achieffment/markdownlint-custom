@@ -13,7 +13,7 @@ export class MinimumH2Rule extends BaseRule {
     }
 
     checkMicromark(params: RuleParams, onError: RuleOnError): void {
-        const tokens = params.parsers.micromark?.tokens ?? [];
+        const tokens = this.getMicromarkTokens(params);
         if (!hasMinimumH2(tokens)) {
             onError({ lineNumber: 1, detail: this.description });
         }

@@ -15,7 +15,7 @@ class MinimumH2Rule extends base_rule_1.BaseRule {
         return "micromark";
     }
     checkMicromark(params, onError) {
-        const tokens = params.parsers.micromark?.tokens ?? [];
+        const tokens = this.getMicromarkTokens(params);
         if (!(0, micromark_heading_1.hasMinimumH2)(tokens)) {
             onError({ lineNumber: 1, detail: this.description });
         }

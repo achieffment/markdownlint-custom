@@ -7,6 +7,9 @@ class BaseRule {
     }
     check(_params, _onError) { }
     checkMicromark(_params, _onError) { }
+    getMicromarkTokens(params) {
+        return params.parsers.micromark?.tokens ?? [];
+    }
     toRule() {
         const parser = this.parser;
         return {

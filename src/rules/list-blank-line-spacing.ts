@@ -17,7 +17,7 @@ export class ListBlankSpacingRule extends BaseRule {
     }
 
     checkMicromark(params: RuleParams, onError: RuleOnError): void {
-        const tokens = params.parsers.micromark?.tokens ?? [];
+        const tokens = this.getMicromarkTokens(params);
         this.spacingChecker.checkMicromark(params.lines, tokens, onError, {
             bef: details.listBlankBef,
             aft: details.listBlankAft,
