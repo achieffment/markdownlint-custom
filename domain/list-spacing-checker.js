@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ListSpacingChecker = void 0;
-const regex_1 = require("../regex");
 const micromark_lists_1 = require("./micromark-lists");
 const micromark_parse_1 = require("./micromark-parse");
 const micromark_token_utils_1 = require("./micromark-token-utils");
+const list_item_body_end_1 = require("./list-item-body-end");
 class ListSpacingChecker {
     constructor(lineParser) {
         this.lineParser = lineParser;
@@ -39,23 +39,11 @@ class ListSpacingChecker {
         return next;
     }
     findPrefixItemEnd(lines, begIx, maxIx) {
-        const ind = this.lineParser.getIndent(lines[begIx]);
-        let end = begIx;
-        for (let ix = begIx + 1; ix < maxIx; ix++) {
-            const trim = lines[ix].trim();
-            if (!trim)
-                continue;
-            if (regex_1.headingRx.test(trim) || regex_1.codeFenceRx.test(trim))
-                break;
-            if (this.lineParser.isLstItem(lines[ix]))
-                break;
-            const jInd = this.lineParser.getIndent(lines[ix]);
-            if (jInd > ind)
-                end = ix;
-            else
-                break;
-        }
-        return end;
+        return (0, list_item_body_end_1.findListItemBodyEnd)(lines, begIx, this.lineParser, {
+            maxIx,
+            traverseFence: false,
+            breakOnAnyListItem: true
+        });
     }
     checkMicromark(lines, tokens, onError, blankDets) {
         const befDet = blankDets.bef;

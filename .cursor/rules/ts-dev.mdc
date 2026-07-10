@@ -15,7 +15,7 @@ SRP/DRY — те же принципы, что в [js-dev.mdc](js-dev.mdc) (дл
 | Каталог | SRP |
 |---------|-----|
 | [`core/`](../src/core/) | `ICustomRule`, `abstract BaseRule` (Template Method `toRule()`) |
-| [`domain/`](../src/domain/) | `ListLineParser`, `outside-code-lines`, `line-list-walker`, `micromark-token-utils`, `micromark-lists`, `micromark-heading`, `micromark-parse`, `ListSpacingChecker`, `ColonChecker`, `micromark-list-checkers`, `no-leading-spaces-checker`, `sentences-end-mark-checker` |
+| [`domain/`](../src/domain/) | `ListLineParser`, `list-item-body-end`, `outside-code-lines`, `line-list-walker`, `micromark-token-utils`, `micromark-lists`, `micromark-heading`, `micromark-parse`, `ListSpacingChecker`, `ColonChecker`, `micromark-list-checkers`, `no-leading-spaces-checker`, `sentences-end-mark-checker` |
 | [`composition/`](../src/composition/) | `AppContext` — wiring singleton-ов |
 | [`rules/`](../src/rules/) | Класс `XxxRule extends BaseRule` — одна политика |
 | `regex.ts`, `details.ts` | Константы (не классы) |

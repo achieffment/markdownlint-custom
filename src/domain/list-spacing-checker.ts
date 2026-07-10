@@ -1,6 +1,5 @@
 import type { MicromarkToken, RuleOnError } from "markdownlint";
 import type { BlankDets, LinePredicate } from "../types";
-import { codeFenceRx, headingRx } from "../regex";
 import {
     collectPrefixesInList,
     eachTopLevelList
@@ -8,6 +7,7 @@ import {
 import { parseMicromarkTokens } from "./micromark-parse";
 import { isBlankLine } from "./micromark-token-utils";
 import type { ListLineParser } from "./list-line-parser";
+import { findListItemBodyEnd } from "./list-item-body-end";
 
 export class ListSpacingChecker {
     constructor(private readonly lineParser: ListLineParser) {}
@@ -37,18 +37,11 @@ export class ListSpacingChecker {
     }
 
     private findPrefixItemEnd(lines: readonly string[], begIx: number, maxIx: number): number {
-        const ind = this.lineParser.getIndent(lines[begIx]);
-        let end = begIx;
-        for (let ix = begIx + 1; ix < maxIx; ix++) {
-            const trim = lines[ix].trim();
-            if (!trim) continue;
-            if (headingRx.test(trim) || codeFenceRx.test(trim)) break;
-            if (this.lineParser.isLstItem(lines[ix])) break;
-            const jInd = this.lineParser.getIndent(lines[ix]);
-            if (jInd > ind) end = ix;
-            else break;
-        }
-        return end;
+        return findListItemBodyEnd(lines, begIx, this.lineParser, {
+            maxIx,
+            traverseFence: false,
+            breakOnAnyListItem: true
+        });
     }
 
     checkMicromark(

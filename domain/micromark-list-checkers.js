@@ -12,7 +12,7 @@ class ListItemsChecker {
         const lineStart = this.lineParser.trimStart(line);
         return lineStart.replace(this.lineParser.lstItemRx, "").trim();
     }
-    checkMicromark(lines, tokens, onError, details) {
+    checkMicromark(lines, tokens, onError, itemDets) {
         (0, micromark_lists_1.eachListItemPrefix)(tokens, (prefix) => {
             const ix = prefix.startLine - 1;
             const line = lines[ix] ?? "";
@@ -23,9 +23,9 @@ class ListItemsChecker {
             const folsub = next < lines.length && this.lineParser.isChildLstItem(line, lines[next]);
             const needsColon = folcod || folsub;
             const endsOk = needsColon ? regex_1.endsWithColonRx.test(cont) : regex_1.endsWithSemiRx.test(cont);
-            const lstDet = needsColon ? details.colon : details.semi;
+            const lstDet = needsColon ? itemDets.colon : itemDets.semi;
             if (!cont) {
-                onError({ lineNumber: prefix.startLine, detail: details.empty, context: trim });
+                onError({ lineNumber: prefix.startLine, detail: itemDets.empty, context: trim });
                 return;
             }
             if (!endsOk) {

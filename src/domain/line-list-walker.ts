@@ -2,6 +2,7 @@ import type { LinePredicate, ListBlockHandler } from "../types";
 import { codeFenceRx, headingRx } from "../regex";
 import { walkOutsideCode } from "./outside-code-lines";
 import type { ListLineParser } from "./list-line-parser";
+import { findListItemBodyEnd } from "./list-item-body-end";
 
 class LineListBlockWalker {
     constructor(
@@ -10,27 +11,10 @@ class LineListBlockWalker {
     ) {}
 
     private findItemEnd(beg: number, shouldBrk: LinePredicate): number {
-        const ind = this.lineParser.getIndent(this.lines[beg]);
-        let end = beg;
-        let aftFence = false;
-        for (let ix = beg + 1; ix < this.lines.length; ix++) {
-            const trim = this.lines[ix].trim();
-            if (!trim) continue;
-            if (headingRx.test(trim)) break;
-            if (shouldBrk(this.lines[ix])) break;
-            const jInd = this.lineParser.getIndent(this.lines[ix]);
-            if (codeFenceRx.test(trim)) {
-                end = ix;
-                ix++;
-                while (ix < this.lines.length && !codeFenceRx.test(this.lines[ix].trim())) ix++;
-                if (ix < this.lines.length) end = ix;
-                aftFence = true;
-                continue;
-            }
-            if (jInd > ind || (aftFence && jInd >= ind)) end = ix;
-            else break;
-        }
-        return end;
+        return findListItemBodyEnd(this.lines, beg, this.lineParser, {
+            traverseFence: true,
+            shouldBrk
+        });
     }
 
     findNumItemEnd(beg: number): number {

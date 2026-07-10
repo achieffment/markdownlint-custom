@@ -13,7 +13,7 @@ alwaysApply: true
 |----------------|------------|
 | [`src/`](../src/) | Исходники TypeScript (правила, хелперы, типы) |
 | [`src/core/`](../src/core/) | `ICustomRule`, `abstract BaseRule` |
-| [`src/domain/`](../src/domain/) | `ListLineParser`, `outside-code-lines`, `line-list-walker`, `micromark-token-utils`, `micromark-lists`, `micromark-heading`, `micromark-list-checkers`, `no-leading-spaces-checker`, `micromark-parse`, `ListSpacingChecker`, `ColonChecker`, `sentences-end-mark-checker` |
+| [`src/domain/`](../src/domain/) | `ListLineParser`, `list-item-body-end`, `outside-code-lines`, `line-list-walker`, `micromark-token-utils`, `micromark-lists`, `micromark-heading`, `micromark-list-checkers`, `no-leading-spaces-checker`, `micromark-parse`, `ListSpacingChecker`, `ColonChecker`, `sentences-end-mark-checker` |
 | [`src/composition/`](../src/composition/) | `AppContext` — wiring зависимостей |
 | [`src/rules/`](../src/rules/) | Класс `XxxRule extends BaseRule` |
 | [`markdownlint-rules.js`](../markdownlint-rules.js) | **Артефакт tsc:** массив правил (`module.exports = [...]`) |
@@ -78,22 +78,22 @@ alwaysApply: true
 ### `list-blank-line-spacing` — политика
 
 - **Parser:** `micromark` + `params.lines[]` (границы/gaps — line-based там, где `list.endLine` захватывает prose после списка).
-- **Numbered** (`isNumItem`: `1.`): blank перед первым и после последнего пункта блока; единообразные blank между **каждой парой** соседних numbered-пунктов в subtree (`collectPrefixesInList` + `findPrefixItemEnd`). Если хотя бы один переход с blank — все должны иметь; если ни у одного нет — OK.
+- **Numbered** (`isNumItem`: `1.`): blank перед первым и после последнего пункта блока; единообразные blank между **каждой парой** соседних numbered-пунктов в subtree (`collectPrefixesInList` + `findListItemBodyEnd`). Если хотя бы один переход с blank — все должны иметь; если ни у одного нет — OK.
 - **Bulleted** (`isBulItem`: `-`, `*`, `+`): только blank до первого и после последнего пункта блока; между пунктами **не проверяется**.
 - **Границы (bounds):** blank до/после проверяется только при реальной границе блока — перед контентом **другого типа** (не same-kind); after не проверяется в EOF; blank после `##` перед списком **обязателен**.
-- **Блок:** top-level `listOrdered` / `listUnordered` из micromark; конец последнего пункта — `findPrefixItemEnd` (не `list.endLine`).
+- **Блок:** top-level `listOrdered` / `listUnordered` из micromark; конец последнего пункта — `findListItemBodyEnd` (не `list.endLine`).
 - **Sub-detail:** `listBlankBef` — нет blank перед первым пунктом блока; `listBlankAft` — нет blank после последнего; `listBlankGap` — неединообразные blank между соседними num-пунктами.
 - **lineNumber:** `listBlankBef` — первый пункт блока; `listBlankAft` — строка после последнего пункта; `listBlankGap` — следующий пункт в паре с нарушением.
 
 ### `list-preceded-by-colon` — политика
 
-- **Parser:** `micromark`; первый пункт блока — `line-list-walker` (line-based: micromark разрывает список на fence).
+- **Parser:** `none` (line-based: `walkLineBasedListBlocks` / `line-list-walker`; micromark не используется — разрывает списки на fence).
 - **Scope:** нумерованные и маркированные списки.
 - **Проверка:** только строка перед **первым пунктом блока** верхнего уровня (не перед каждым вложенным).
 - **Skip вложенные:** пункт с отступом (`indent > 0`) — `:` не требуется (`isNestedLstItem`).
 - **Skip prev:** заголовок, пункт списка, code fence, pipe-строки таблицы (подъём вверх через `tableRowRx` в `checkPrecededByColon`, включая пустые строки между pipe-строками); нет непустой строки выше (`prev < 0`) — skip.
 - **Пустые строки:** между целью и prev пропускаются (`skipBlankBck`); `:` ищется на первой непустой prose-строке выше после skip blank + pipe-блока.
-- **Тело пункта:** текст после code fence внутри пункта не считается отдельным блоком (`line-list-walker` / `LineListBlockWalker` / `findPrefixItemEnd`).
+- **Тело пункта:** текст после code fence внутри пункта не считается отдельным блоком (`line-list-walker` / `LineListBlockWalker` / `findListItemBodyEnd`).
 - **lineNumber:** строка prose **перед** первым пунктом блока (первая непустая выше после skip blank + pipe-блока; не pipe-строка).
 
 ### `codeblock-preceded-by-colon` — политика
@@ -138,7 +138,7 @@ alwaysApply: true
 | `checkListBlankSpacing` | Политика `list-blank-line-spacing` (третий аргумент — `blankDets`: `bef`/`aft`/`gap`) |
 | `checkListPrecededByColon` | Политика `list-preceded-by-colon` (третий аргумент — `colDet`) |
 
-Внутренние (не экспортируются): `ListLineParser` (`trimStart`, `isNumItem`, `isBulItem`, `isNestedLstItem`, `skipBlankBck`), `line-list-walker` (`LineListBlockWalker`, `walkLineBasedListBlocks` — fence-in-list для `list-preceded-by-colon`), `ListSpacingChecker` (`hasBlankGap`, `boundBefIdx`, `boundAftIdx`, `findPrefixItemEnd`), `outside-code-lines` (`walkOutsideCode`, `walkCodeFenceAware`, `eachOpeningCodeFenceLine`; `eachLineOutsideCode` — публичный через hlprs), `micromark-token-utils` (`require("markdownlint/helpers")` + `path.join(helpersDir, "micromark-helpers.cjs")`: `filterByTypes`, `getParentOfType`, `isBlankLine`, …), `micromark-lists` (`eachTopLevelList`, `collectPrefixesInList`, `eachListItemPrefix`), `micromark-heading` (`hasMinimumH2`), `micromark-list-checkers` (`ListItemsChecker`), `no-leading-spaces-checker` (`NoLeadingSpacesChecker`), `sentences-end-mark-checker` (`SentencesEndMarkChecker`), `ColonChecker` (`checkOpeningCodeFences`, `checkListPrecededByColon`), `micromark-parse` (tokens для hlprs API).
+Внутренние (не экспортируются): `ListLineParser` (`trimStart`, `isNumItem`, `isBulItem`, `isNestedLstItem`, `skipBlankBck`), `list-item-body-end` (`findListItemBodyEnd` — shared конец тела пункта для spacing и colon), `line-list-walker` (`LineListBlockWalker`, `walkLineBasedListBlocks` — fence-in-list для `list-preceded-by-colon`), `ListSpacingChecker` (`hasBlankGap`, `boundBefIdx`, `boundAftIdx`), `outside-code-lines` (`walkOutsideCode`, `walkCodeFenceAware`, `eachOpeningCodeFenceLine`; `eachLineOutsideCode` — публичный через hlprs), `micromark-token-utils` (`require("markdownlint/helpers")` + `path.join(helpersDir, "micromark-helpers.cjs")`: `filterByTypes`, `getParentOfType`, `isBlankLine`, …), `micromark-lists` (`eachTopLevelList`, `collectPrefixesInList`, `eachListItemPrefix`), `micromark-heading` (`hasMinimumH2`), `micromark-list-checkers` (`ListItemsChecker`), `no-leading-spaces-checker` (`NoLeadingSpacesChecker`), `sentences-end-mark-checker` (`SentencesEndMarkChecker`), `ColonChecker` (`checkOpeningCodeFences`, `checkListPrecededByColon`), `micromark-parse` (tokens для hlprs API; test-only parse).
 
 **Parser custom rules:** **3** правила — `parser: "micromark"` (`checkMicromark`, `params.parsers.micromark.tokens`): `minimum-h2-heading`, `list-items-end-with-semicolon-or-colon`, `list-blank-line-spacing` (последнее — tokens + `params.lines[]` для границ/gaps). **4** правила — `parser: "none"` по умолчанию ([`BaseRule`](../src/core/base-rule.ts), `check()`, только `params.lines[]`): `list-preceded-by-colon`, `codeblock-preceded-by-colon`, `no-leading-spaces`, `sentences-end-with-mark` — line-based там, где micromark разрывает списки на fence, не парсит indented fence или проще обходить prose/blockquote построчно.
 

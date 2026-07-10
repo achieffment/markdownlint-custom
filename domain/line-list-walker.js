@@ -3,40 +3,17 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.walkLineBasedListBlocks = void 0;
 const regex_1 = require("../regex");
 const outside_code_lines_1 = require("./outside-code-lines");
+const list_item_body_end_1 = require("./list-item-body-end");
 class LineListBlockWalker {
     constructor(lines, lineParser) {
         this.lines = lines;
         this.lineParser = lineParser;
     }
     findItemEnd(beg, shouldBrk) {
-        const ind = this.lineParser.getIndent(this.lines[beg]);
-        let end = beg;
-        let aftFence = false;
-        for (let ix = beg + 1; ix < this.lines.length; ix++) {
-            const trim = this.lines[ix].trim();
-            if (!trim)
-                continue;
-            if (regex_1.headingRx.test(trim))
-                break;
-            if (shouldBrk(this.lines[ix]))
-                break;
-            const jInd = this.lineParser.getIndent(this.lines[ix]);
-            if (regex_1.codeFenceRx.test(trim)) {
-                end = ix;
-                ix++;
-                while (ix < this.lines.length && !regex_1.codeFenceRx.test(this.lines[ix].trim()))
-                    ix++;
-                if (ix < this.lines.length)
-                    end = ix;
-                aftFence = true;
-                continue;
-            }
-            if (jInd > ind || (aftFence && jInd >= ind))
-                end = ix;
-            else
-                break;
-        }
-        return end;
+        return (0, list_item_body_end_1.findListItemBodyEnd)(this.lines, beg, this.lineParser, {
+            traverseFence: true,
+            shouldBrk
+        });
     }
     findNumItemEnd(beg) {
         return this.findItemEnd(beg, (line) => {

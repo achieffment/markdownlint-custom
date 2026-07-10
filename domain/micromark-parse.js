@@ -1,20 +1,18 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.parseMicromarkTokens = void 0;
+const path_1 = __importDefault(require("path"));
+const mmRoot = path_1.default.join(__dirname, "..", "node_modules", "markdownlint");
+// Только для hlprs API (checkListBlankSpacing в test-rules); production rules получают tokens от markdownlint.
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const { lint } = require("markdownlint/sync");
+const { parse } = require(path_1.default.join(mmRoot, "lib/micromark-parse.mjs"));
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { flatTokensSymbol } = require(path_1.default.join(mmRoot, "helpers/shared.cjs"));
 const parseMicromarkTokens = (lines) => {
-    let tokens = [];
-    const rule = {
-        names: ["micromark-parse-internal"],
-        description: "internal",
-        tags: [],
-        parser: "micromark",
-        function: (params) => {
-            tokens = params.parsers.micromark?.tokens ?? [];
-        }
-    };
-    lint({ strings: { content: lines.join("\n") } }, { customRules: [rule], config: { default: false, "micromark-parse-internal": true } });
-    return tokens;
+    const doc = parse(lines.join("\n"));
+    return doc[flatTokensSymbol] ?? [];
 };
 exports.parseMicromarkTokens = parseMicromarkTokens;

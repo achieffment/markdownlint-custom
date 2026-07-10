@@ -16,7 +16,7 @@ export class ListItemsChecker {
         lines: readonly string[],
         tokens: readonly MicromarkToken[],
         onError: RuleOnError,
-        details: {
+        itemDets: {
             empty: string;
             colon: string;
             semi: string;
@@ -32,9 +32,9 @@ export class ListItemsChecker {
             const folsub = next < lines.length && this.lineParser.isChildLstItem(line, lines[next]);
             const needsColon = folcod || folsub;
             const endsOk = needsColon ? endsWithColonRx.test(cont) : endsWithSemiRx.test(cont);
-            const lstDet = needsColon ? details.colon : details.semi;
+            const lstDet = needsColon ? itemDets.colon : itemDets.semi;
             if (!cont) {
-                onError({ lineNumber: prefix.startLine, detail: details.empty, context: trim });
+                onError({ lineNumber: prefix.startLine, detail: itemDets.empty, context: trim });
                 return;
             }
             if (!endsOk) {

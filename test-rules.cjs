@@ -332,8 +332,36 @@ const listColonHlprsOk = collectErrs((onErr) => {
 if (listColonHlprsOk.length !== 0) {
     assert(false, "checkListPrecededByColon ok: expected no errors");
 }
+
+const blankSpacingDets = {
+    bef: details.listBlankBef,
+    aft: details.listBlankAft,
+    gap: details.listBlankGap
+};
+const spacingBefLines = ["## T", "- пункт;"];
+const spacingBefErrs = collectErrs((onErr) => {
+    hlprs.checkListBlankSpacing(spacingBefLines, onErr, blankSpacingDets);
+});
+if (spacingBefErrs.length !== 1 || spacingBefErrs[0].lineNumber !== 2 || spacingBefErrs[0].detail !== details.listBlankBef) {
+    assert(false, "checkListBlankSpacing bef: expected line 2 listBlankBef");
+}
+const spacingAftLines = ["## T", "", "1. один;", "2. два;", "Текст после."];
+const spacingAftErrs = collectErrs((onErr) => {
+    hlprs.checkListBlankSpacing(spacingAftLines, onErr, blankSpacingDets);
+});
+if (spacingAftErrs.length !== 1 || spacingAftErrs[0].lineNumber !== 5 || spacingAftErrs[0].detail !== details.listBlankAft) {
+    assert(false, "checkListBlankSpacing aft: expected line 5 listBlankAft");
+}
+const spacingGapLines = ["## T", "", "1. один;", "2. два;", "", "3. три;"];
+const spacingGapErrs = collectErrs((onErr) => {
+    hlprs.checkListBlankSpacing(spacingGapLines, onErr, blankSpacingDets);
+});
+if (spacingGapErrs.length !== 1 || spacingGapErrs[0].lineNumber !== 4 || spacingGapErrs[0].detail !== details.listBlankGap) {
+    assert(false, "checkListBlankSpacing gap: expected line 4 listBlankGap");
+}
+
 if (failed === 0) {
-    console.log("OK   hlprs checkers (checkPrecededByColon, checkListPrecededByColon)");
+    console.log("OK   hlprs checkers (checkPrecededByColon, checkListPrecededByColon, checkListBlankSpacing)");
 }
 
 const deepIndents = [3, 6, 9, 12, 15];
@@ -848,6 +876,15 @@ if (getFiredRules(listAtDocStartRes.t || []).size > 0) {
     console.log("OK   list at doc start skips list-preceded-by-colon");
 }
 
+const listBulAtDocStartOk = `- первый;
+`;
+const listBulAtDocStartRes = lintStrings({ t: listBulAtDocStartOk }, ["list-preceded-by-colon"]);
+if (getFiredRules(listBulAtDocStartRes.t || []).size > 0) {
+    assert(false, "bul list at doc start: expected skip, got " + [...getFiredRules(listBulAtDocStartRes.t || [])].join(", "));
+} else {
+    console.log("OK   bulleted list at doc start skips list-preceded-by-colon");
+}
+
 const listColonTablePrevOk = `## T
 
 | Col | Val |
@@ -1095,6 +1132,21 @@ if (lstCodFired.size > 0) {
     assert(false, "list item before code must not trigger codeblock rule: " + [...lstCodFired].join(", "));
 } else {
     console.log("OK   codeblock skips list items before code");
+}
+
+const lstSemiCod = `## T
+
+- пункт;
+
+\`\`\`js
+const x = 1;
+\`\`\`
+`;
+const lstSemiCodRes = lintStrings({ t: lstSemiCod }, ["codeblock-preceded-by-colon", "minimum-h2-heading"]);
+if (getFiredRules(lstSemiCodRes.t || []).size > 0) {
+    assert(false, "list item with ; before code must not trigger codeblock rule: " + [...getFiredRules(lstSemiCodRes.t || [])].join(", "));
+} else {
+    console.log("OK   codeblock skips list item with ; before code");
 }
 
 const codblkSkipHeadingOk = `## T
@@ -1418,6 +1470,23 @@ if (!noLeadingTopErrFired.has("no-leading-spaces") || noLeadingTopErrFired.size 
     assert(false, "top-level indent err: expected no-leading-spaces only, got " + [...noLeadingTopErrFired].join(", "));
 } else {
     console.log("OK   top-level indent → no-leading-spaces");
+}
+
+const noLeadingListIndentErr = `## T
+
+  - пункт;
+`;
+const noLeadingListIndentErrRes = lintStrings({ t: noLeadingListIndentErr }, ["no-leading-spaces", "minimum-h2-heading", "list-items-end-with-semicolon-or-colon"]);
+const noLeadingListIndentFired = getFiredRules(noLeadingListIndentErrRes.t || []);
+if (!noLeadingListIndentFired.has("no-leading-spaces") || noLeadingListIndentFired.size !== 1) {
+    assert(false, "top-level list indent err: expected no-leading-spaces only, got " + [...noLeadingListIndentFired].join(", "));
+} else {
+    const listIndentLine = (noLeadingListIndentErrRes.t || []).find(v => v.ruleNames.includes("no-leading-spaces"))?.lineNumber;
+    if (listIndentLine !== 3) {
+        assert(false, `top-level list indent err line: expected 3 got ${listIndentLine ?? "none"}`);
+    } else {
+        console.log("OK   top-level list indent → no-leading-spaces on line 3");
+    }
 }
 
 const noLeadingSkipHeadingOk = ` ## T
