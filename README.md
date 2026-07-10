@@ -90,7 +90,7 @@ bin\lint-markdown.bat .\path\to\docs    # Windows CMD
 
 ## Архитектура
 
-Каждое правило — класс `XxxRule extends BaseRule`: `parser: "micromark"`, `checkMicromark()` вызывает domain-сервисы (tokens и/или `params.lines[]`) и сообщает нарушения через `onError`; `toRule()` адаптирует класс к API markdownlint.
+Каждое правило — класс `XxxRule extends BaseRule`: **3** правила с `parser: "micromark"` (`checkMicromark`, tokens AST); **4** — `parser: "none"` (`check()`, только `params.lines[]`). Domain-сервисы сообщают нарушения через `onError`; `toRule()` адаптирует класс к API markdownlint.
 
 Зависимости (парсер списков, обход code fence, checker-ы) собираются в [`AppContext`](src/composition/app-context.ts). [`markdownlint-rules.ts`](src/markdownlint-rules.ts) регистрирует все правила; [`markdownlint-hlprs.js`](markdownlint-hlprs.js) — compat-слой для [`test-rules.cjs`](test-rules.cjs).
 
@@ -121,7 +121,7 @@ flowchart LR
 | --- | --- |
 | `npm run build` | `tsc`: `src/` → корень |
 | `npm test` | `pretest` (build) + `test-rules.cjs` + `test-cli2-config.cjs` + `check-function-order.cjs` (cli2 parity — только здесь) |
-| `npm run lint:md` | Локальный lint папки/файла (bootstrap в runner) |
+| `npm run lint:md` | Локальный lint папки/файла (bootstrap в runner); несколько файлов: `lint:md -- file1.md file2.md` |
 | `npm run sync:cli2-config` | Регенерация `.markdownlint-cli2.jsonc` из schema + overrides + custom keys из `markdownlint-rules.js` + `globs` (`presync:cli2-config` → build). При bump `markdownlint` — обновить `schema/` (см. `.mdc`) |
 | `npm run check` | `precheck` (build) + `tsc --noEmit` + `node --check` + порядок функций (без запуска `test-cli2-config`) |
 | `npm run check:order` | Только проверка порядка функций |

@@ -11,10 +11,7 @@ class CodeblockPrecededByColonRule extends base_rule_1.BaseRule {
         this.description = details_1.details.codeblockColon;
         this.tags = ["code"];
     }
-    get parser() {
-        return "micromark";
-    }
-    checkMicromark(params, onError) {
+    check(params, onError) {
         this.colonChecker.checkOpeningCodeFences(params.lines, onError, this.description);
     }
 }

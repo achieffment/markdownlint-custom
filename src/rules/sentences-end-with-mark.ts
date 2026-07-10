@@ -12,11 +12,7 @@ export class SentencesEndMarkRule extends BaseRule {
         super();
     }
 
-    protected override get parser(): "micromark" {
-        return "micromark";
-    }
-
-    checkMicromark(params: RuleParams, onError: RuleOnError): void {
+    check(params: RuleParams, onError: RuleOnError): void {
         this.proseChecker.checkLines(params.lines, onError, this.description);
     }
 }

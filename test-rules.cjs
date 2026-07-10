@@ -5,7 +5,7 @@ const customRules = require("./markdownlint-rules.js");
 const { loadLintConfig } = require("./load-cli2-config.cjs");
 const hlprs = require("./markdownlint-hlprs");
 const { details } = require("./details.js");
-const { codeFenceRx, h2Rx, bulItemRx, numItemRx } = require("./regex.js");
+const { codeFenceRx, h2Rx, bulItemRx, numItemRx, endsWithSemiRx } = require("./regex.js");
 const { lstItemRx, isLstItem, eachLineOutsideCode, getIndent, isChildLstItem, skipBlankFwd, findPrevListInd } = hlprs;
 
 const { config: lintConfig } = loadLintConfig();
@@ -121,8 +121,8 @@ const allowedLineDiff = (errLine, sucLine) => {
     if (errLine.endsWith(".") && sucLine === errLine.slice(0, -1) + ":") return true;
     if (errLine.endsWith(";") && sucLine === errLine.slice(0, -1) + ":") return true;
     if (sucLine === errLine.trimStart() && errLine.length > sucLine.length) return true;
-    if (bulItemRx.test(errLine) && errLine.replace(bulItemRx, "").trim() === "" && /^[-+*] .+;/.test(sucLine)) return true;
-    if (numItemRx.test(errLine) && errLine.replace(numItemRx, "").trim() === "" && /^\d+\. .+;/.test(sucLine)) return true;
+    if (bulItemRx.test(errLine) && errLine.replace(bulItemRx, "").trim() === "" && bulItemRx.test(sucLine) && endsWithSemiRx.test(sucLine) && sucLine.replace(bulItemRx, "").trim() !== "") return true;
+    if (numItemRx.test(errLine) && errLine.replace(numItemRx, "").trim() === "" && numItemRx.test(sucLine) && endsWithSemiRx.test(sucLine) && sucLine.replace(numItemRx, "").trim() !== "") return true;
     return false;
 };
 
@@ -295,6 +295,45 @@ if (findPrevListInd(prevLines, 2) !== 0) {
 }
 if (failed === 0) {
     console.log("OK   hlprs behavior (isChildLstItem, getIndent, skipBlankFwd, findPrevListInd)");
+}
+
+const collectErrs = (fn) => {
+    const errs = [];
+    fn((info) => {
+        errs.push(info);
+    });
+    return errs;
+};
+
+const colonPrevLines = ["Текст перед кодом.", "```js"];
+const colonPrevErrs = collectErrs((onErr) => {
+    hlprs.checkPrecededByColon(colonPrevLines, 1, onErr, details.codeblockColon);
+});
+if (colonPrevErrs.length !== 1 || colonPrevErrs[0].lineNumber !== 1 || colonPrevErrs[0].detail !== details.codeblockColon) {
+    assert(false, "checkPrecededByColon err: expected line 1 codeblockColon");
+}
+const colonPrevOk = collectErrs((onErr) => {
+    hlprs.checkPrecededByColon(["Текст:", "```js"], 1, onErr, details.codeblockColon);
+});
+if (colonPrevOk.length !== 0) {
+    assert(false, "checkPrecededByColon ok: expected no errors");
+}
+
+const listColonHlprsLines = ["## T", "", "Текст.", "", "1. пункт;"];
+const listColonHlprsErrs = collectErrs((onErr) => {
+    hlprs.checkListPrecededByColon(listColonHlprsLines, onErr, details.listPrecededByColon);
+});
+if (listColonHlprsErrs.length !== 1 || listColonHlprsErrs[0].lineNumber !== 3 || listColonHlprsErrs[0].detail !== details.listPrecededByColon) {
+    assert(false, "checkListPrecededByColon err: expected line 3 listPrecededByColon");
+}
+const listColonHlprsOk = collectErrs((onErr) => {
+    hlprs.checkListPrecededByColon(["## T", "", "Текст:", "", "1. пункт;"], onErr, details.listPrecededByColon);
+});
+if (listColonHlprsOk.length !== 0) {
+    assert(false, "checkListPrecededByColon ok: expected no errors");
+}
+if (failed === 0) {
+    console.log("OK   hlprs checkers (checkPrecededByColon, checkListPrecededByColon)");
 }
 
 const deepIndents = [3, 6, 9, 12, 15];
@@ -685,10 +724,13 @@ if (!listColonErrFired.has("list-preceded-by-colon") || listColonErrFired.size !
     assert(false, "list colon err: expected list-preceded-by-colon only, got " + [...listColonErrFired].join(", "));
 } else {
     console.log("OK   list colon err → list-preceded-by-colon");
-    const listColonLine = (listColonErrRes.t || [])
-        .find(v => v.ruleNames.includes("list-preceded-by-colon"))?.lineNumber;
+    const listColonViol = (listColonErrRes.t || [])
+        .find(v => v.ruleNames.includes("list-preceded-by-colon"));
+    const listColonLine = listColonViol?.lineNumber;
     if (listColonLine !== 3) {
         assert(false, `list colon err line: expected 3 got ${listColonLine ?? "none"}`);
+    } else if (listColonViol?.errorDetail !== details.listPrecededByColon) {
+        assert(false, `list colon err detail: expected listPrecededByColon got ${listColonViol?.errorDetail ?? "none"}`);
     } else if (failed === 0) {
         console.log("OK   list colon err lineNumber on prose");
     }
@@ -1118,10 +1160,13 @@ if (!bareCodFired.has("codeblock-preceded-by-colon") || bareCodFired.size !== 1)
 } else {
     console.log("OK   bare fence without lang → codeblock-preceded-by-colon");
 }
-const bareCodLine = (bareCodRes.t || [])
-    .find(v => v.ruleNames.includes("codeblock-preceded-by-colon"))?.lineNumber;
+const bareCodViol = (bareCodRes.t || [])
+    .find(v => v.ruleNames.includes("codeblock-preceded-by-colon"));
+const bareCodLine = bareCodViol?.lineNumber;
 if (bareCodLine !== 3) {
     assert(false, `bare fence err line: expected 3 got ${bareCodLine ?? "none"}`);
+} else if (bareCodViol?.errorDetail !== details.codeblockColon) {
+    assert(false, `bare fence err detail: expected codeblockColon got ${bareCodViol?.errorDetail ?? "none"}`);
 } else if (failed === 0) {
     console.log("OK   bare fence err lineNumber on prose");
 }
@@ -1141,10 +1186,13 @@ if (!jsCodFired.has("codeblock-preceded-by-colon") || jsCodFired.size !== 1) {
 } else {
     console.log("OK   js fence without colon → codeblock-preceded-by-colon");
 }
-const jsCodLine = (jsCodRes.t || [])
-    .find(v => v.ruleNames.includes("codeblock-preceded-by-colon"))?.lineNumber;
+const jsCodViol = (jsCodRes.t || [])
+    .find(v => v.ruleNames.includes("codeblock-preceded-by-colon"));
+const jsCodLine = jsCodViol?.lineNumber;
 if (jsCodLine !== 3) {
     assert(false, `js fence err line: expected 3 got ${jsCodLine ?? "none"}`);
+} else if (jsCodViol?.errorDetail !== details.codeblockColon) {
+    assert(false, `js fence err detail: expected codeblockColon got ${jsCodViol?.errorDetail ?? "none"}`);
 } else if (failed === 0) {
     console.log("OK   js fence err lineNumber on prose");
 }

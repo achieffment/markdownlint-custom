@@ -11,10 +11,7 @@ class SentencesEndMarkRule extends base_rule_1.BaseRule {
         this.description = details_1.details.sentencesEndMark;
         this.tags = ["formatting"];
     }
-    get parser() {
-        return "micromark";
-    }
-    checkMicromark(params, onError) {
+    check(params, onError) {
         this.proseChecker.checkLines(params.lines, onError, this.description);
     }
 }

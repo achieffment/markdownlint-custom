@@ -48,6 +48,7 @@ Windows CMD: пути с пробелами передавать в кавычк
 - `cwd` = корень repo
 - `--help` / `-h` — справка; без `targetPath` первым аргументом — `usage()` и `exit 1` (в т.ч. флаги cli2 до path)
 - Passthrough: `lint-markdown <path> -- <extra cli2 args>` или `lint-markdown -- <path> <extra>`; `--` после path отрезается как разделитель
+- **Несколько файлов:** первый аргумент — `targetPath` (`:file` glob); остальные пути передаются в cli2 как passthrough: `npm run lint:md -- README.md AGENTS.md` → `:README.md` + `AGENTS.md`
 - Конфиг и `customRules` — всегда из корня этого репозитория (`cwd` = repoRoot), в т.ч. для внешнего `<path>`
 - Исключение `node_modules`, `vendor`: в [`.markdownlint-cli2.jsonc`](../.markdownlint-cli2.jsonc) — `!node_modules`, `!vendor` (IDE/workspace); в [`lint-markdown.cjs`](../bin/lint-markdown.cjs) для папок — `#node_modules`, `#vendor` (cli2 glob при `--no-globs`)
 
