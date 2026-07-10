@@ -3,7 +3,7 @@ import type { MicromarkToken } from "markdownlint";
 
 const mmRoot = path.join(path.dirname(require.resolve("markdownlint/helpers")), "..");
 
-// Только для hlprs API (checkListBlankSpacing в test-rules); production rules получают tokens от markdownlint.
+// parseMicromarkTokens — ListSpacingChecker.checkLines (hlprs checkListBlankSpacing) и exclusivity в test-rules; production rules получают tokens от markdownlint.
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { parse } = require(path.join(mmRoot, "lib/micromark-parse.mjs")) as {
     parse: (markdown: string) => Record<symbol, MicromarkToken[]>;

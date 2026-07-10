@@ -80,7 +80,7 @@
 - `.cursor/rules/*.mdc` **намеренно** вне lint globs (`**/*.{md,markdown}` в [`.markdownlint-cli2.jsonc`](.markdownlint-cli2.jsonc)); аудит `.mdc` — статическая сверка с кодом/docs, не lint-fix каталога;
 - Каталог 7 `names` идентичен в коде, cli2, AGENTS, README, `.mdc`;
 - Каждый sub-detail в [`src/details.ts`](src/details.ts) семантически соответствует политике в `markdownlint-project.mdc`;
-- `test-rules.cjs` использует `regex.js` / `hlprs` вместо дублирующих inline-regex там, где есть канон; для exclusivity примеров — также `domain/micromark-parse.js`, `domain/micromark-heading.js`, `domain/outside-code-lines.js`;
+- `test-rules.cjs` использует `regex.js` / `hlprs` вместо дублирующих inline-regex там, где есть канон; для exclusivity примеров — также `domain/micromark-parse.js`, `domain/micromark-heading.js`, `domain/outside-code-lines.js`; `micromark-parse.js` также в runtime-пути hlprs `checkListBlankSpacing` (`ListSpacingChecker.checkLines`);
 - Нет открытых расхождений между `.mdc`-примерами и фактическим кодом test/TS;
 
 ## Границы

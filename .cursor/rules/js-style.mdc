@@ -57,11 +57,16 @@ let end = beg;
 
 ```javascript
 const { endsWithColonRx, endsWithSemiRx } = require("./regex.js");
-const { isOpeningCodeFenceAt } = require("./outside-code-lines.js");
+const { eachOpeningCodeFenceLine } = require("./outside-code-lines.js");
+const openingFences = new Set();
+eachOpeningCodeFenceLine(lines, (fenceIx) => {
+    openingFences.add(fenceIx);
+});
 const lineStart = lineParser.trimStart(line);
 let cont = lineStart.replace(regex, "");
 cont = cont.trim();
-const folcod = next < lines.length && isOpeningCodeFenceAt(lines, next);
+const next = lineParser.skipBlankFwd(lines, ix);
+const folcod = next < lines.length && openingFences.has(next);
 const folsub = next < lines.length && isChildLstItem(line, lines[next]);
 const needsColon = folcod || folsub;
 const endsOk = needsColon ? endsWithColonRx.test(cont) : endsWithSemiRx.test(cont);
