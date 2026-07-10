@@ -8,7 +8,7 @@ const { details } = require("./details.js");
 const { codeFenceRx, h2Rx, bulItemRx, numItemRx, endsWithSemiRx } = require("./regex.js");
 const { parseMicromarkTokens } = require("./domain/micromark-parse.js");
 const { hasMinimumH2 } = require("./domain/micromark-heading.js");
-const { isOpeningCodeFenceAt } = require("./domain/outside-code-lines.js");
+const { isOpeningCodeFenceAt, eachOpeningCodeFenceLine } = require("./domain/outside-code-lines.js");
 const { lstItemRx, isLstItem, eachLineOutsideCode, getIndent, isChildLstItem, skipBlankFwd, findPrevListInd } = hlprs;
 
 const { config: lintConfig } = loadLintConfig();
@@ -132,6 +132,7 @@ const checkExamplePair = (ruleName, errPath, sucPath) => {
     const suc = stripBlanks(sucRaw);
     const rel = path.relative(__dirname, path.dirname(errPath));
     if (ruleName === "list-blank-line-spacing") {
+        assert(errRaw !== sucRaw, `${rel}: _err and _suc must differ by blank lines`);
         assert(err === suc, `${rel}: _err and _suc must have identical non-blank text`);
         return;
     }
@@ -170,14 +171,11 @@ if (failed === 0) {
 const checkExampleFenceLang = (filePath) => {
     const rel = path.relative(__dirname, filePath);
     const lines = fs.readFileSync(filePath, "utf8").split("\n");
-    let inCodeB = false;
-    lines.forEach((line, ix) => {
-        const trim = line.trim();
-        if (!trim.startsWith("```")) return;
-        if (!inCodeB && (!codeFenceRx.test(trim) || trim === "```")) {
-            assert(false, `${rel}:${ix + 1}: opening fence must have language tag (e.g. js, pr)`);
+    eachOpeningCodeFenceLine(lines, (fenceIx) => {
+        const trim = lines[fenceIx].trim();
+        if (!codeFenceRx.test(trim) || trim === "```") {
+            assert(false, `${rel}:${fenceIx + 1}: opening fence must have language tag (e.g. js, pr)`);
         }
-        inCodeB = !inCodeB;
     });
 };
 
@@ -234,6 +232,23 @@ itemsDets.forEach(det => {
 });
 if (failed === 0) {
     console.log("OK   list-items-end-with-semicolon-or-colon/_err sub-details");
+}
+
+const exampleErrCounts = [
+    { ruleName: "list-preceded-by-colon", count: 2 },
+    { ruleName: "codeblock-preceded-by-colon", count: 2 },
+    { ruleName: "no-leading-spaces", count: 4 },
+    { ruleName: "sentences-end-with-mark", count: 3 }
+];
+exampleErrCounts.forEach(({ ruleName, count }) => {
+    const errPath = path.join(examplesDir, ruleName, "_err.md");
+    const viols = getViolations(errPath).filter(v => v.ruleNames.includes(ruleName));
+    if (viols.length !== count) {
+        assert(false, `${ruleName}/_err.md: expected ${count} violations, got ${viols.length}`);
+    }
+});
+if (failed === 0) {
+    console.log("OK   multi-violation example counts (4 rules)");
 }
 
 if (failed > 0) {
@@ -598,6 +613,62 @@ if (!codFenceSemiFired.has("list-items-end-with-semicolon-or-colon") || codFence
     }
 }
 
+const wrapFenceOk = `## T
+
+1. пункт без двоеточия
+   продолжение с двоеточием:
+
+\`\`\`js
+const x = 1;
+\`\`\`
+`;
+const wrapFenceOkRes = lintStrings({ t: wrapFenceOk }, ["list-items-end-with-semicolon-or-colon", "minimum-h2-heading"]);
+if (getFiredRules(wrapFenceOkRes.t || []).size > 0) {
+    assert(false, "wrapped prose before fence ok: " + [...getFiredRules(wrapFenceOkRes.t || [])].join(", "));
+} else {
+    console.log("OK   wrapped prose colon before fence → clean");
+}
+
+const wrapChildOk = `## T
+
+1. parent
+   intro text:
+
+   1. child;
+`;
+const wrapChildOkRes = lintStrings({ t: wrapChildOk }, ["list-items-end-with-semicolon-or-colon", "minimum-h2-heading"]);
+if (getFiredRules(wrapChildOkRes.t || []).size > 0) {
+    assert(false, "wrapped prose before child ok: " + [...getFiredRules(wrapChildOkRes.t || [])].join(", "));
+} else {
+    console.log("OK   wrapped prose colon before child → clean");
+}
+
+const wrapFenceErr = `## T
+
+1. пункт без двоеточия
+   продолжение без двоеточия
+
+\`\`\`js
+const x = 1;
+\`\`\`
+`;
+const wrapFenceErrRes = lintStrings({ t: wrapFenceErr }, ["list-items-end-with-semicolon-or-colon", "minimum-h2-heading"]);
+const wrapFenceErrViol = wrapFenceErrRes.t || [];
+const wrapFenceErrFired = getFiredRules(wrapFenceErrViol);
+if (!wrapFenceErrFired.has("list-items-end-with-semicolon-or-colon") || wrapFenceErrFired.size !== 1) {
+    assert(false, "wrapped prose fence err: expected list-items only, got " + [...wrapFenceErrFired].join(", "));
+} else {
+    const wrapFenceLine = wrapFenceErrViol[0]?.lineNumber;
+    const wrapFenceDet = wrapFenceErrViol[0]?.errorDetail;
+    if (wrapFenceLine !== 4) {
+        assert(false, `wrapped prose fence err line: expected 4 got ${wrapFenceLine ?? "none"}`);
+    } else if (wrapFenceDet !== details.listItemsColon) {
+        assert(false, `wrapped prose fence err detail: expected listItemsColon got "${wrapFenceDet || "none"}"`);
+    } else {
+        console.log("OK   wrapped prose before fence → listItemsColon on line 4");
+    }
+}
+
 const openingFenceLines = ["```js", "x", "```", "", "- a;", "```"];
 if (!isOpeningCodeFenceAt(openingFenceLines, 0)) {
     assert(false, "isOpeningCodeFenceAt: first fence should be opening");
@@ -858,9 +929,11 @@ if (!listColonBulErrFired.has("list-preceded-by-colon") || listColonBulErrFired.
 } else {
     console.log("OK   list colon bul err → list-preceded-by-colon");
     const listColonBulLine = (listColonBulErrRes.t || [])
-        .find(v => v.ruleNames.includes("list-preceded-by-colon"))?.lineNumber;
-    if (listColonBulLine !== 3) {
-        assert(false, `list colon bul err line: expected 3 got ${listColonBulLine ?? "none"}`);
+        .find(v => v.ruleNames.includes("list-preceded-by-colon"));
+    if (listColonBulLine?.lineNumber !== 3) {
+        assert(false, `list colon bul err line: expected 3 got ${listColonBulLine?.lineNumber ?? "none"}`);
+    } else if (listColonBulLine?.errorDetail !== details.listPrecededByColon) {
+        assert(false, `list colon bul err detail: expected listPrecededByColon got ${listColonBulLine?.errorDetail ?? "none"}`);
     } else if (failed === 0) {
         console.log("OK   list colon bul err lineNumber on prose");
     }
@@ -1489,14 +1562,14 @@ if (getFiredRules(noLeadingNestedOkRes.t || []).size > 0) {
     console.log("OK   nested list indent → clean");
 }
 
-const noLeadingDedntErr = `## T
+const noLeadingDedentErr = `## T
 
 1. parent:
    1. ok;
  1. bad;
 `;
-const noLeadingDedntErrRes = lintStrings({ t: noLeadingDedntErr }, ["no-leading-spaces", "minimum-h2-heading", "list-items-end-with-semicolon-or-colon", "list-blank-line-spacing"]);
-const noLeadingDedntViol = noLeadingDedntErrRes.t || [];
+const noLeadingDedentErrRes = lintStrings({ t: noLeadingDedentErr }, ["no-leading-spaces", "minimum-h2-heading", "list-items-end-with-semicolon-or-colon", "list-blank-line-spacing"]);
+const noLeadingDedntViol = noLeadingDedentErrRes.t || [];
 const noLeadingDedntFired = getFiredRules(noLeadingDedntViol);
 if (!noLeadingDedntFired.has("no-leading-spaces") || noLeadingDedntFired.size !== 1) {
     assert(false, "list dedent err: expected no-leading-spaces only, got " + [...noLeadingDedntFired].join(", "));

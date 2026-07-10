@@ -17,7 +17,7 @@ export class ColonChecker {
         while (prev >= 0) {
             const prevTrim = lines[prev].trim();
             if (!prevTrim) {
-                prev = this.lineParser.skipBlankBck(lines, prev);
+                prev--;
                 continue;
             }
             if (tableRowRx.test(prevTrim)) {

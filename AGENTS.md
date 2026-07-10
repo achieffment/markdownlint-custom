@@ -44,13 +44,13 @@
 
 | `names` | Суть |
 | --- | --- |
-| `minimum-h2-heading` | Минимум один `##` вне code fence |
-| `list-items-end-with-semicolon-or-colon` | Пункт списка (num/bul, вложенные): `;`, перед открывающей `` ``` `` или **прямым дочерним** пунктом — `:` |
-| `list-blank-line-spacing` | Numbered: blank до/после (EOF skip, same-kind skip) и единообразно между соседними num-пунктами блока (вложенные `1.` на любом уровне); bulleted: blank до/после блока (между пунктами не проверяется) |
+| `minimum-h2-heading` | Минимум один H2 (`##` или setext) вне code fence |
+| `list-items-end-with-semicolon-or-colon` | Пункт списка (num/bul, вложенные): `;`, перед открывающей `` ``` `` или **прямым дочерним** пунктом — `:`; конец тела через `findListItemBodyEnd` |
+| `list-blank-line-spacing` | Numbered: blank до/после (EOF skip, same-kind skip) и единообразно между соседними num-пунктами блока (вложенные `1.` на любом уровне); bulleted: blank до/после блока (между пунктами не проверяется); blank после `##` перед списком обязателен |
 | `list-preceded-by-colon` | Обычный текст (не пункт списка) перед первым пунктом блока верхнего уровня (num/bul) заканчивается `:`; skip prev: заголовок, пункт списка, code fence, pipe-таблица; вложенные не проверяются |
 | `codeblock-preceded-by-colon` | Открывающая `` ``` ``: строка перед ней заканчивается `:` (обычный текст, не пункт списка); skip prev: заголовок, пункт списка, code fence, pipe-таблица |
 | `no-leading-spaces` | Нет отступа у обычного текста, пунктов списка верхнего уровня и обозначений блока кода (`` ``` ``); вложенные пункты — при `indent >=` предыдущего |
-| `sentences-end-with-mark` | Обычный текст (не заголовок, blockquote и продолжения, HR, не пункт списка, не pipe-таблица) заканчивается `.`, `!`, `?`, `:` или `;` |
+| `sentences-end-with-mark` | Обычный текст (не заголовок, blockquote и продолжения, HR, пункт списка, pipe-таблица) заканчивается `.`, `!`, `?`, `:` или `;` |
 
 Подробности и пути к примерам — в [markdownlint-project.mdc](.cursor/rules/markdownlint-project.mdc).
 
@@ -80,7 +80,7 @@
 - `.cursor/rules/*.mdc` **намеренно** вне lint globs (`**/*.{md,markdown}` в [`.markdownlint-cli2.jsonc`](.markdownlint-cli2.jsonc)); аудит `.mdc` — статическая сверка с кодом/docs, не lint-fix каталога;
 - Каталог 7 `names` идентичен в коде, cli2, AGENTS, README, `.mdc`;
 - Каждый sub-detail в [`src/details.ts`](src/details.ts) семантически соответствует политике в `markdownlint-project.mdc`;
-- `test-rules.cjs` использует `regex.js` / `hlprs` вместо дублирующих inline-regex там, где есть канон; для exclusivity примеров — также `domain/micromark-parse.js`, `domain/micromark-heading.js`, `domain/outside-code-lines.js`; `micromark-parse.js` также в runtime-пути hlprs `checkListBlankSpacing` (`ListSpacingChecker.checkLines`);
+- `test-rules.cjs` использует `regex.js` / `hlprs` вместо дублирующих inline-regex там, где есть канон; **test-only domain imports** (намеренно не в hlprs): `domain/micromark-parse.js` (`parseMicromarkTokens`), `domain/micromark-heading.js` (`hasMinimumH2`), `domain/outside-code-lines.js` (`isOpeningCodeFenceAt`, `eachOpeningCodeFenceLine`); `micromark-parse.js` также в runtime-пути hlprs `checkListBlankSpacing` (`ListSpacingChecker.checkLines`);
 - Нет открытых расхождений между `.mdc`-примерами и фактическим кодом test/TS;
 
 ## Границы

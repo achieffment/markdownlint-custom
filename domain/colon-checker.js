@@ -13,7 +13,7 @@ class ColonChecker {
         while (prev >= 0) {
             const prevTrim = lines[prev].trim();
             if (!prevTrim) {
-                prev = this.lineParser.skipBlankBck(lines, prev);
+                prev--;
                 continue;
             }
             if (regex_1.tableRowRx.test(prevTrim)) {
