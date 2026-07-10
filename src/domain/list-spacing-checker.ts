@@ -65,8 +65,12 @@ export class ListSpacingChecker {
             const prefixes = collectPrefixesInList(list);
             if (prefixes.length === 0) return;
             const isSameKind: LinePredicate = isNum
-                ? (line) => this.lineParser.isNumItem(line)
-                : (line) => this.lineParser.isBulItem(line);
+                ? (line) => {
+                    return this.lineParser.isNumItem(line);
+                }
+                : (line) => {
+                    return this.lineParser.isBulItem(line);
+                };
             const fstBeg = prefixes[0].startLine - 1;
             const lastPrefix = prefixes[prefixes.length - 1];
             const visualEnd = this.findPrefixItemEnd(lines, lastPrefix.startLine - 1, lines.length);
@@ -85,7 +89,9 @@ export class ListSpacingChecker {
                 const end = this.findPrefixItemEnd(lines, begIx, nxtBeg);
                 return { nxtBeg, hasBlank: this.hasBlankGap(lines, end + 1, nxtBeg - 1) };
             });
-            const anyBlank = gaps.some((gap) => gap.hasBlank);
+            const anyBlank = gaps.some((gap) => {
+                return gap.hasBlank;
+            });
             if (!anyBlank) return;
             gaps.forEach((gap) => {
                 if (!gap.hasBlank) {

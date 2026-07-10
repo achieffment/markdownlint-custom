@@ -25,7 +25,7 @@ alwaysApply: false
 - `readonly string[]` для `lines`
 - `as const` в `details.ts`
 - `module.exports` в barrels
-- **Thin arrow/method wrappers** — одна строка (делегат без ветвлений); многострочные тела — только при циклах/ветвлениях
+- **Функции** (`const` / `export const`, методы класса, method в `module.exports`, колбэки) — всегда block body `{ return …; }` на отдельных строках; не expression arrow (`=> expr`), не однострочное `{ return x; }`
 
 ## Симметрия имён и конвейер
 

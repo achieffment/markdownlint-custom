@@ -39,10 +39,14 @@ class LineListBlockWalker {
         return end;
     }
     findNumItemEnd(beg) {
-        return this.findItemEnd(beg, (line) => this.lineParser.isNumItem(line));
+        return this.findItemEnd(beg, (line) => {
+            return this.lineParser.isNumItem(line);
+        });
     }
     findBulItemEnd(beg) {
-        return this.findItemEnd(beg, (line) => this.lineParser.isBulItem(line) || this.lineParser.isNumItem(line));
+        return this.findItemEnd(beg, (line) => {
+            return this.lineParser.isBulItem(line) || this.lineParser.isNumItem(line);
+        });
     }
     collectBlock(fstBeg, isItem, shouldBrk, findEnd) {
         const baseInd = this.lineParser.getIndent(this.lines[fstBeg]);
@@ -73,10 +77,22 @@ class LineListBlockWalker {
         return items;
     }
     collectNumBlock(fstBeg) {
-        return this.collectBlock(fstBeg, (line) => this.lineParser.isNumItem(line), () => false, (beg) => this.findNumItemEnd(beg));
+        return this.collectBlock(fstBeg, (line) => {
+            return this.lineParser.isNumItem(line);
+        }, () => {
+            return false;
+        }, (beg) => {
+            return this.findNumItemEnd(beg);
+        });
     }
     collectBulBlock(fstBeg) {
-        return this.collectBlock(fstBeg, (line) => this.lineParser.isBulItem(line), (line) => this.lineParser.isNumItem(line), (beg) => this.findBulItemEnd(beg));
+        return this.collectBlock(fstBeg, (line) => {
+            return this.lineParser.isBulItem(line);
+        }, (line) => {
+            return this.lineParser.isNumItem(line);
+        }, (beg) => {
+            return this.findBulItemEnd(beg);
+        });
     }
 }
 const walkLineBasedListBlocks = (lines, lineParser, onBlock) => {
@@ -86,14 +102,22 @@ const walkLineBasedListBlocks = (lines, lineParser, onBlock) => {
             const items = walker.collectNumBlock(ix);
             if (items.length === 0)
                 return ix + 1;
-            onBlock(items, (beg) => walker.findNumItemEnd(beg), (line) => lineParser.isNumItem(line), true);
+            onBlock(items, (beg) => {
+                return walker.findNumItemEnd(beg);
+            }, (line) => {
+                return lineParser.isNumItem(line);
+            }, true);
             return walker.findNumItemEnd(items[items.length - 1]);
         }
         if (lineParser.isBulItem(lines[ix])) {
             const items = walker.collectBulBlock(ix);
             if (items.length === 0)
                 return ix + 1;
-            onBlock(items, (beg) => walker.findBulItemEnd(beg), (line) => lineParser.isBulItem(line), false);
+            onBlock(items, (beg) => {
+                return walker.findBulItemEnd(beg);
+            }, (line) => {
+                return lineParser.isBulItem(line);
+            }, false);
             return walker.findBulItemEnd(items[items.length - 1]);
         }
         return undefined;

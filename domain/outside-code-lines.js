@@ -27,11 +27,15 @@ const eachLineOutsideCode = (lines, fn) => {
 };
 exports.eachLineOutsideCode = eachLineOutsideCode;
 const walkOutsideCode = (lines, fn) => {
-    walkLines(lines, () => { }, (_line, ix, trim) => fn(ix, trim));
+    walkLines(lines, () => { }, (_line, ix, trim) => {
+        return fn(ix, trim);
+    });
 };
 exports.walkOutsideCode = walkOutsideCode;
 const walkCodeFenceAware = (lines, handlers) => {
-    walkLines(lines, (line, ix, trim, opening) => handlers.onFence(line, ix, trim, opening), (line, ix, trim) => {
+    walkLines(lines, (line, ix, trim, opening) => {
+        handlers.onFence(line, ix, trim, opening);
+    }, (line, ix, trim) => {
         handlers.onOutside(line, ix, trim);
         return undefined;
     });

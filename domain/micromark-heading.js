@@ -7,5 +7,7 @@ const isH2Heading = (token) => {
         return false;
     return (0, micromark_token_utils_1.getHeadingLevel)(token) === 2 && (0, micromark_token_utils_1.getHeadingText)(token).length > 0;
 };
-const hasMinimumH2 = (tokens) => (0, micromark_token_utils_1.filterByTypes)(tokens, ["atxHeading", "setextHeading"]).some(isH2Heading);
+const hasMinimumH2 = (tokens) => {
+    return (0, micromark_token_utils_1.filterByTypes)(tokens, ["atxHeading", "setextHeading"]).some(isH2Heading);
+};
 exports.hasMinimumH2 = hasMinimumH2;

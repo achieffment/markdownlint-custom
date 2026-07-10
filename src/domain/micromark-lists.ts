@@ -5,11 +5,13 @@ import {
     getParentOfType
 } from "./micromark-token-utils";
 
-const isList = (token: MicromarkToken): boolean =>
-    token.type === "listOrdered" || token.type === "listUnordered";
+const isList = (token: MicromarkToken): boolean => {
+    return token.type === "listOrdered" || token.type === "listUnordered";
+};
 
-const getListContainerForPrefix = (prefix: MicromarkToken): MicromarkToken | null =>
-    getParentOfType(prefix, ["listOrdered", "listUnordered"]);
+const getListContainerForPrefix = (prefix: MicromarkToken): MicromarkToken | null => {
+    return getParentOfType(prefix, ["listOrdered", "listUnordered"]);
+};
 
 export const eachListItemPrefix = (
     tokens: readonly MicromarkToken[],
@@ -28,7 +30,9 @@ export const eachTopLevelList = (
     for (const list of filterByPredicate(
         tokens,
         isList,
-        (token) => (isList(token) || token.type === "htmlFlow") ? [] : token.children
+        (token) => {
+            return (isList(token) || token.type === "htmlFlow") ? [] : token.children;
+        }
     )) {
         fn(list);
     }
@@ -41,5 +45,7 @@ export const collectPrefixesInList = (list: MicromarkToken): MicromarkToken[] =>
         for (const child of node.children) walk(child);
     };
     walk(list);
-    return result.sort((a, b) => a.startLine - b.startLine);
+    return result.sort((a, b) => {
+        return a.startLine - b.startLine;
+    });
 };

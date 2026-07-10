@@ -36,14 +36,18 @@ export const walkOutsideCode = (lines: readonly string[], fn: OutsideCodeWalker)
     walkLines(
         lines,
         () => {},
-        (_line, ix, trim) => fn(ix, trim)
+        (_line, ix, trim) => {
+            return fn(ix, trim);
+        }
     );
 };
 
 export const walkCodeFenceAware = (lines: readonly string[], handlers: CodeFenceHandlers): void => {
     walkLines(
         lines,
-        (line, ix, trim, opening) => handlers.onFence(line, ix, trim, opening),
+        (line, ix, trim, opening) => {
+            handlers.onFence(line, ix, trim, opening);
+        },
         (line, ix, trim) => {
             handlers.onOutside(line, ix, trim);
             return undefined;
