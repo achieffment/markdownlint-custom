@@ -21,6 +21,20 @@ const walkLines = (
     }
 };
 
+export const isOpeningCodeFenceAt = (lines: readonly string[], ix: number): boolean => {
+    let inCodeB = false;
+    for (let i = 0; i <= ix; i++) {
+        const trim = lines[i].trim();
+        if (codeFenceRx.test(trim)) {
+            if (i === ix) {
+                return !inCodeB;
+            }
+            inCodeB = !inCodeB;
+        }
+    }
+    return false;
+};
+
 export const eachLineOutsideCode = (lines: readonly string[], fn: OutsideCodeCallback): void => {
     walkLines(
         lines,

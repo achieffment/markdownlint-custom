@@ -8,6 +8,7 @@ const { details } = require("./details.js");
 const { codeFenceRx, h2Rx, bulItemRx, numItemRx, endsWithSemiRx } = require("./regex.js");
 const { parseMicromarkTokens } = require("./domain/micromark-parse.js");
 const { hasMinimumH2 } = require("./domain/micromark-heading.js");
+const { isOpeningCodeFenceAt } = require("./domain/outside-code-lines.js");
 const { lstItemRx, isLstItem, eachLineOutsideCode, getIndent, isChildLstItem, skipBlankFwd, findPrevListInd } = hlprs;
 
 const { config: lintConfig } = loadLintConfig();
@@ -530,6 +531,23 @@ if (!codFenceSemiFired.has("list-items-end-with-semicolon-or-colon") || codFence
     } else {
         console.log("OK   semicolon before code fence → listItemsColon");
     }
+}
+
+const openingFenceLines = ["```js", "x", "```", "", "- a;", "```"];
+if (!isOpeningCodeFenceAt(openingFenceLines, 0)) {
+    assert(false, "isOpeningCodeFenceAt: first fence should be opening");
+}
+if (isOpeningCodeFenceAt(openingFenceLines, 2)) {
+    assert(false, "isOpeningCodeFenceAt: closing fence should not be opening");
+}
+if (!isOpeningCodeFenceAt(openingFenceLines, 5)) {
+    assert(false, "isOpeningCodeFenceAt: fence after closed block should be opening");
+}
+const closingAfterListLines = ["```js", "x", "", "- a;", "```"];
+if (isOpeningCodeFenceAt(closingAfterListLines, 4)) {
+    assert(false, "isOpeningCodeFenceAt: fence closing open block should not be opening");
+} else {
+    console.log("OK   isOpeningCodeFenceAt closing vs opening");
 }
 
 const starBulSemiErr = `## T

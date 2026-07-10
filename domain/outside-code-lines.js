@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.eachOpeningCodeFenceLine = exports.walkCodeFenceAware = exports.walkOutsideCode = exports.eachLineOutsideCode = void 0;
+exports.eachOpeningCodeFenceLine = exports.walkCodeFenceAware = exports.walkOutsideCode = exports.eachLineOutsideCode = exports.isOpeningCodeFenceAt = void 0;
 const regex_1 = require("../regex");
 const walkLines = (lines, onFence, onOutside) => {
     let inCodeB = false;
@@ -19,6 +19,20 @@ const walkLines = (lines, onFence, onOutside) => {
             ix = jump;
     }
 };
+const isOpeningCodeFenceAt = (lines, ix) => {
+    let inCodeB = false;
+    for (let i = 0; i <= ix; i++) {
+        const trim = lines[i].trim();
+        if (regex_1.codeFenceRx.test(trim)) {
+            if (i === ix) {
+                return !inCodeB;
+            }
+            inCodeB = !inCodeB;
+        }
+    }
+    return false;
+};
+exports.isOpeningCodeFenceAt = isOpeningCodeFenceAt;
 const eachLineOutsideCode = (lines, fn) => {
     walkLines(lines, () => { }, (_line, ix, trim) => {
         fn(lines[ix], ix, trim);
