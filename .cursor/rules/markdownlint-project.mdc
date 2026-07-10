@@ -44,7 +44,7 @@ alwaysApply: true
 |---------|---------------|---------|
 | `minimum-h2-heading` | Минимум один заголовок H2 (`##` или setext) вне code fence | `markdownlint-examples/minimum-h2-heading/` |
 | `list-items-end-with-semicolon-or-colon` | Пункт списка (num/bul, вложенные): `;`, перед открывающей `` ``` `` или **прямым дочерним** пунктом — `:`; конец тела через `findListItemBodyEnd` | `markdownlint-examples/list-items-end-with-semicolon-or-colon/` |
-| `list-blank-line-spacing` | Numbered: blank до/после (EOF skip, same-kind skip) и единообразно между соседними num-пунктами блока (вложенные `1.`); bulleted: blank до/после блока (между пунктами не проверяется); blank после `##` перед списком обязателен | `markdownlint-examples/list-blank-line-spacing/` |
+| `list-blank-line-spacing` | Numbered: blank до/после (EOF skip, same-kind skip) и единообразно между соседними `listItemPrefix` в ordered subtree (вложенные bul/num); bulleted: blank до/после блока (между пунктами не проверяется); blank после `##` перед списком обязателен | `markdownlint-examples/list-blank-line-spacing/` |
 | `list-preceded-by-colon` | Обычный текст (не пункт списка) перед первым пунктом блока верхнего уровня (num/bul) заканчивается `:`; skip prev: заголовок, пункт списка, code fence, pipe-таблица; вложенные не проверяются | `markdownlint-examples/list-preceded-by-colon/` |
 | `codeblock-preceded-by-colon` | Открывающая `` ``` ``: строка перед ней заканчивается `:` (не пункт списка — те проверяет `list-items-*`); skip prev: заголовок, пункт списка, code fence, pipe-таблица | `markdownlint-examples/codeblock-preceded-by-colon/` |
 | `no-leading-spaces` | Нет отступа у обычного текста, пунктов списка верхнего уровня и обозначений блока кода (`` ``` ``); вложенные пункты — при `indent >=` предыдущего | `markdownlint-examples/no-leading-spaces/` |
@@ -86,7 +86,7 @@ alwaysApply: true
 - **Границы (bounds):** blank до/после проверяется только при реальной границе блока — перед контентом **другого типа** (не same-kind); after не проверяется в EOF; blank после `##` перед списком **обязателен**.
 - **Блок:** top-level `listOrdered` / `listUnordered` из micromark; конец последнего пункта — `findListItemBodyEnd` (не `list.endLine`).
 - **Sub-detail:** `listBlankBef` — нет blank перед первым пунктом блока; `listBlankAft` — нет blank после последнего; `listBlankGap` — неединообразные blank между соседними `listItemPrefix` в ordered subtree.
-- **lineNumber:** `listBlankBef` — первый пункт блока; `listBlankAft` — строка после последнего пункта; `listBlankGap` — следующий пункт в паре с нарушением.
+- **lineNumber:** `listBlankBef` — первый пункт блока; `listBlankAft` — первая непустая content-строка после блока (через `skipBlankFwd` от конца последнего пункта); `listBlankGap` — следующий пункт в паре с нарушением.
 
 ### `list-preceded-by-colon` — политика
 

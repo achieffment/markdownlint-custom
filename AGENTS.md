@@ -46,7 +46,7 @@
 | --- | --- |
 | `minimum-h2-heading` | Минимум один H2 (`##` или setext) вне code fence |
 | `list-items-end-with-semicolon-or-colon` | Пункт списка (num/bul, вложенные): `;`, перед открывающей `` ``` `` или **прямым дочерним** пунктом — `:`; конец тела через `findListItemBodyEnd` |
-| `list-blank-line-spacing` | Numbered: blank до/после (EOF skip, same-kind skip) и единообразно между соседними num-пунктами блока (вложенные `1.` на любом уровне); bulleted: blank до/после блока (между пунктами не проверяется); blank после `##` перед списком обязателен |
+| `list-blank-line-spacing` | Numbered: blank до/после (EOF skip, same-kind skip) и единообразно между соседними `listItemPrefix` в ordered subtree (вложенные bul/num на любом уровне); bulleted: blank до/после блока (между пунктами не проверяется); blank после `##` перед списком обязателен |
 | `list-preceded-by-colon` | Обычный текст (не пункт списка) перед первым пунктом блока верхнего уровня (num/bul) заканчивается `:`; skip prev: заголовок, пункт списка, code fence, pipe-таблица; вложенные не проверяются |
 | `codeblock-preceded-by-colon` | Открывающая `` ``` ``: строка перед ней заканчивается `:` (обычный текст, не пункт списка); skip prev: заголовок, пункт списка, code fence, pipe-таблица |
 | `no-leading-spaces` | Нет отступа у обычного текста, пунктов списка верхнего уровня и обозначений блока кода (`` ``` ``); вложенные пункты — при `indent >=` предыдущего |
@@ -82,6 +82,20 @@
 - Каждый sub-detail в [`src/details.ts`](src/details.ts) семантически соответствует политике в `markdownlint-project.mdc`;
 - `test-rules.cjs` использует `regex.js` / `hlprs` вместо дублирующих inline-regex там, где есть канон; **test-only domain imports** (намеренно не в hlprs): `domain/micromark-parse.js` (`parseMicromarkTokens`), `domain/micromark-heading.js` (`hasMinimumH2`), `domain/outside-code-lines.js` (`isOpeningCodeFenceAt`, `eachOpeningCodeFenceLine`); `micromark-parse.js` также в runtime-пути hlprs `checkListBlankSpacing` (`ListSpacingChecker.checkLines`);
 - Нет открытых расхождений между `.mdc`-примерами и фактическим кодом test/TS;
+
+## Stop-condition аудита
+
+Аудит считается **закрытым**, когда выполнены все пункты ниже. Дальнейшие правки — только по новой задаче, не «дочистка аудита»:
+
+1. **`git status`** — чистая working tree (или весь WIP в одном атомарном коммите);
+2. **Единый gate один раз в конце** (не по слоям):
+
+```bash
+npm test && npm run check && npm run lint:md -- README.md AGENTS.md
+```
+
+3. Все gate зелёные и нет открытых расхождений docs ↔ код ↔ тесты;
+4. **Не коммитить** слайсовые «закрытие аудита» без связки: код + `test-rules.cjs` + examples + docs (см. [docs-consistency.mdc](.cursor/rules/docs-consistency.mdc));
 
 ## Границы
 
