@@ -20,7 +20,7 @@ alwaysApply: false
 
 ```javascript
 // Плохо: одна function на 80+ строк с несвязанными ветками
-// Хорошо: findNumItemEnd — конец тела пункта; checkBlockBounds — только пробелы
+// Хорошо: findListItemBodyEnd — конец тела пункта; boundBefIdx — только границы blank
 ```
 
 ## DRY

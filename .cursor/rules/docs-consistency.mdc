@@ -31,7 +31,7 @@ alwaysApply: true
 | **Новое lint-правило** | `src/rules/`, [`markdownlint-rules.ts`](../src/markdownlint-rules.ts), [`details.ts`](../src/details.ts), [`AppContext`](../src/composition/app-context.ts), `markdownlint-examples/<name>/`, [`test-rules.cjs`](../test-rules.cjs), `npm test` | Каталог + политика в `markdownlint-project.mdc`; обновить [`.markdownlint-cli2.jsonc`](../.markdownlint-cli2.jsonc): `npm run sync:cli2-config` (custom keys из `markdownlint-rules.js`); строки в `AGENTS.md`, README |
 | **Изменение политики lint-правила** | `src/` (+ domain), примеры, inline в `test-rules.cjs`, `npm test` | Политика в `markdownlint-project.mdc`; `AGENTS.md` / README — если изменилась суть для пользователя |
 | **Изменение `description` / `detail`** | [`details.ts`](../src/details.ts), класс правила | Политика в `.mdc`; краткие строки в `AGENTS.md` / README при расхождении |
-| **Константы regex** | [`regex.ts`](../src/regex.ts), потребители в `src/` и [`test-rules.cjs`](../test-rules.cjs) (`h2Rx` exclusivity) | Политика в `markdownlint-project.mdc` при смене семантики; `npm test` |
+| **Константы regex** | [`regex.ts`](../src/regex.ts), потребители в `src/` и [`test-rules.cjs`](../test-rules.cjs) (`h2Rx` в `checkExamplePair`; exclusivity H2 — `hasMinimumH2` + `parseMicromarkTokens`) | Политика в `markdownlint-project.mdc` при смене семантики; `npm test` |
 | **Публичный экспорт hlprs** | [`markdownlint-hlprs.ts`](../src/markdownlint-hlprs.ts), `npm test` | Таблица API в `markdownlint-project.mdc` |
 | **Архитектура / новый domain-модуль** | `src/domain/`, `AppContext`, `npm test` | Таблицы модулей в `ts-dev.mdc`, структура в `markdownlint-project.mdc`, scope в `AGENTS.md`, «Структура» / mermaid в README |
 | **Изменение BaseRule / контракта `onError`** | `src/core/` | `ts-style.mdc`, «Контракты» в `markdownlint-project.mdc`, шаги 5–6 в `AGENTS.md` |
@@ -73,4 +73,4 @@ Workflow — канон в [AGENTS.md](../AGENTS.md); `.mdc` не дублиру
 - [ ] Модули актуальны в `ts-dev.mdc`, конвенции — в `ts-style.mdc` (если менялся TS)
 - [ ] Конвенции test актуальны в `js-dev.mdc`, `js-style.mdc` (если менялся test)
 - [ ] `AGENTS.md` и README соответствуют канону; AGENTS — ссылки на все `.mdc`; README — AGENTS + user-facing `.mdc`
-- [ ] `npm test` проходит
+- [ ] `npm test` и `npm run check` — зелёные; `npm run lint:md -- README.md AGENTS.md` — 0 ошибок

@@ -69,7 +69,7 @@
 
 ## Верификация
 
-См. шаг 7 workflow. Дополнительно — `npm run check` (`precheck` → build, без cli2 parity): `tsc --noEmit`, `node --check` на 9 `.js`/`.cjs` (см. [`package.json`](package.json) `scripts.check`), затем `check-function-order.cjs`; `npm run lint:md -- <path>`, `npm run sync:cli2-config` (через `presync:cli2-config` → build: schema + overrides + custom keys из `markdownlint-rules.js`, `globs`). **Parity cli2 ↔ schema** — только `npm test` (`test-cli2-config.cjs`).
+См. шаг 7 workflow. Дополнительно — `npm run check` (`precheck` → build, без cli2 parity): `tsc --noEmit`, `node --check` на 9 `.js`/`.cjs` (см. [`package.json`](package.json) `scripts.check`), затем `check-function-order.cjs`; `npm run check:order` (только порядок функций; входит в `npm test` и `npm run check`); `npm run lint:md -- <path>`, `npm run sync:cli2-config` (через `presync:cli2-config` → build: schema + overrides + custom keys из `markdownlint-rules.js`, `globs`). **Parity cli2 ↔ schema** — только `npm test` (`test-cli2-config.cjs`).
 
 После правки примеров — `_err` срабатывает **только** на целевое custom-правило (полный конфиг); inline-кейсы в `test-rules.cjs` обязаны проходить.
 

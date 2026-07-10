@@ -37,7 +37,7 @@ alwaysApply: false
 - **Checker entry:** `checkMicromark` — tokens + lines; `checkLines` — только `params.lines` (line-only checker’ы: `NoLeadingSpacesChecker`, `SentencesEndMarkChecker`; alias `ListSpacingChecker.checkLines` для hlprs)
 - `onError({ lineNumber, detail, context? })`, `lineNumber` с 1
 - **`detail`:** `this.description` для основного сообщения; `details.*` для sub-detail (`listItemsColon`, `listBlankBef`, …)
-- **`context`:** полная `line` — indent-правила (`no-leading-spaces`, `colon-checker`); `trim` — prose и spacing-checker (`ListSpacingChecker`)
+- **`context`:** полная `line` — indent-правила (`no-leading-spaces`, `colon-checker`); `trim` — prose (`ListItemsChecker`, `SentencesEndMarkChecker`, `ListSpacingChecker`)
 - Runtime — **CommonJS**
 
 ## Чего не делать

@@ -6,6 +6,8 @@ const { loadLintConfig } = require("./load-cli2-config.cjs");
 const hlprs = require("./markdownlint-hlprs");
 const { details } = require("./details.js");
 const { codeFenceRx, h2Rx, bulItemRx, numItemRx, endsWithSemiRx } = require("./regex.js");
+const { parseMicromarkTokens } = require("./domain/micromark-parse.js");
+const { hasMinimumH2 } = require("./domain/micromark-heading.js");
 const { lstItemRx, isLstItem, eachLineOutsideCode, getIndent, isChildLstItem, skipBlankFwd, findPrevListInd } = hlprs;
 
 const { config: lintConfig } = loadLintConfig();
@@ -61,11 +63,7 @@ const getFiredRules = (violations) => {
 
 const hasH2OutsideCode = (text) => {
     const lines = text.split("\n");
-    let found = false;
-    eachLineOutsideCode(lines, (_line, _ix, trim) => {
-        if (h2Rx.test(trim)) found = true;
-    });
-    return found;
+    return hasMinimumH2(parseMicromarkTokens(lines));
 };
 
 let failed = 0;
