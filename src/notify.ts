@@ -3,7 +3,7 @@
 import fs from "fs";
 import path from "path";
 
-const envPath = path.join(__dirname, ".env");                      // notify.js собирается в корень репозитория
+const envPath = path.join(__dirname, ".env"); // notify.js собирается в корень репозитория
 const TIMEOUT_MS = 2000;
 
 interface WebhookConfig {
@@ -38,7 +38,7 @@ const loadEnvFile = (): void => {
     for (const raw of lines) {
         const parsed = parseEnvLine(raw);
         if (parsed && !(parsed.key in process.env)) {
-            process.env[parsed.key] = parsed.value;                // приоритет — у уже заданных
+            process.env[parsed.key] = parsed.value; // приоритет — у уже заданных
         }
     }
 };
@@ -59,7 +59,7 @@ export const sendWebhook = async (text: string): Promise<boolean> => {
         return false;
     }
     if (!cfg.url.startsWith("https://")) {
-        return false;                                            // без TLS токен не отправляем
+        return false; // без TLS токен не отправляем
     }
     const headers: Record<string, string> = { "Content-Type": "application/json" };
     if (cfg.tok) {
@@ -76,7 +76,7 @@ export const sendWebhook = async (text: string): Promise<boolean> => {
         });
         return true;
     } catch {
-        return false;                                            // fire-and-forget: не роняем прогон
+        return false; // fire-and-forget: не роняем прогон
     } finally {
         clearTimeout(timer);
     }
