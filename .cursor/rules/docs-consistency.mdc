@@ -42,7 +42,7 @@ alwaysApply: true
 | **npm-скрипты** | [`package.json`](../package.json) | README «npm-скрипты»; «Верификация» в `AGENTS.md` |
 | **CLI / bin / конфиг lint** | [`.markdownlint-cli2.jsonc`](../.markdownlint-cli2.jsonc), [`load-cli2-config.cjs`](../load-cli2-config.cjs), [`test-cli2-config.cjs`](../test-cli2-config.cjs), [`bin/`](../bin/), `package.json` `lint:md` | `platform-scripts.mdc`, `markdownlint-project.mdc`, `AGENTS.md`, README; `globs`/overrides → examples + test-rules |
 | **Schema / sync cli2** | [`schema/.markdownlint.jsonc`](../schema/.markdownlint.jsonc), [`scripts/sync-cli2-config.cjs`](../scripts/sync-cli2-config.cjs), [`scripts/cli2-overrides.cjs`](../scripts/cli2-overrides.cjs), `.markdownlint-cli2.jsonc`, [`test-cli2-config.cjs`](../test-cli2-config.cjs) | `markdownlint-project.mdc` (overrides, sync, schema bump); `npm run sync:cli2-config` (`presync:cli2-config`); `npm test` |
-| **Новое/удаление `.mdc`** | — | Каталог в [AGENTS.md](../AGENTS.md); строка «`.cursor/rules/`» в `markdownlint-project.mdc`; роли в этом файле |
+| **Новое/удаление `.mdc`** | — | Каталог в [AGENTS.md](../AGENTS.md); строка «`.cursor/rules/`» в `markdownlint-project.mdc`; роли в этом файле; карта соответствия в [rules-sync.mdc](rules-sync.mdc) (обе версии) |
 | **Удаление lint-правила** | `src/`, examples, `test-rules.cjs` | Обратный чеклист: все docs + `npm run sync:cli2-config` для `.markdownlint-cli2.jsonc` |
 | **Критерии завершения аудита** | `npm test`, `npm run check`, `lint:md` README+AGENTS | Блок «Критерии завершения аудита» в [AGENTS.md](../AGENTS.md); `.mdc` вне lint globs — намеренно |
 

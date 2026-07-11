@@ -29,9 +29,9 @@ npm test        # pretest → build, test-rules + test-cli2-config + check-funct
 
 ## Локальная проверка без IDE
 
-Точки входа, bootstrap, guard без пути — [`.cursor/rules/platform-scripts.mdc`](.cursor/rules/platform-scripts.mdc).
+Точки входа, bootstrap, guard без пути — [`.cursor/rules/platform-scripts.mdc`](.cursor/rules/platform-scripts.mdc) (Claude: [`.claude/rules/platform-scripts.md`](.claude/rules/platform-scripts.md)).
 
-Примеры команд (`--help`, passthrough `-- <cli2 args>` — см. [`.cursor/rules/platform-scripts.mdc`](.cursor/rules/platform-scripts.mdc)):
+Примеры команд (`--help`, passthrough `-- <cli2 args>` — см. [`.cursor/rules/platform-scripts.mdc`](.cursor/rules/platform-scripts.mdc) / [`.claude/rules/platform-scripts.md`](.claude/rules/platform-scripts.md)):
 
 ```bash
 npm run lint:md -- ./path/to/docs
@@ -42,15 +42,15 @@ bin\lint-markdown.bat .\path\to\docs    # Windows CMD
 
 В IDE lint весь markdown workspace (кроме `node_modules`, `vendor`). Внешняя документация — `npm run lint:md -- <path>`; конфиг и custom rules — из корня этого репозитория. macOS Finder: drag-and-drop на `bin/lint-markdown.command`.
 
-Конфиг — [`.markdownlint-cli2.jsonc`](.markdownlint-cli2.jsonc). Built-in: `default: true`; намеренные overrides — таблица в [`.cursor/rules/markdownlint-project.mdc`](.cursor/rules/markdownlint-project.mdc) (`MD013`, `MD007`, `MD029`, `MD032`, `MD043`, `MD046`).
+Конфиг — [`.markdownlint-cli2.jsonc`](.markdownlint-cli2.jsonc). Built-in: `default: true`; намеренные overrides — таблица в [`.cursor/rules/markdownlint-project.mdc`](.cursor/rules/markdownlint-project.mdc) / [`.claude/rules/markdownlint-project.md`](.claude/rules/markdownlint-project.md) (`MD013`, `MD007`, `MD029`, `MD032`, `MD043`, `MD046`).
 
 ### VS Code для markdown
 
-Рекомендуемые настройки `[markdown]` — в [`.cursor/rules/markdownlint-project.mdc`](.cursor/rules/markdownlint-project.mdc) (раздел IDE и EditorConfig).
+Рекомендуемые настройки `[markdown]` — в [`.cursor/rules/markdownlint-project.mdc`](.cursor/rules/markdownlint-project.mdc) / [`.claude/rules/markdownlint-project.md`](.claude/rules/markdownlint-project.md) (раздел IDE и EditorConfig).
 
 ## Подключение в VS Code
 
-См. [`.cursor/rules/markdownlint-project.mdc`](.cursor/rules/markdownlint-project.mdc) (раздел «Подключение в VS Code»).
+См. [`.cursor/rules/markdownlint-project.mdc`](.cursor/rules/markdownlint-project.mdc) / [`.claude/rules/markdownlint-project.md`](.claude/rules/markdownlint-project.md) (раздел «Подключение в VS Code»).
 
 ## Правила проверки
 
@@ -83,10 +83,11 @@ bin\lint-markdown.bat .\path\to\docs    # Windows CMD
 | [`schema/`](schema/) | Snapshot [official schema](https://github.com/DavidAnson/markdownlint/blob/main/schema/.markdownlint.jsonc) для `test-cli2-config.cjs` |
 | [`scripts/`](scripts/) | `sync-cli2-config.cjs`, `cli2-overrides.cjs` — регенерация cli2 из schema + overrides + custom keys |
 | [`.cursor/rules/`](.cursor/rules/) | Правила Cursor; каталог — [`AGENTS.md`](AGENTS.md) |
-| `.gitignore`, `.gitattributes`, `.editorconfig`, `.nvmrc`, `.npmrc` | Git, EditorConfig, Node/npm (подробнее в `.mdc`) |
+| [`.claude/rules/`](.claude/rules/), [`CLAUDE.md`](CLAUDE.md) | Правила Claude Code (эквивалент `.cursor/rules/`); каталог — [`AGENTS.md`](AGENTS.md) |
+| `.gitignore`, `.gitattributes`, `.editorconfig`, `.nvmrc`, `.npmrc` | Git, EditorConfig, Node/npm (подробнее в правилах) |
 | [`AGENTS.md`](AGENTS.md) | Краткий справочник для AI-агента |
 
-Подробная структура — [`.cursor/rules/markdownlint-project.mdc`](.cursor/rules/markdownlint-project.mdc).
+Подробная структура — [`.cursor/rules/markdownlint-project.mdc`](.cursor/rules/markdownlint-project.mdc) (Claude: [`.claude/rules/markdownlint-project.md`](.claude/rules/markdownlint-project.md)).
 
 ## Архитектура
 
@@ -128,14 +129,15 @@ flowchart LR
 
 ## Разработка и тестирование
 
-Workflow — [`AGENTS.md`](AGENTS.md) (шаги 1–8). Кратко: правки → при новом/удалённом правиле `npm run sync:cli2-config` → `npm test` → sync docs по [`.cursor/rules/docs-consistency.mdc`](.cursor/rules/docs-consistency.mdc).
+Workflow — [`AGENTS.md`](AGENTS.md) (шаги 1–8). Кратко: правки → при новом/удалённом правиле `npm run sync:cli2-config` → `npm test` → sync docs по [`.cursor/rules/docs-consistency.mdc`](.cursor/rules/docs-consistency.mdc) / [`.claude/rules/docs-consistency.md`](.claude/rules/docs-consistency.md).
 
 Runtime — CommonJS `.js`, не `.ts` и не ESM.
 
 ## Связанная документация
 
 - [`AGENTS.md`](AGENTS.md) — краткий справочник для AI-агента, workflow;
-- [`.cursor/rules/markdownlint-project.mdc`](.cursor/rules/markdownlint-project.mdc) — полные политики lint-правил, `.markdownlint-cli2.jsonc`, CLI;
-- [`.cursor/rules/platform-scripts.mdc`](.cursor/rules/platform-scripts.mdc) — bin-скрипты, bootstrap в runner (`node_modules`, stale build);
-- [`.cursor/rules/docs-consistency.mdc`](.cursor/rules/docs-consistency.mdc) — синхронизация кода и документации;
+- [`CLAUDE.md`](CLAUDE.md) — точка входа для Claude Code (эквивалент `.cursor/rules/` для Claude);
+- [`.cursor/rules/markdownlint-project.mdc`](.cursor/rules/markdownlint-project.mdc) / [`.claude/rules/markdownlint-project.md`](.claude/rules/markdownlint-project.md) — полные политики lint-правил, `.markdownlint-cli2.jsonc`, CLI;
+- [`.cursor/rules/platform-scripts.mdc`](.cursor/rules/platform-scripts.mdc) / [`.claude/rules/platform-scripts.md`](.claude/rules/platform-scripts.md) — bin-скрипты, bootstrap в runner (`node_modules`, stale build);
+- [`.cursor/rules/docs-consistency.mdc`](.cursor/rules/docs-consistency.mdc) / [`.claude/rules/docs-consistency.md`](.claude/rules/docs-consistency.md) — синхронизация кода и документации;
 - [markdownlint: Custom Rules](https://github.com/DavidAnson/markdownlint/blob/main/doc/CustomRules.md) — официальная документация;

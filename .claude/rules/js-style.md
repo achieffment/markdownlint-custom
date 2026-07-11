@@ -1,0 +1,87 @@
+# Стиль test-rules.cjs
+
+> Claude-эквивалент [`.cursor/rules/js-style.mdc`](../../.cursor/rules/js-style.mdc). Применяется при работе с `test-rules.cjs`.
+
+Исходники TypeScript/OOP — [ts-style.md](ts-style.md). Симметрия имён, однострочные условия, конвейер. Проект — [markdownlint-project.md](markdownlint-project.md); проектирование — [js-dev.md](js-dev.md). При изменении конвенций — [docs-consistency.md](docs-consistency.md).
+
+**Не редактировать** tsc-артефакты (`rules/*.js`, `domain/*.js`, …) — только `src/**/*.ts`.
+
+## Формат файла
+
+- CommonJS: `require` / `module.exports` не используется для правил (правила — `./markdownlint-rules.js`)
+- Отступ **4 пробела**
+- **Не выравнивать** ключи, отступы и **пробелы перед `=`**
+
+## Симметрия имён
+
+- Ровность **длин соседей** в блоке, не padding перед `=`
+- Смотри длину ряда (3, 5, 6, 9…); **сокращай только выбивающихся** — не словарь ко всем подряд
+- Имя уже вписывается (`getIndent` = 9) — **оставь читаемую форму**
+- **Составные имена** — сокращай **все части**: `fstBeg`/`lstEnd`, не `fstStart`/`lstEnd`; `nxtBeg`, не `nextStart`; `boundBefIdx`/`boundAftIdx`, не `boundBeforeIx`/`boundAfterIx`
+- **Пары направления** — единый словарь: `Bef`/`Aft` (не `Before`/`After`), `Fwd`/`Bck`, `beg`/`end`, `prev`/`next`
+- **Суффиксы:** `Ind` — отступ (`currInd`, `prevInd`); `Idx` — индекс строки в составном имени (`befIdx`, `boundBefIdx`); параметр цикла/колбэка — короткий `ix` или `idx`
+- **Диапазон строк** — симметричная пара: `beg`/`end`, `f`/`t` или `from`/`dest`; не `from`/`to` (4 vs 2)
+- **Не вводи лишнюю ступень:** соседи 3 и 5 — не ставь 4 (`ind`, не `indt`); пара `beg`/`end` — обе по 3
+- Серия `item1`, `item2` — целиком; не смешивать `item` и `item2`
+
+**Проверка блока:** (1) длины соседних `const`/`let`; (2) **каждая часть** составного имени — словарное сокращение (`Bef`/`Aft`, `Beg`/`End`, `Brk`, `Ind`/`Idx`); (3) пары одной длины (`beg`/`end`, `ind`/`jInd`, `fstBeg`/`lstEnd`, `befIdx`/`aftIdx`).
+
+**Словарь (при необходимости):** `cont`, `rx`, `ix`, `idx`, `prev`/`next`, `curr`, `beg`/`end`/`nxtBeg`, `f`/`t`, `from`/`dest`, `ind` (локально; хелпер `getIndent`), `currInd`/`prevInd`/`lineInd`, `befIdx`/`aftIdx`, `fst`/`lst`, `Bef`/`Aft`, `folcod`, `folsub`, `needsColon`, `inCodeB`, `sep`, `incl`, `proc`, `tok`, `lstItemRx`, `isLstItem`, `isChildLstItem`, `isNumItem`, `isBulItem`, `isNestedLstItem`, `hasBlankGap`, `boundBefIdx`/`boundAftIdx`, `shouldBrk`.
+
+**Исключения:** `params`, `onError`, сигнатуры markdownlint, внешние API.
+
+## Константы-функции
+
+Те же правила симметрии, что у переменных. Алгоритм: сгруппировать соседей → целевая длина → укоротить только длиннее цели.
+
+```javascript
+const hlprs = require("./markdownlint-hlprs");
+const { lstItemRx, numItemRx } = require("./regex.js");
+const { isLstItem, getIndent } = hlprs;
+const fstBeg = items[0];
+const ind = getIndent(lines[beg]);
+let end = beg;
+```
+
+- Плохо: `fstStart`/`lstEnd`; `boundBeforeIx`/`boundAfterIx`; `befIx`/`aftIx` (суффикс `Ix`); `from`/`to` (4 vs 2); `indt` (4) рядом с `end`/`idx` (3)
+
+## Конвейер, возвраты, условия
+
+- **Конвейер:** наращивать через переменные (`trim` → `cont`), не вкладывать вызовы
+- **Возврат:** именованная переменная после шагов; guard-`return` без `{}`
+- **Условие в одну строку**; guard без вызова — без `{}`; **вызов в теле — обязательно `{}`**
+
+```javascript
+const { endsWithColonRx, endsWithSemiRx } = require("./regex.js");
+const { eachOpeningCodeFenceLine } = require("./outside-code-lines.js");
+const openingFences = new Set();
+eachOpeningCodeFenceLine(lines, (fenceIx) => {
+    openingFences.add(fenceIx);
+});
+const lineStart = lineParser.trimStart(line);
+let cont = lineStart.replace(regex, "");
+cont = cont.trim();
+const next = lineParser.skipBlankFwd(lines, ix);
+const folcod = next < lines.length && openingFences.has(next);
+const folsub = next < lines.length && isChildLstItem(line, lines[next]);
+const needsColon = folcod || folsub;
+const endsOk = needsColon ? endsWithColonRx.test(cont) : endsWithSemiRx.test(cont);
+if (!cont) {
+    onError({ lineNumber: ix + 1, detail: details.listItemsEmpty, context: trim });
+    return;
+}
+if (!endsOk) {
+    onError({ lineNumber: ix + 1, detail, context: trim });
+}
+```
+
+## Markdownlint (inline-кейсы)
+
+- `lintStrings({ key: markdown }, ruleNames)` — прогон через custom rules
+- `getFiredRules(results)` — множество сработавших `names`
+- `onError({ lineNumber, detail, context? })`, `lineNumber` с 1 — в ожиданиях lint
+
+## Чего не делать
+
+- Padding перед `=`; переносы тернарников/условий; `if (...) onError(...)` без `{}`
+- Сокращать «на всякий случай»; рефакторить ради правила без задачи

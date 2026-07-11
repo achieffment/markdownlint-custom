@@ -1,43 +1,40 @@
----
-description: Кастомные правила markdownlint — структура, каталог, политики, примеры
-alwaysApply: true
----
-
 # Проект markdownlint custom rules
 
-Кастомные правила [markdownlint](https://github.com/DavidAnson/markdownlint) для VS Code (**vscode-markdownlint**) и локального CLI (**markdownlint-cli2**). Единый конфиг — [`.markdownlint-cli2.jsonc`](../.markdownlint-cli2.jsonc).
+> Claude-эквивалент [`.cursor/rules/markdownlint-project.mdc`](../../.cursor/rules/markdownlint-project.mdc). Применяется всегда.
+
+Кастомные правила [markdownlint](https://github.com/DavidAnson/markdownlint) для VS Code (**vscode-markdownlint**) и локального CLI (**markdownlint-cli2**). Единый конфиг — [`.markdownlint-cli2.jsonc`](../../.markdownlint-cli2.jsonc).
 
 ## Структура репозитория
 
 | Файл / каталог | Назначение |
 |----------------|------------|
-| [`src/`](../src/) | Исходники TypeScript (правила, хелперы, типы) |
-| [`src/core/`](../src/core/) | `ICustomRule`, `abstract BaseRule` |
-| [`src/domain/`](../src/domain/) | `ListLineParser`, `list-item-body-end`, `outside-code-lines`, `line-list-walker`, `micromark-token-utils`, `micromark-lists`, `micromark-heading`, `micromark-list-checkers`, `no-leading-spaces-checker`, `micromark-parse`, `ListSpacingChecker`, `ColonChecker`, `sentences-end-mark-checker` |
-| [`src/composition/`](../src/composition/) | `AppContext` — wiring зависимостей |
-| [`src/rules/`](../src/rules/) | Класс `XxxRule extends BaseRule` |
-| [`markdownlint-rules.js`](../markdownlint-rules.js) | **Артефакт tsc:** массив правил (`module.exports = [...]`) |
-| [`.markdownlint-cli2.jsonc`](../.markdownlint-cli2.jsonc) | **Единый конфиг:** built-in MD001–MD060 + custom rules + `customRules`; IDE и CLI |
-| [`load-cli2-config.cjs`](../load-cli2-config.cjs) | Загрузка `config` из cli2 для [`test-rules.cjs`](../test-rules.cjs) |
-| [`test-cli2-config.cjs`](../test-cli2-config.cjs) | Parity cli2 `config` ↔ [`schema/.markdownlint.jsonc`](../schema/.markdownlint.jsonc) |
-| [`scripts/sync-cli2-config.cjs`](../scripts/sync-cli2-config.cjs) | Регенерация `.markdownlint-cli2.jsonc` из schema + custom keys из `markdownlint-rules.js` (`presync:cli2-config` → build) |
-| [`scripts/cli2-overrides.cjs`](../scripts/cli2-overrides.cjs) | Единый список built-in overrides (`MD013`, `MD007`, `MD029`, `MD032`, `MD043`, `MD046`) для sync и `test-cli2-config.cjs` |
-| [`schema/.markdownlint.jsonc`](../schema/.markdownlint.jsonc) | Snapshot official schema для тестов |
-| [`bin/`](../bin/) | `lint-markdown.cjs`; `.sh` / `.bat` / `.command` |
-| [`markdownlint-hlprs.js`](../markdownlint-hlprs.js) | **Артефакт tsc:** публичный API для `test-rules.cjs` (compat); правила — DI через `AppContext` |
-| Корневые `*.js`, `core/`, `domain/`, `composition/`, [`rules/`](../rules/) | **Артефакты tsc**; коммитить вместе с `src/` |
-| [`markdownlint-examples/`](../markdownlint-examples/) | Пары `_err.md` / `_suc.md` на каждое правило |
-| [`test-rules.cjs`](../test-rules.cjs) | Прогон примеров и inline-кейсов через markdownlint CLI |
-| [`check-function-order.cjs`](../check-function-order.cjs) | Проверка порядка функций (callee перед caller) |
-| [`tsconfig.json`](../tsconfig.json) | Сборка `src/` → CommonJS `.js` в корне |
+| [`src/`](../../src/) | Исходники TypeScript (правила, хелперы, типы) |
+| [`src/core/`](../../src/core/) | `ICustomRule`, `abstract BaseRule` |
+| [`src/domain/`](../../src/domain/) | `ListLineParser`, `list-item-body-end`, `outside-code-lines`, `line-list-walker`, `micromark-token-utils`, `micromark-lists`, `micromark-heading`, `micromark-list-checkers`, `no-leading-spaces-checker`, `micromark-parse`, `ListSpacingChecker`, `ColonChecker`, `sentences-end-mark-checker` |
+| [`src/composition/`](../../src/composition/) | `AppContext` — wiring зависимостей |
+| [`src/rules/`](../../src/rules/) | Класс `XxxRule extends BaseRule` |
+| [`markdownlint-rules.js`](../../markdownlint-rules.js) | **Артефакт tsc:** массив правил (`module.exports = [...]`) |
+| [`.markdownlint-cli2.jsonc`](../../.markdownlint-cli2.jsonc) | **Единый конфиг:** built-in MD001–MD060 + custom rules + `customRules`; IDE и CLI |
+| [`load-cli2-config.cjs`](../../load-cli2-config.cjs) | Загрузка `config` из cli2 для [`test-rules.cjs`](../../test-rules.cjs) |
+| [`test-cli2-config.cjs`](../../test-cli2-config.cjs) | Parity cli2 `config` ↔ [`schema/.markdownlint.jsonc`](../../schema/.markdownlint.jsonc) |
+| [`scripts/sync-cli2-config.cjs`](../../scripts/sync-cli2-config.cjs) | Регенерация `.markdownlint-cli2.jsonc` из schema + custom keys из `markdownlint-rules.js` (`presync:cli2-config` → build) |
+| [`scripts/cli2-overrides.cjs`](../../scripts/cli2-overrides.cjs) | Единый список built-in overrides (`MD013`, `MD007`, `MD029`, `MD032`, `MD043`, `MD046`) для sync и `test-cli2-config.cjs` |
+| [`schema/.markdownlint.jsonc`](../../schema/.markdownlint.jsonc) | Snapshot official schema для тестов |
+| [`bin/`](../../bin/) | `lint-markdown.cjs`; `.sh` / `.bat` / `.command` |
+| [`markdownlint-hlprs.js`](../../markdownlint-hlprs.js) | **Артефакт tsc:** публичный API для `test-rules.cjs` (compat); правила — DI через `AppContext` |
+| Корневые `*.js`, `core/`, `domain/`, `composition/`, [`rules/`](../../rules/) | **Артефакты tsc**; коммитить вместе с `src/` |
+| [`markdownlint-examples/`](../../markdownlint-examples/) | Пары `_err.md` / `_suc.md` на каждое правило |
+| [`test-rules.cjs`](../../test-rules.cjs) | Прогон примеров и inline-кейсов через markdownlint CLI |
+| [`check-function-order.cjs`](../../check-function-order.cjs) | Проверка порядка функций (callee перед caller) |
+| [`tsconfig.json`](../../tsconfig.json) | Сборка `src/` → CommonJS `.js` в корне |
 | `.gitignore`, `.gitattributes` | Git: ignore-паттерны; LF в index и working tree (Windows: `core.autocrlf=false`) |
 | `.editorconfig` | LF, отступ 4 пробела (EditorConfig) |
 | `.nvmrc`, `.npmrc` | Node 22 (nvm), `engine-strict` для `engines` |
-| [`package.json`](../package.json) | npm-скрипты, `engines.node >= 22`, `type: commonjs` |
-| [`AGENTS.md`](../AGENTS.md) | Краткий справочник для AI-агента |
-| [`README.md`](../README.md) | Документация для людей (onboarding, правила проверки кратко) |
-| [`.cursor/rules/`](../.cursor/rules/) | Правила Cursor; каталог — [AGENTS.md](../AGENTS.md) |
-| [`.claude/rules/`](../.claude/rules/) | Правила Claude Code (эквивалент `.cursor/rules/`); каталог — [AGENTS.md](../AGENTS.md) |
+| [`package.json`](../../package.json) | npm-скрипты, `engines.node >= 22`, `type: commonjs` |
+| [`AGENTS.md`](../../AGENTS.md) | Краткий справочник для AI-агента |
+| [`README.md`](../../README.md) | Документация для людей (onboarding, правила проверки кратко) |
+| [`.cursor/rules/`](../../.cursor/rules/) | Правила Cursor; каталог — [AGENTS.md](../../AGENTS.md) |
+| [`.claude/rules/`](../../.claude/rules/) | Правила Claude Code (эквивалент `.cursor/rules/`); каталог — [AGENTS.md](../../AGENTS.md) |
 
 ## Каталог правил
 
@@ -65,15 +62,15 @@ alwaysApply: true
 ### `minimum-h2-heading` — политика
 
 - **Parser:** `micromark` (`params.parsers.micromark.tokens`).
-- **Проверка:** хотя бы один `atxHeading` или `setextHeading` уровня 2 с непустым текстом (`hasMinimumH2` в [`src/domain/micromark-heading.ts`](../src/domain/micromark-heading.ts)).
+- **Проверка:** хотя бы один `atxHeading` или `setextHeading` уровня 2 с непустым текстом (`hasMinimumH2` в [`src/domain/micromark-heading.ts`](../../src/domain/micromark-heading.ts)).
 - **Ошибка:** строка 1, если заголовка H2 нет.
 
 ### `list-items-end-with-semicolon-or-colon` — политика
 
 - **Parser:** `micromark` (`listItemPrefix` через `eachListItemPrefix`); контент, `folcod`/`folsub` и конец тела — `params.lines[]` + `findListItemBodyEnd`.
-- **Конец тела:** `findListItemBodyEnd` (`traverseFence: true`, `shouldBrk: isLstItem`) — как в [`line-list-walker.ts`](../src/domain/line-list-walker.ts); последняя prose-строка тела — через `getLastProseIx` (пропуск blank и code fence блоков).
+- **Конец тела:** `findListItemBodyEnd` (`traverseFence: true`, `shouldBrk: isLstItem`) — как в [`line-list-walker.ts`](../../src/domain/line-list-walker.ts); последняя prose-строка тела — через `getLastProseIx` (пропуск blank и code fence блоков).
 - **Проверка:** последняя prose-строка тела заканчивается `;`; если после неё в теле или сразу после тела — открывающая `` ``` `` или **прямой** дочерний пункт (больший отступ; sibling на том же indent — `;`), то `:`.
-- **folcod:** только **открывающая** `` ``` `` (pre-scan `eachOpeningCodeFenceLine` → `Set<number>` в [`ListItemsChecker`](../src/domain/micromark-list-checkers.ts); в теле между последней prose-строкой и `bodyEnd` или сразу после `bodyEnd`; `isOpeningCodeFenceAt` — эквивалентная семантика, unit-тесты; closing fence не требует `:`).
+- **folcod:** только **открывающая** `` ``` `` (pre-scan `eachOpeningCodeFenceLine` → `Set<number>` в [`ListItemsChecker`](../../src/domain/micromark-list-checkers.ts); в теле между последней prose-строкой и `bodyEnd` или сразу после `bodyEnd`; `isOpeningCodeFenceAt` — эквивалентная семантика, unit-тесты; closing fence не требует `:`).
 - **folsub:** первая непустая строка после `bodyEnd` — прямой дочерний пункт (`isChildLstItem`).
 - **Пустой пункт** (только маркер) — ошибка с `detail: listItemsEmpty`; контент после маркера — через `ListLineParser.trimStart`, не `line.trim()` (иначе `- ` теряет пробел маркера).
 - **Sub-detail:** `listItemsColon` — перед открывающей `` ``` `` или прямым дочерним пунктом нужен `:`; `listItemsSemi` — в остальных случаях нужен `;`.
@@ -107,14 +104,14 @@ alwaysApply: true
 - **Проверка:** строка перед fence должна заканчиваться `:`.
 - **Skip prev:** заголовок, **любой** пункт списка (`isLstItem` / `lstItemRx`), code fence, pipe-строки таблицы (подъём вверх через `tableRowRx` в `checkPrecededByColon`, включая пустые строки между pipe-строками); нет непустой строки выше — skip.
 - **Пустые строки:** между fence и prev пропускаются (`skipBlankBck`); `:` ищется на первой непустой prose-строке выше после skip blank + pipe-блока.
-- **Обход fence:** `eachOpeningCodeFenceLine` из [`src/domain/outside-code-lines.ts`](../src/domain/outside-code-lines.ts) (regex; покрывает indented fence, которые micromark не парсит как `codeFenced`).
+- **Обход fence:** `eachOpeningCodeFenceLine` из [`src/domain/outside-code-lines.ts`](../../src/domain/outside-code-lines.ts) (regex; покрывает indented fence, которые micromark не парсит как `codeFenced`).
 - **lineNumber:** строка prose **перед** открывающей `` ``` `` (первая непустая выше после skip blank + pipe-блока; не pipe-строка).
 
 ### `no-leading-spaces` — политика
 
 - **Parser:** `none` (line-based: `walkCodeFenceAware`; проверяет сами строки `` ``` ``, не только контент).
 - **Scope:** строки вне code fence и строки-обозначения блока (opening/closing `` ``` ``).
-- **Обход:** `walkCodeFenceAware` из [`src/domain/outside-code-lines.ts`](../src/domain/outside-code-lines.ts) (строки fence не пропускаются; не `eachLineOutsideCode`).
+- **Обход:** `walkCodeFenceAware` из [`src/domain/outside-code-lines.ts`](../../src/domain/outside-code-lines.ts) (строки fence не пропускаются; не `eachLineOutsideCode`).
 - **Skip:** заголовки (`#`); содержимое между fence не проверяется.
 - **Fence:** отступ 0 у opening/closing `` ``` ``.
 - **Пункт списка:** отступ 0; вложенный допустим при `indent > 0` и `indent >=` отступа предыдущего пункта списка (`findPrevListInd`; соседи на одном уровне — с тем же отступом); при поиске предыдущего пункта пропускаются блоки code fence. При `indent > 0` ошибка на **первом** пункте блока (`prevInd < 0`); siblings с тем же отступом (`currInd >= prevInd`) допустимы — осознанная ленивость.
@@ -147,11 +144,11 @@ alwaysApply: true
 
 Внутренние (не экспортируются): `ListLineParser` (`trimStart`, `isNumItem`, `isBulItem`, `isNestedLstItem`, `skipBlankBck`), `list-item-body-end` (`findListItemBodyEnd` — shared конец тела пункта для spacing и colon), `line-list-walker` (`LineListBlockWalker`, `walkLineBasedListBlocks` — fence-in-list для `list-preceded-by-colon`), `ListSpacingChecker` (`hasBlankGap`, `boundBefIdx`, `boundAftIdx`), `outside-code-lines` (`walkOutsideCode`, `walkCodeFenceAware`, `eachOpeningCodeFenceLine`, `isOpeningCodeFenceAt`, `skipFenceBlockFwd`, `skipFenceBlockBck`; `eachLineOutsideCode` — публичный через hlprs), `micromark-token-utils` (`require("markdownlint/helpers")` + `path.join(helpersDir, "micromark-helpers.cjs")`: `filterByTypes`, `getParentOfType`, `isBlankLine`, …), `micromark-lists` (`eachTopLevelList`, `collectPrefixesInList`, `eachListItemPrefix`), `micromark-heading` (`hasMinimumH2`), `micromark-list-checkers` (`ListItemsChecker`), `no-leading-spaces-checker` (`NoLeadingSpacesChecker`), `sentences-end-mark-checker` (`SentencesEndMarkChecker`), `ColonChecker` (`checkPrecededByColon`, `checkOpeningCodeFences`, `checkListPrecededByColon`), `micromark-parse` (`parseMicromarkTokens` — `ListSpacingChecker.checkLines` для hlprs `checkListBlankSpacing`; exclusivity в test-rules; production rules получают tokens от markdownlint).
 
-**Parser custom rules:** **3** правила — `parser: "micromark"` (`checkMicromark`, `params.parsers.micromark.tokens`): `minimum-h2-heading`, `list-items-end-with-semicolon-or-colon`, `list-blank-line-spacing` (последнее — tokens + `params.lines[]` для границ/gaps). **4** правила — `parser: "none"` по умолчанию ([`BaseRule`](../src/core/base-rule.ts), `check()`, только `params.lines[]`): `list-preceded-by-colon`, `codeblock-preceded-by-colon`, `no-leading-spaces`, `sentences-end-with-mark` — line-based там, где micromark разрывает списки на fence, не парсит indented fence или проще обходить prose/blockquote построчно.
+**Parser custom rules:** **3** правила — `parser: "micromark"` (`checkMicromark`, `params.parsers.micromark.tokens`): `minimum-h2-heading`, `list-items-end-with-semicolon-or-colon`, `list-blank-line-spacing` (последнее — tokens + `params.lines[]` для границ/gaps). **4** правила — `parser: "none"` по умолчанию ([`BaseRule`](../../src/core/base-rule.ts), `check()`, только `params.lines[]`): `list-preceded-by-colon`, `codeblock-preceded-by-colon`, `no-leading-spaces`, `sentences-end-with-mark` — line-based там, где micromark разрывает списки на fence, не парсит indented fence или проще обходить prose/blockquote построчно.
 
 ## Конфигурация lint (`.markdownlint-cli2.jsonc`)
 
-Единый канон для **vscode-markdownlint**, **markdownlint-cli2** и [`bin/lint-markdown.cjs`](../bin/lint-markdown.cjs). Расширение подхватывает файл в корне workspace автоматически.
+Единый канон для **vscode-markdownlint**, **markdownlint-cli2** и [`bin/lint-markdown.cjs`](../../bin/lint-markdown.cjs). Расширение подхватывает файл в корне workspace автоматически.
 
 | Политика | Значение |
 |----------|----------|
@@ -164,17 +161,17 @@ alwaysApply: true
 | `MD046` | `false` — намеренно (fenced code в examples) |
 | 7 custom `names` | `true` |
 
-Полный список MD001–MD060 — в [`config`](../.markdownlint-cli2.jsonc) (на базе [official schema](https://github.com/DavidAnson/markdownlint/blob/main/schema/.markdownlint.jsonc)). Отключения MD029/MD046 документированы комментарием с закомментированным дефолтом.
+Полный список MD001–MD060 — в [`config`](../../.markdownlint-cli2.jsonc) (на базе [official schema](https://github.com/DavidAnson/markdownlint/blob/main/schema/.markdownlint.jsonc)). Отключения MD029/MD046 документированы комментарием с закомментированным дефолтом.
 
 `customRules`: `["./markdownlint-rules.js"]`.
 
-`globs`: `["**/*.{md,markdown}", "!node_modules", "!vendor"]` — workspace/IDE: весь markdown, кроме `node_modules` и `vendor`; в [`bin/lint-markdown.cjs`](../bin/lint-markdown.cjs) для папок — `#node_modules`, `#vendor` (явный путь, `--no-globs`).
+`globs`: `["**/*.{md,markdown}", "!node_modules", "!vendor"]` — workspace/IDE: весь markdown, кроме `node_modules` и `vendor`; в [`bin/lint-markdown.cjs`](../../bin/lint-markdown.cjs) для папок — `#node_modules`, `#vendor` (явный путь, `--no-globs`).
 
-Синхронизация config с upstream schema: `npm run sync:cli2-config` (сохраняет overrides из [`scripts/cli2-overrides.cjs`](../scripts/cli2-overrides.cjs), custom keys из `markdownlint-rules.js`, `globs`).
+Синхронизация config с upstream schema: `npm run sync:cli2-config` (сохраняет overrides из [`scripts/cli2-overrides.cjs`](../../scripts/cli2-overrides.cjs), custom keys из `markdownlint-rules.js`, `globs`).
 
 **Обновление snapshot schema** (при bump `markdownlint` в `package.json`):
 
-1. Скопировать [upstream schema](https://github.com/DavidAnson/markdownlint/blob/main/schema/.markdownlint.jsonc) в [`schema/.markdownlint.jsonc`](../schema/.markdownlint.jsonc) (версия в URL — тег пакета).
+1. Скопировать [upstream schema](https://github.com/DavidAnson/markdownlint/blob/main/schema/.markdownlint.jsonc) в [`schema/.markdownlint.jsonc`](../../schema/.markdownlint.jsonc) (версия в URL — тег пакета).
 2. `npm run sync:cli2-config`
 3. `npm test`
 
@@ -190,7 +187,7 @@ alwaysApply: true
 
 ## IDE и EditorConfig
 
-Рекомендуемые настройки VS Code для markdown (согласованы с правилами и [`.editorconfig`](../.editorconfig)):
+Рекомендуемые настройки VS Code для markdown (согласованы с правилами и [`.editorconfig`](../../.editorconfig)):
 
 ```json
 "[markdown]": {
@@ -212,7 +209,7 @@ alwaysApply: true
 
 ## Подключение в VS Code
 
-Достаточно [`.markdownlint-cli2.jsonc`](../.markdownlint-cli2.jsonc) в корне workspace. Ручной `markdownlint.config` / `markdownlint.customRules` в settings **не нужен**, если файл в корне.
+Достаточно [`.markdownlint-cli2.jsonc`](../../.markdownlint-cli2.jsonc) в корне workspace. Ручной `markdownlint.config` / `markdownlint.customRules` в settings **не нужен**, если файл в корне.
 
 Другой workspace (документация), правила из этой папки:
 
@@ -226,17 +223,17 @@ alwaysApply: true
 
 ## Workflow: новое или изменённое правило
 
-Общий порядок — [AGENTS.md](../AGENTS.md) (шаги 1–8).
+Общий порядок — [AGENTS.md](../../AGENTS.md) (шаги 1–8).
 
 Специфика lint-правила:
 
 1. `_err.md` / `_suc.md` в `markdownlint-examples/<rule-name>/`
-2. Класс в `src/rules/<rule-name>.ts`; ключи — [`details.ts`](../src/details.ts), regex — [`regex.ts`](../src/regex.ts); domain — при необходимости
-3. `new XxxRule(deps).toRule()` в [`src/markdownlint-rules.ts`](../src/markdownlint-rules.ts); `npm run sync:cli2-config` для [`.markdownlint-cli2.jsonc`](../.markdownlint-cli2.jsonc) (custom keys из `markdownlint-rules.js`); новый checker — [`AppContext`](../src/composition/app-context.ts); inline-кейсы — [`test-rules.cjs`](../test-rules.cjs)
+2. Класс в `src/rules/<rule-name>.ts`; ключи — [`details.ts`](../../src/details.ts), regex — [`regex.ts`](../../src/regex.ts); domain — при необходимости
+3. `new XxxRule(deps).toRule()` в [`src/markdownlint-rules.ts`](../../src/markdownlint-rules.ts); `npm run sync:cli2-config` для [`.markdownlint-cli2.jsonc`](../../.markdownlint-cli2.jsonc) (custom keys из `markdownlint-rules.js`); новый checker — [`AppContext`](../../src/composition/app-context.ts); inline-кейсы — [`test-rules.cjs`](../../test-rules.cjs)
 4. При ≥3 повторах алгоритма — domain-класс (не barrel)
 
 ## Контракты
 
 - **Исходники:** TypeScript в `src/`; **runtime custom rules:** CommonJS `.js` в корне (не ESM, не `.ts` напрямую).
 - **onError:** `{ lineNumber, detail, context? }`, `lineNumber` с 1.
-- Не менять исходники пакета `markdownlint` (built-in rules); конфигурация built-in — только в [`.markdownlint-cli2.jsonc`](../.markdownlint-cli2.jsonc).
+- Не менять исходники пакета `markdownlint` (built-in rules); конфигурация built-in — только в [`.markdownlint-cli2.jsonc`](../../.markdownlint-cli2.jsonc).

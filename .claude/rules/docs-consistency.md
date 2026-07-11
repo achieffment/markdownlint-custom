@@ -1,0 +1,76 @@
+# Синхронизация документации и правил
+
+> Claude-эквивалент [`.cursor/rules/docs-consistency.mdc`](../../.cursor/rules/docs-consistency.mdc). Применяется всегда.
+
+При изменении логики, архитектуры, тестов, стиля или структуры — синхронизировать код и все связанные артефакты. Не завершать задачу, пока docs и правила (`.claude/rules/*.md` / `.cursor/rules/*.mdc`) не соответствуют коду.
+
+## Роли артефактов
+
+| Слой | Файлы | Содержит |
+|------|-------|----------|
+| **Поведение (источник истины)** | [`src/`](../../src/), [`details.ts`](../../src/details.ts), [`regex.ts`](../../src/regex.ts) | Реализация, `description`/`detail` |
+| **Канон проекта (AI)** | [markdownlint-project.md](markdownlint-project.md) | Политики lint-правил, примеры, API hlprs, структура, `.markdownlint-cli2.jsonc`, CLI |
+| **Платформы / bin (AI)** | [platform-scripts.md](platform-scripts.md) | Bootstrap в `lint-markdown.cjs`, кроссплатформенные скрипты |
+| **Стиль TS (AI)** | [ts-style.md](ts-style.md) | Оформление `src/**/*.ts`: BaseRule, типы, barrels, `onError` |
+| **Архитектура TS (AI)** | [ts-dev.md](ts-dev.md) | SRP/DRY, модули `src/`, порядок функций |
+| **Стиль test (AI)** | [js-style.md](js-style.md) | Симметрия имён, конвейер в [`test-rules.cjs`](../../test-rules.cjs) |
+| **Архитектура test (AI)** | [js-dev.md](js-dev.md) | SRP/DRY, inline-кейсы, порядок функций в test |
+| **Синхронизация (AI)** | [docs-consistency.md](docs-consistency.md) | Этот файл — матрица и чеклист |
+| **Справочник AI** | [`AGENTS.md`](../../AGENTS.md) | Scope, workflow, краткий каталог lint-правил, ссылки на все правила |
+| **Документация людей** | [`README.md`](../../README.md) | Onboarding, структура, скрипты; таблица lint-правил — **кратко** |
+
+Не копировать политики из `markdownlint-project.md` в README. Не менять только README, не обновив правила и `AGENTS.md`.
+
+## Матрица изменений
+
+| Тип изменения | Код / тесты | Правила и docs |
+|---------------|-------------|----------------|
+| **Новое lint-правило** | `src/rules/`, [`markdownlint-rules.ts`](../../src/markdownlint-rules.ts), [`details.ts`](../../src/details.ts), [`AppContext`](../../src/composition/app-context.ts), `markdownlint-examples/<name>/`, [`test-rules.cjs`](../../test-rules.cjs), `npm test` | Каталог + политика в `markdownlint-project.md`; обновить [`.markdownlint-cli2.jsonc`](../../.markdownlint-cli2.jsonc): `npm run sync:cli2-config` (custom keys из `markdownlint-rules.js`); строки в `AGENTS.md`, README |
+| **Изменение политики lint-правила** | `src/` (+ domain), примеры, inline в `test-rules.cjs`, `npm test` | Политика в `markdownlint-project.md`; `AGENTS.md` / README — если изменилась суть для пользователя |
+| **Изменение `description` / `detail`** | [`details.ts`](../../src/details.ts), класс правила | Политика в соответствующем правиле; краткие строки в `AGENTS.md` / README при расхождении |
+| **Константы regex** | [`regex.ts`](../../src/regex.ts), потребители в `src/` и [`test-rules.cjs`](../../test-rules.cjs) (`h2Rx` в `checkExamplePair`; exclusivity H2 — `hasMinimumH2` + `parseMicromarkTokens`) | Политика в `markdownlint-project.md` при смене семантики; `npm test` |
+| **Публичный экспорт hlprs** | [`markdownlint-hlprs.ts`](../../src/markdownlint-hlprs.ts), `npm test` | Таблица API в `markdownlint-project.md` |
+| **Архитектура / новый domain-модуль** | `src/domain/`, `AppContext`, `npm test` | Таблицы модулей в `ts-dev.md`, структура в `markdownlint-project.md`, scope в `AGENTS.md`, «Структура» / mermaid в README |
+| **Изменение BaseRule / контракта `onError`** | `src/core/` | `ts-style.md`, «Контракты» в `markdownlint-project.md`, шаги 5–6 в `AGENTS.md` |
+| **Конвенции стиля TS** | `src/**/*.ts` | `ts-style.md` (в т.ч. контракт `onError` detail/context); перекрёстные ссылки в `ts-dev.md` при необходимости |
+| **Конвенции test-rules** | [`test-rules.cjs`](../../test-rules.cjs) | `js-style.md`, `js-dev.md`; конвенции примеров в `markdownlint-project.md` при пересечении |
+| **Порядок функций / check-function-order** | `src/`, `test-rules.cjs`, [`check-function-order.cjs`](../../check-function-order.cjs) | `ts-dev.md`, `js-dev.md` |
+| **Структура репозитория** | — | `markdownlint-project.md`, `AGENTS.md` scope; README «Структура» (кратко + ссылка на правила) |
+| **npm-скрипты** | [`package.json`](../../package.json) | README «npm-скрипты»; «Верификация» в `AGENTS.md` |
+| **CLI / bin / конфиг lint** | [`.markdownlint-cli2.jsonc`](../../.markdownlint-cli2.jsonc), [`load-cli2-config.cjs`](../../load-cli2-config.cjs), [`test-cli2-config.cjs`](../../test-cli2-config.cjs), [`bin/`](../../bin/), `package.json` `lint:md` | `platform-scripts.md`, `markdownlint-project.md`, `AGENTS.md`, README; `globs`/overrides → examples + test-rules |
+| **Schema / sync cli2** | [`schema/.markdownlint.jsonc`](../../schema/.markdownlint.jsonc), [`scripts/sync-cli2-config.cjs`](../../scripts/sync-cli2-config.cjs), [`scripts/cli2-overrides.cjs`](../../scripts/cli2-overrides.cjs), `.markdownlint-cli2.jsonc`, [`test-cli2-config.cjs`](../../test-cli2-config.cjs) | `markdownlint-project.md` (overrides, sync, schema bump); `npm run sync:cli2-config` (`presync:cli2-config`); `npm test` |
+| **Новое/удаление правила Cursor/Claude** | — | Каталог в [AGENTS.md](../../AGENTS.md); строка про `.cursor/rules/` и `.claude/rules/` в `markdownlint-project.md`; роли в этом файле; карта соответствия в [rules-sync.md](rules-sync.md) (обе версии) |
+| **Удаление lint-правила** | `src/`, examples, `test-rules.cjs` | Обратный чеклист: все docs + `npm run sync:cli2-config` для `.markdownlint-cli2.jsonc` |
+| **Критерии завершения аудита** | `npm test`, `npm run check`, `lint:md` README+AGENTS | Блок «Критерии завершения аудита» в [AGENTS.md](../../AGENTS.md); правила вне lint globs — намеренно |
+
+Список `names` custom lint-правил — одинаковый в [`markdownlint-rules.ts`](../../src/markdownlint-rules.ts) / [`markdownlint-rules.js`](../../markdownlint-rules.js), [`.markdownlint-cli2.jsonc`](../../.markdownlint-cli2.jsonc) и каталогах docs; [`scripts/sync-cli2-config.cjs`](../../scripts/sync-cli2-config.cjs) генерирует custom keys из runtime rules (не хранит список).
+
+**Cursor и Claude правила синхронны по содержанию.** При изменении матрицы/чеклиста — править `.cursor/rules/docs-consistency.mdc` и `.claude/rules/docs-consistency.md` одновременно (см. [`.cursor/rules/docs-consistency.mdc`](../../.cursor/rules/docs-consistency.mdc)).
+
+## Порядок работы
+
+1. Код, примеры, `test-rules.cjs`
+2. `npm test`
+3. Правила по типу изменения (см. матрицу): `markdownlint-project` → `ts-*` / `js-*` при необходимости — в обоих каталогах (`.cursor/rules/*.mdc` и `.claude/rules/*.md`)
+4. `AGENTS.md` → `README.md`
+5. Финальный чеклист
+
+Workflow — канон в [AGENTS.md](../../AGENTS.md); правила не дублируют шаги build/test/sync.
+
+## Антипаттерны
+
+- Обновить docs без `npm test` после изменения логики
+- Развести расхождения в `names` между кодом и документами
+- Дублировать полные политики в README или AGENTS.md
+- Менять workflow в правилах, не сверившись с [AGENTS.md](../../AGENTS.md)
+- Забыть `npm run sync:cli2-config` (обновить `.markdownlint-cli2.jsonc`) при добавлении/удалении custom lint-правила
+- Обновить `.cursor/rules/*.mdc`, не обновив соответствующий `.claude/rules/*.md` (и наоборот)
+
+## Финальный чеклист
+
+- [ ] Каталоги custom `names` совпадают в коде (`markdownlint-rules.js`), `.markdownlint-cli2.jsonc`, правилах, `AGENTS.md`, README; sync round-trip проходит (`test-cli2-config.cjs`)
+- [ ] Политики и конвенции примеров актуальны в `markdownlint-project.md` (и парном `.mdc`)
+- [ ] Модули актуальны в `ts-dev.md`, конвенции — в `ts-style.md` (если менялся TS)
+- [ ] Конвенции test актуальны в `js-dev.md`, `js-style.md` (если менялся test)
+- [ ] `AGENTS.md` и README соответствуют канону; AGENTS — ссылки на все правила; README — AGENTS + user-facing правила
+- [ ] `npm test` и `npm run check` — зелёные; `npm run lint:md -- README.md AGENTS.md` — 0 ошибок
