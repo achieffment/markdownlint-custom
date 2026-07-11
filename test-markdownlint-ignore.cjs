@@ -52,7 +52,47 @@ const testNativeGitignoreRelative = () => {
     fs.rmSync(tmp, { recursive: true, force: true });
 };
 
+const testAnchoredPatternOutsideRepoRoot = () => {
+    // Anchoring follows real gitignore rules: a "/" anywhere except at the
+    // very end makes the pattern anchored to the ignore file's directory —
+    // a single-segment "Warehouse/" is unanchored (matches any depth), a
+    // multi-segment "Warehouse/Arduino/" is anchored (matches only from the
+    // ignore file's own directory), which is what trips up external targets.
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "markdownlint-ignore-anchor-"));
+    const repoDir = path.join(tmp, "Components", "repo");
+    const outsideDir = path.join(tmp, "Workspace", "Warehouse", "Arduino");
+    fs.mkdirSync(repoDir, { recursive: true });
+    fs.mkdirSync(outsideDir, { recursive: true });
+    fs.writeFileSync(path.join(outsideDir, "bad.md"), "no heading\n");
+    fs.writeFileSync(
+        path.join(repoDir, ".markdownlint-cli2.jsonc"),
+        JSON.stringify({ gitignore: ".markdownlint-ignore" })
+    );
+    const targetGlob = "../../Workspace/Warehouse/**/*.md";
+
+    fs.writeFileSync(path.join(repoDir, ".markdownlint-ignore"), "Warehouse/Arduino/\n");
+    const anchored = spawnSync(cli2Bin, ["--no-globs", targetGlob], {
+        cwd: repoDir,
+        shell: process.platform === "win32",
+        encoding: "utf8"
+    });
+    assert(anchored.status !== 0,
+        `multi-segment anchored pattern does not match a target outside repo root (documented gotcha): ${anchored.stdout}${anchored.stderr}`);
+
+    fs.writeFileSync(path.join(repoDir, ".markdownlint-ignore"), "**/Warehouse/Arduino/**\n");
+    const unanchored = spawnSync(cli2Bin, ["--no-globs", targetGlob], {
+        cwd: repoDir,
+        shell: process.platform === "win32",
+        encoding: "utf8"
+    });
+    assert(unanchored.status === 0,
+        `"**/"-prefixed pattern matches a target outside repo root: ${unanchored.stdout}${unanchored.stderr}`);
+
+    fs.rmSync(tmp, { recursive: true, force: true });
+};
+
 testNativeGitignoreRelative();
+testAnchoredPatternOutsideRepoRoot();
 
 if (failed > 0) {
     console.error(`\n${failed} markdownlint-ignore check(s) failed`);
