@@ -2,9 +2,15 @@
 
 ## Обзор
 
-Кастомные правила [markdownlint](https://github.com/DavidAnson/markdownlint) для VS Code (**vscode-markdownlint**) и локального CLI (**markdownlint-cli2**). Единый конфиг — [`.markdownlint-cli2.jsonc`](.markdownlint-cli2.jsonc) (built-in MD001–MD060 + custom rules).
+Проект — **пример-эталон** того, как расширять линтинг Markdown собственными правилами: и в IDE (**vscode-markdownlint**), и через CLI (**markdownlint-cli2**), на едином конфиге. Показывает end-to-end путь от идеи правила до работающей проверки: TypeScript-класс правила → сборка в CommonJS → регистрация в `customRules` → примеры нарушений/исправлений → автотесты → единый `.markdownlint-cli2.jsonc`, который подхватывают и редактор, и командная строка без дублирования логики.
 
-Исходники — TypeScript в [`src/`](src/); runtime для markdownlint — CommonJS [`.js`](markdownlint-rules.js) в корне репозитория. Entry points: [`markdownlint-rules.js`](markdownlint-rules.js) (правила), [`markdownlint-hlprs.js`](markdownlint-hlprs.js) (compat для тестов).
+Репозиторий можно использовать как:
+
+- **Референс архитектуры** — как оформить custom-правило markdownlint (`BaseRule`, `parser: "none" | "micromark"`, `onError`), не изобретая контракт с нуля;
+- **Готовый набор правил** — 7 custom-правил для типографики и оформления списков/заголовков в Markdown, которые можно подключить как есть;
+- **Отправную точку** — скопировать структуру (`src/`, `markdownlint-examples/`, `test-rules.cjs`, `.markdownlint-cli2.jsonc`) под свои правила и адаптировать/отключить готовые;
+
+Единый конфиг — [`.markdownlint-cli2.jsonc`](.markdownlint-cli2.jsonc) (built-in MD001–MD060 + custom rules). Исходники — TypeScript в [`src/`](src/); runtime для markdownlint — CommonJS [`.js`](markdownlint-rules.js) в корне репозитория. Entry points: [`markdownlint-rules.js`](markdownlint-rules.js) (правила), [`markdownlint-hlprs.js`](markdownlint-hlprs.js) (compat для тестов).
 
 ## Требования
 
@@ -136,6 +142,37 @@ flowchart LR
 Workflow — [`AGENTS.md`](AGENTS.md) (шаги 1–8). Кратко: правки → при новом/удалённом правиле `npm run sync:cli2-config` → `npm test` → sync docs по [`.cursor/rules/docs-consistency.mdc`](.cursor/rules/docs-consistency.mdc) / [`.claude/rules/docs-consistency.md`](.claude/rules/docs-consistency.md).
 
 Runtime — CommonJS `.js`, не `.ts` и не ESM.
+
+### Включение / выключение custom-правил
+
+Все 7 custom-правил (`names` из таблицы выше) регулируются точечно в блоке `"config"` файла [`.markdownlint-cli2.jsonc`](.markdownlint-cli2.jsonc) — так же, как built-in MD001–MD060:
+
+```jsonc
+{
+  "config": {
+    // выключить одно custom-правило
+    "sentences-end-with-mark": false,
+    // остальные custom-правила остаются как есть
+    "list-blank-line-spacing": true
+  }
+}
+```
+
+- Выключить **все** custom-правила разом — убрать `"./markdownlint-rules.js"` из `customRules` (или оставить пустой массив); built-in MD001–MD060 продолжат работать как обычно, `default: true` их не затрагивает;
+- Выключить **отдельное** правило — `"<name>": false` в `config` (пример выше); остальные custom и built-in правила не меняются;
+- Использовать **только стандартные** правила markdownlint (без этого проекта) — взять `.markdownlint-cli2.jsonc` без ключей `customRules` и без 7 custom `names`; вся built-in часть (MD001–MD060 + overrides) самодостаточна и работает без исходников `src/`;
+- **Настроить** built-in правило под свой стиль — обычные опции markdownlint в его блоке `"MDxxx": { ... }` (см. [ссылки на официальную документацию](https://github.com/DavidAnson/markdownlint) в комментариях конфига); custom-правила настроек не имеют — это фиксированная политика, при необходимости другого поведения меняется код правила (`src/rules/`) и его примеры;
+
+Изменение `config` требует пересборки только если вы правите **код** правила ([«Пересборка после правок»](#пересборка-после-правок-в-src)) — сам конфиг `.markdownlint-cli2.jsonc` подхватывается IDE и CLI сразу, без `npm run build`.
+
+### Пересборка после правок в `src/`
+
+Runtime custom-правил — это скомпилированный CommonJS `.js` в корне репозитория (`markdownlint-rules.js`, `markdownlint-hlprs.js`, `core/`, `domain/`, `composition/`, `rules/`), а не исходники `src/**/*.ts` напрямую — markdownlint (и IDE, и CLI) требует CommonJS:
+
+- `npm run build` — пересобрать `src/` → корень (`tsc`); нужно после любой правки `.ts`, если не пользуетесь `npm test` / `npm run lint:md` (они пересобирают сами через bootstrap);
+- `npm run lint:md` и bin-обёртки (`bin/lint-markdown.sh` / `.bat` / `.command`) пересобирают **автоматически**, если `src/**/*.ts` новее скомпилированных артефактов ([`platform-scripts`](.cursor/rules/platform-scripts.mdc)) — вручную `npm run build` вызывать не обязательно перед локальным lint;
+- `npm test` тоже пересобирает (`pretest` → build) перед прогоном примеров и тестов;
+- Добавили/удалили custom-правило — дополнительно `npm run sync:cli2-config`, чтобы перегенерировать список custom `names` в `.markdownlint-cli2.jsonc` (сам конфиг руками не редактируется под custom keys);
 
 ## Связанная документация
 
