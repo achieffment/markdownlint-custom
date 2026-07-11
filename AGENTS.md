@@ -16,10 +16,10 @@
 | Domain / core | `src/core/`, `src/domain/`, `src/composition/app-context.ts` |
 | Barrels | `src/markdownlint-rules.ts`, `src/markdownlint-hlprs.ts` |
 | Runtime | корневые `*.js`, `core/`, `domain/`, `composition/`, `rules/` (артефакты tsc; entry points: `markdownlint-rules.js`, `markdownlint-hlprs.js`) |
-| Конфиг lint | `.markdownlint-cli2.jsonc`, `load-cli2-config.cjs`, `schema/`, `scripts/` (`sync-cli2-config.cjs`, `cli2-overrides.cjs`) |
+| Конфиг lint | `.markdownlint-cli2.jsonc`, `.markdownlint-ignore`, `load-cli2-config.cjs`, `schema/`, `scripts/` (`sync-cli2-config.cjs`, `cli2-overrides.cjs`) |
 | CLI / bin | `bin/lint-markdown.cjs`, `bin/lint-markdown.{sh,bat,command}` |
 | Примеры | `markdownlint-examples/**/*.md` |
-| Тесты | `test-rules.cjs`, `test-cli2-config.cjs`, `check-function-order.cjs` |
+| Тесты | `test-rules.cjs`, `test-cli2-config.cjs`, `test-markdownlint-ignore.cjs`, `check-function-order.cjs` |
 | Cursor rules | `.cursor/rules/*.mdc` |
 | Claude rules | `.claude/rules/*.md`, `CLAUDE.md` |
 | Repo / tooling | `.gitignore`, `.gitattributes`, `.editorconfig`, `.nvmrc`, `.npmrc` |
@@ -67,14 +67,14 @@
 4. **Match conventions** — `extends BaseRule`, `AppContext`, [`src/details.ts`](src/details.ts), стиль как в файле;
 5. **Preserve contracts** — `onError({ lineNumber, detail, context? })`, публичный API hlprs, runtime CommonJS;
 6. **Register** — `new XxxRule(deps).toRule()` в [`src/markdownlint-rules.ts`](src/markdownlint-rules.ts); обновить cli2: `npm run sync:cli2-config` (через `presync:cli2-config` → build; custom keys из `markdownlint-rules.js`); новый checker → [`src/composition/app-context.ts`](src/composition/app-context.ts);
-7. **Test** — `npm test` (pretest → build; test-rules + test-cli2-config + check-function-order);
+7. **Test** — `npm test` (pretest → build; test-rules + test-cli2-config + test-markdownlint-ignore + check-function-order);
 8. **Sync docs** — по [docs-consistency.mdc](.cursor/rules/docs-consistency.mdc) / [docs-consistency.md](.claude/rules/docs-consistency.md): правила (по матрице, оба каталога) → AGENTS → README;
 
 Локальная проверка **папки или файла**: `npm run lint:md -- <path>`, `./bin/lint-markdown.sh <path>` (см. [platform-scripts.mdc](.cursor/rules/platform-scripts.mdc) / [platform-scripts.md](.claude/rules/platform-scripts.md) для `.bat`/`.command`); **без пути** — `usage` и `exit 1`.
 
 ## Верификация
 
-См. шаг 7 workflow. Дополнительно — `npm run check` (`precheck` → build, без cli2 parity): `tsc --noEmit`, `node --check` на 9 `.js`/`.cjs` (см. [`package.json`](package.json) `scripts.check`), затем `check-function-order.cjs`; `npm run check:order` (только порядок функций; входит в `npm test` и `npm run check`); `npm run lint:md -- <path>`, `npm run sync:cli2-config` (через `presync:cli2-config` → build: schema + overrides + custom keys из `markdownlint-rules.js`, `globs`). **Parity cli2 ↔ schema** — только `npm test` (`test-cli2-config.cjs`).
+См. шаг 7 workflow. Дополнительно — `npm run check` (`precheck` → build, без cli2 parity): `tsc --noEmit`, `node --check` на 10 `.js`/`.cjs` (см. [`package.json`](package.json) `scripts.check`), затем `check-function-order.cjs`; `npm run check:order` (только порядок функций; входит в `npm test` и `npm run check`); `npm run lint:md -- <path>`, `npm run sync:cli2-config` (через `presync:cli2-config` → build: schema + overrides + custom keys из `markdownlint-rules.js`, `globs`, `gitignore`). **Parity cli2 ↔ schema** — только `npm test` (`test-cli2-config.cjs`); **.markdownlint-ignore** — `test-markdownlint-ignore.cjs` (интеграционный прогон cli2).
 
 После правки примеров — `_err` срабатывает **только** на целевое custom-правило (полный конфиг); inline-кейсы в `test-rules.cjs` обязаны проходить.
 

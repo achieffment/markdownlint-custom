@@ -17,10 +17,12 @@ alwaysApply: true
 | [`src/composition/`](../src/composition/) | `AppContext` — wiring зависимостей |
 | [`src/rules/`](../src/rules/) | Класс `XxxRule extends BaseRule` |
 | [`markdownlint-rules.js`](../markdownlint-rules.js) | **Артефакт tsc:** массив правил (`module.exports = [...]`) |
-| [`.markdownlint-cli2.jsonc`](../.markdownlint-cli2.jsonc) | **Единый конфиг:** built-in MD001–MD060 + custom rules + `customRules`; IDE и CLI |
+| [`.markdownlint-cli2.jsonc`](../.markdownlint-cli2.jsonc) | **Единый конфиг:** built-in MD001–MD060 + custom rules + `customRules` + `gitignore`; IDE и CLI |
+| [`.markdownlint-ignore`](../.markdownlint-ignore) | Игнор-файл (gitignore-синтаксис); подключён через top-level `gitignore` в `.markdownlint-cli2.jsonc` — см. [platform-scripts.mdc](platform-scripts.mdc) |
 | [`load-cli2-config.cjs`](../load-cli2-config.cjs) | Загрузка `config` из cli2 для [`test-rules.cjs`](../test-rules.cjs) |
-| [`test-cli2-config.cjs`](../test-cli2-config.cjs) | Parity cli2 `config` ↔ [`schema/.markdownlint.jsonc`](../schema/.markdownlint.jsonc) |
-| [`scripts/sync-cli2-config.cjs`](../scripts/sync-cli2-config.cjs) | Регенерация `.markdownlint-cli2.jsonc` из schema + custom keys из `markdownlint-rules.js` (`presync:cli2-config` → build) |
+| [`test-cli2-config.cjs`](../test-cli2-config.cjs) | Parity cli2 `config` ↔ [`schema/.markdownlint.jsonc`](../schema/.markdownlint.jsonc); проверка `gitignore` |
+| [`test-markdownlint-ignore.cjs`](../test-markdownlint-ignore.cjs) | Тест `.markdownlint-ignore`: интеграционный прогон реального cli2 с временным конфигом |
+| [`scripts/sync-cli2-config.cjs`](../scripts/sync-cli2-config.cjs) | Регенерация `.markdownlint-cli2.jsonc` из schema + custom keys из `markdownlint-rules.js` + `gitignore` (`presync:cli2-config` → build) |
 | [`scripts/cli2-overrides.cjs`](../scripts/cli2-overrides.cjs) | Единый список built-in overrides (`MD013`, `MD007`, `MD029`, `MD032`, `MD043`, `MD046`) для sync и `test-cli2-config.cjs` |
 | [`schema/.markdownlint.jsonc`](../schema/.markdownlint.jsonc) | Snapshot official schema для тестов |
 | [`bin/`](../bin/) | `lint-markdown.cjs`; `.sh` / `.bat` / `.command` |
@@ -170,7 +172,9 @@ alwaysApply: true
 
 `globs`: `["**/*.{md,markdown}", "!node_modules", "!vendor"]` — workspace/IDE: весь markdown, кроме `node_modules` и `vendor`; в [`bin/lint-markdown.cjs`](../bin/lint-markdown.cjs) для папок — `#node_modules`, `#vendor` (явный путь, `--no-globs`).
 
-Синхронизация config с upstream schema: `npm run sync:cli2-config` (сохраняет overrides из [`scripts/cli2-overrides.cjs`](../scripts/cli2-overrides.cjs), custom keys из `markdownlint-rules.js`, `globs`).
+`gitignore`: `".markdownlint-ignore"` — top-level ключ cli2, подключает [`.markdownlint-ignore`](../.markdownlint-ignore) как gitignore-style игнор-файл (относительные glob-паттерны от корня репозитория); читает **и** IDE, **и** CLI (одна и та же реализация `markdownlint-cli2`), поэтому работает одинаково без дополнительного кода. Подробности — [platform-scripts.mdc](platform-scripts.mdc).
+
+Синхронизация config с upstream schema: `npm run sync:cli2-config` (сохраняет overrides из [`scripts/cli2-overrides.cjs`](../scripts/cli2-overrides.cjs), custom keys из `markdownlint-rules.js`, `globs`, `gitignore`).
 
 **Обновление snapshot schema** (при bump `markdownlint` в `package.json`):
 

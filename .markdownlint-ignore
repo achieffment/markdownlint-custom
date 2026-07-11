@@ -1,0 +1,9 @@
+# markdownlint-ignore — папки/файлы вне markdownlint (IDE и CLI).
+#
+# gitignore-синтаксис (glob от корня репозитория). Читает markdownlint-cli2
+# нативно (top-level "gitignore" в .markdownlint-cli2.jsonc) — работает
+# одинаково в VS Code и в CLI.
+#
+# Пример:
+# docs/generated/
+# notes/*.draft.md

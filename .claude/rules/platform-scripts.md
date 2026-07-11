@@ -49,6 +49,15 @@ Windows CMD: пути с пробелами передавать в кавычк
 - Конфиг и `customRules` — всегда из корня этого репозитория (`cwd` = repoRoot), в т.ч. для внешнего `<path>`
 - Исключение `node_modules`, `vendor`: в [`.markdownlint-cli2.jsonc`](../../.markdownlint-cli2.jsonc) — `!node_modules`, `!vendor` (IDE/workspace); в [`lint-markdown.cjs`](../../bin/lint-markdown.cjs) для папок — `#node_modules`, `#vendor` (cli2 glob при `--no-globs`)
 
+## Игнор-файл (`.markdownlint-ignore`)
+
+Единственный файл в корне репозитория; синтаксис — как в `.gitignore` (комментарии `#`, пустые строки игнорируются, glob-паттерны от корня репозитория).
+
+Подключён через top-level `"gitignore": ".markdownlint-ignore"` в [`.markdownlint-cli2.jsonc`](../../.markdownlint-cli2.jsonc) — читает сам `markdownlint-cli2`, поэтому работает одинаково в VS Code и в CLI без дополнительного кода.
+
+- Только **относительные** glob-паттерны (`docs/legacy/`, `notes/*.md`); абсолютные пути файловой системы не поддерживаются.
+- Тесты — [`test-markdownlint-ignore.cjs`](../../test-markdownlint-ignore.cjs) (интеграционный прогон реального `markdownlint-cli2` с временным конфигом, подтверждающий работу `gitignore`).
+
 ## Новые исполняемые артефакты
 
 При добавлении CLI/bin:

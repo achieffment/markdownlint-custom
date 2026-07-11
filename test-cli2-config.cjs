@@ -44,6 +44,7 @@ assert(Array.isArray(cli2.customRules) && cli2.customRules.length === 1
     && cli2.customRules[0] === "./markdownlint-rules.js", "customRules must be ['./markdownlint-rules.js']");
 
 assert(cli2.ignores === undefined, "ignores must not be set");
+assert(cli2.gitignore === ".markdownlint-ignore", 'gitignore must be ".markdownlint-ignore"');
 
 assert(Array.isArray(cli2.globs), "globs must be set");
 assert(cli2.globs.includes("**/*.{md,markdown}"), 'globs must include "**/*.{md,markdown}"');
@@ -94,6 +95,7 @@ const synced = loadJsonc(tmpCli2);
 assert(deepEq(synced.config, cli2.config), "synced config must match committed cli2.config");
 assert(deepEq(synced.globs, cli2.globs), "synced globs must match committed cli2.globs");
 assert(deepEq(synced.customRules, cli2.customRules), "synced customRules must match committed cli2.customRules");
+assert(synced.gitignore === cli2.gitignore, "synced gitignore must match committed cli2.gitignore");
 try {
     fs.unlinkSync(tmpCli2);
 } catch (_) {

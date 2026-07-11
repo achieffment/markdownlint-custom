@@ -322,5 +322,6 @@
     "no-leading-spaces": true,
     "sentences-end-with-mark": true
   },
+  "gitignore": ".markdownlint-ignore",
   "globs": ["**/*.{md,markdown}", "!node_modules", "!vendor"]
 }

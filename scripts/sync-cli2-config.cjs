@@ -62,6 +62,7 @@ const out = `// markdownlint-cli2 — единый конфиг для IDE, CLI 
   "config": {
 ${indented}
   },
+  "gitignore": ".markdownlint-ignore",
   "globs": ["**/*.{md,markdown}", "!node_modules", "!vendor"]
 }
 `;

@@ -44,6 +44,10 @@ bin\lint-markdown.bat .\path\to\docs          # Windows CMD
 
 Конфиг — [`.markdownlint-cli2.jsonc`](.markdownlint-cli2.jsonc). Built-in: `default: true`; намеренные overrides — таблица в [`.cursor/rules/markdownlint-project.mdc`](.cursor/rules/markdownlint-project.mdc) / [`.claude/rules/markdownlint-project.md`](.claude/rules/markdownlint-project.md) (`MD013`, `MD007`, `MD029`, `MD032`, `MD043`, `MD046`).
 
+### Исключение папок из lint (`.markdownlint-ignore`)
+
+[`.markdownlint-ignore`](.markdownlint-ignore) — gitignore-синтаксис (комментарии `#`, пустые строки игнорируются, glob-паттерны от корня репозитория). Читает сам `markdownlint-cli2` (top-level `gitignore` в `.markdownlint-cli2.jsonc`) — работает одинаково в VS Code и в CLI.
+
 ### VS Code для markdown
 
 Рекомендуемые настройки `[markdown]` — в [`.cursor/rules/markdownlint-project.mdc`](.cursor/rules/markdownlint-project.mdc) / [`.claude/rules/markdownlint-project.md`](.claude/rules/markdownlint-project.md) (раздел IDE и EditorConfig).
@@ -75,10 +79,10 @@ bin\lint-markdown.bat .\path\to\docs          # Windows CMD
 | [`src/`](src/) | Исходники TypeScript (`core/`, `domain/`, `composition/`, `rules/`) |
 | Корневые `*.js`, `core/`, `domain/`, `composition/`, `rules/` | **Артефакты tsc** — коммитить вместе с `src/` |
 | [`markdownlint-examples/`](markdownlint-examples/) | Пары `_err.md` / `_suc.md` на каждое правило |
-| [`test-rules.cjs`](test-rules.cjs), [`test-cli2-config.cjs`](test-cli2-config.cjs), [`check-function-order.cjs`](check-function-order.cjs) | Тесты, проверка cli2-конфига, порядок функций |
+| [`test-rules.cjs`](test-rules.cjs), [`test-cli2-config.cjs`](test-cli2-config.cjs), [`test-markdownlint-ignore.cjs`](test-markdownlint-ignore.cjs), [`check-function-order.cjs`](check-function-order.cjs) | Тесты, проверка cli2-конфига и игнор-файла, порядок функций |
 | [`markdownlint-hlprs.js`](markdownlint-hlprs.js) | Compat API для `test-rules.cjs` |
 | [`package.json`](package.json), [`tsconfig.json`](tsconfig.json) | npm-скрипты, сборка tsc |
-| [`.markdownlint-cli2.jsonc`](.markdownlint-cli2.jsonc), [`load-cli2-config.cjs`](load-cli2-config.cjs) | Единый конфиг lint; загрузчик для test |
+| [`.markdownlint-cli2.jsonc`](.markdownlint-cli2.jsonc), [`.markdownlint-ignore`](.markdownlint-ignore), [`load-cli2-config.cjs`](load-cli2-config.cjs) | Единый конфиг lint, игнор-файл (папки вне lint); загрузчик для test |
 | [`bin/`](bin/) | CLI: `lint-markdown.cjs`, `.sh` / `.bat` / `.command` |
 | [`schema/`](schema/) | Snapshot [official schema](https://github.com/DavidAnson/markdownlint/blob/main/schema/.markdownlint.jsonc) для `test-cli2-config.cjs` |
 | [`scripts/`](scripts/) | `sync-cli2-config.cjs`, `cli2-overrides.cjs` — регенерация cli2 из schema + overrides + custom keys |
@@ -121,10 +125,10 @@ flowchart LR
 | Скрипт | Действие |
 | --- | --- |
 | `npm run build` | `tsc`: `src/` → корень |
-| `npm test` | `pretest` (build) + `test-rules.cjs` + `test-cli2-config.cjs` + `check-function-order.cjs` (cli2 parity — только здесь) |
+| `npm test` | `pretest` (build) + `test-rules.cjs` + `test-cli2-config.cjs` + `test-markdownlint-ignore.cjs` + `check-function-order.cjs` (cli2 parity — только здесь) |
 | `npm run lint:md` | Локальный lint папки/файла (bootstrap в runner); несколько файлов: `lint:md -- file1.md file2.md` |
-| `npm run sync:cli2-config` | Регенерация `.markdownlint-cli2.jsonc` из schema + overrides + custom keys из `markdownlint-rules.js` + `globs` (`presync:cli2-config` → build). При bump `markdownlint` — обновить `schema/` (см. `.mdc`) |
-| `npm run check` | `precheck` (build) + `tsc --noEmit` + `node --check` на 9 `.js`/`.cjs` + порядок функций (без запуска `test-cli2-config`) |
+| `npm run sync:cli2-config` | Регенерация `.markdownlint-cli2.jsonc` из schema + overrides + custom keys из `markdownlint-rules.js` + `globs` + `gitignore` (`presync:cli2-config` → build). При bump `markdownlint` — обновить `schema/` (см. `.mdc`) |
+| `npm run check` | `precheck` (build) + `tsc --noEmit` + `node --check` на 10 `.js`/`.cjs` + порядок функций (без запуска `test-cli2-config`) |
 | `npm run check:order` | Только проверка порядка функций |
 
 ## Разработка и тестирование
