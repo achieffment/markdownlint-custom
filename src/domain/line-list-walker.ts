@@ -99,31 +99,13 @@ export const walkLineBasedListBlocks = (
         if (lineParser.isNumItem(lines[ix])) {
             const items = walker.collectNumBlock(ix);
             if (items.length === 0) return ix + 1;
-            onBlock(
-                items,
-                (beg) => {
-                    return walker.findNumItemEnd(beg);
-                },
-                (line) => {
-                    return lineParser.isNumItem(line);
-                },
-                true
-            );
+            onBlock(items);
             return walker.findNumItemEnd(items[items.length - 1]);
         }
         if (lineParser.isBulItem(lines[ix])) {
             const items = walker.collectBulBlock(ix);
             if (items.length === 0) return ix + 1;
-            onBlock(
-                items,
-                (beg) => {
-                    return walker.findBulItemEnd(beg);
-                },
-                (line) => {
-                    return lineParser.isBulItem(line);
-                },
-                false
-            );
+            onBlock(items);
             return walker.findBulItemEnd(items[items.length - 1]);
         }
         return undefined;

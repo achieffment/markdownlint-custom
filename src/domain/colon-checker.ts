@@ -28,7 +28,7 @@ export class ColonChecker {
         }
         if (prev < 0) return;
         const prevTrim = lines[prev].trim();
-        if (!prevTrim || headingRx.test(prevTrim) || codeFenceRx.test(prevTrim) || this.lineParser.isLstItem(lines[prev])) {
+        if (headingRx.test(prevTrim) || codeFenceRx.test(prevTrim) || this.lineParser.isLstItem(lines[prev])) {
             return;
         }
         if (!endsWithColonRx.test(prevTrim)) {

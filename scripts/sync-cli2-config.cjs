@@ -17,17 +17,17 @@ body = body.replace(/^\/\/ Example[^\n]*\n{\n\n/, "");
 body = body.replace(/  \/\/ Path to configuration[^\n]*\n  "extends": null,\n\n/, "");
 body = body.replace(
     /  \/\/ MD013[^\n]*\n  "MD013": \{[\s\S]*?\n  \},/,
-  `  // MD013/line-length — дефолт vscode-markdownlint: отключено (line-length)
+    `  // MD013/line-length — дефолт vscode-markdownlint: отключено (line-length)
   "MD013": false,`
 );
 body = body.replace(
-  /  \/\/ MD029[^\n]*\n  "MD029": \{[\s\S]*?\n  \},/,
-  `  // MD029/ol-prefix — дефолт: { "style": "one_or_ordered" }
+    /  \/\/ MD029[^\n]*\n  "MD029": \{[\s\S]*?\n  \},/,
+    `  // MD029/ol-prefix — дефолт: { "style": "one_or_ordered" }
   // Намеренно отключено: fenced code в examples разрывает списки; nested 1. — style one
   "MD029": false,`
 );
 body = body.replace(
-  /  \/\/ MD046[^\n]*\n  "MD046": \{[\s\S]*?\n  \},/,
+    /  \/\/ MD046[^\n]*\n  "MD046": \{[\s\S]*?\n  \},/,
     `  // MD046/code-block-style — дефолт: { "style": "consistent" }
   // Намеренно отключено: политика fenced code в examples / custom rules
   "MD046": false,`
