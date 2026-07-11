@@ -225,6 +225,8 @@
 
 `customRules` в конфиге резолвятся относительно расположения `.markdownlint-cli2.jsonc`.
 
+**Известное ограничение:** команда `markdownlint.lintWorkspace` («Lint all markdown files...») игнорирует `markdownlint.configFile` — она не передаёт `--config` в `markdownlint-cli2` (в отличие от лайв-линтинга открытых файлов) и полагается на собственное автообнаружение конфига в целевом воркспейсе. Если там нет своего `.markdownlint-cli2.jsonc`, применяются дефолты cli2, а `.markdownlint-ignore` из чужого конфига не подключается. Обход: `npm run lint:md` / `bin/lint-markdown.cjs` (явный `--config`) вместо этой команды, либо копия/симлинк конфига в целевом воркспейсе.
+
 ## Workflow: новое или изменённое правило
 
 Общий порядок — [AGENTS.md](../../AGENTS.md) (шаги 1–8).
