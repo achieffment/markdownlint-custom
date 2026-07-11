@@ -52,6 +52,16 @@ Windows CMD: пути с пробелами передавать в кавычк
 - Конфиг и `customRules` — всегда из корня этого репозитория (`cwd` = repoRoot), в т.ч. для внешнего `<path>`
 - Исключение `node_modules`, `vendor`: в [`.markdownlint-cli2.jsonc`](../.markdownlint-cli2.jsonc) — `!node_modules`, `!vendor` (IDE/workspace); в [`lint-markdown.cjs`](../bin/lint-markdown.cjs) для папок — `#node_modules`, `#vendor` (cli2 glob при `--no-globs`)
 
+## Кросс-запуск путей (Windows ↔ WSL)
+
+`targetToGlobs` в [`lint-markdown.cjs`](../bin/lint-markdown.cjs) принимает путь и в чужом для текущей платформы формате — аналогично `pick_directory()` / `_wslpath` в `fs-tools/shared/picker.py` (другой проект пользователя), но без диалога: только конвертация строки пути через `wslpath`.
+
+- `abs = path.resolve(repoRoot, target)` не существует → пробуем `crossPlatformPath(target)`:
+  - на `win32`, если `target` похож на WSL-путь (`/...`) — `wsl wslpath -w <target>` (через `wsl.exe`, вызывающий `wslpath` внутри дистрибутива); `~/...` не поддерживается — `wslpath` не разворачивает tilde без shell (проверено: возвращает путь как есть с кодом 0, ложноположительный результат);
+  - в WSL (Linux + `/proc/version` содержит `microsoft`, либо `WSL_DISTRO_NAME` в env), если `target` похож на Windows-путь (`C:\...`, `C:/...`, `\\...` UNC) — `wslpath -u <target>`.
+- Конвертация — `null` при отсутствии `wsl`/`wslpath`, ненулевом коде или пустом выводе; тогда — исходная ошибка `Path not found`.
+- Не поддерживается: конвертация на обычном Linux/macOS (там нет `wslpath`) — `crossPlatformPath` возвращает `null`, путь ищется только как есть.
+
 ## Игнор-файл (`.markdownlint-ignore`)
 
 Единственный файл в корне репозитория; синтаксис — как в `.gitignore` (комментарии `#`, пустые строки игнорируются, glob-паттерны от корня репозитория).

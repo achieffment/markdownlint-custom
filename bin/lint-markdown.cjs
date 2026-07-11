@@ -141,8 +141,43 @@ const parseArgs = (argv) => {
     return { target, passthrough };
 };
 
+const isWinPathLike = (target) => /^[a-zA-Z]:[\\/]/.test(target) || target.startsWith("\\\\");
+const isWslPathLike = (target) => target.startsWith("/");
+
+const isWsl = () => {
+    if (process.platform !== "linux") return false;
+    try {
+        return fs.readFileSync("/proc/version", "utf-8").toLowerCase().includes("microsoft");
+    } catch {
+        return Boolean(process.env.WSL_DISTRO_NAME);
+    }
+};
+
+const convertPath = (cmd, args) => {
+    const conv = spawnSync(cmd, args, { encoding: "utf-8" });
+    if (conv.error || conv.status !== 0) return null;
+    return conv.stdout.trim() || null;
+};
+
+// Путь в чужом для платформы формате конвертируется через wslpath (см. platform-scripts.md).
+const crossPlatformPath = (target) => {
+    if (process.platform === "win32" && isWslPathLike(target)) {
+        return convertPath("wsl", ["wslpath", "-w", target]);
+    }
+    if (isWsl() && isWinPathLike(target)) {
+        return convertPath("wslpath", ["-u", target]);
+    }
+    return null;
+};
+
 const targetToGlobs = (target) => {
-    const abs = path.resolve(repoRoot, target);
+    let abs = path.resolve(repoRoot, target);
+    if (!fs.existsSync(abs)) {
+        const converted = crossPlatformPath(target);
+        if (converted) {
+            abs = path.resolve(converted);
+        }
+    }
     if (!fs.existsSync(abs)) {
         console.error(`Path not found: ${target}`);
         process.exit(1);
