@@ -22,7 +22,10 @@ export const findListItemBodyEnd = (
     let aftFence = false;
     for (let ix = begIx + 1; ix < maxIx; ix++) {
         const trim = lines[ix].trim();
-        if (!trim) continue;
+        if (!trim) {
+            aftFence = false;
+            continue;
+        }
         if (headingRx.test(trim)) break;
         if (opts.shouldBrk?.(lines[ix])) break;
         if (codeFenceRx.test(trim)) {
@@ -39,6 +42,7 @@ export const findListItemBodyEnd = (
         if (opts.traverseFence) {
             if (jInd > ind || (aftFence && jInd >= ind)) end = ix;
             else break;
+            aftFence = false;
         } else if (jInd > ind) {
             end = ix;
         } else {

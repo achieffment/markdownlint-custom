@@ -1120,7 +1120,6 @@ const fenceContinuationOk = `## T
 \`\`\`js
 const x = 1;
 \`\`\`
-
 Продолжение того же пункта;
 
 2. второй;

@@ -10,8 +10,10 @@ const findListItemBodyEnd = (lines, begIx, lineParser, opts) => {
     let aftFence = false;
     for (let ix = begIx + 1; ix < maxIx; ix++) {
         const trim = lines[ix].trim();
-        if (!trim)
+        if (!trim) {
+            aftFence = false;
             continue;
+        }
         if (regex_1.headingRx.test(trim))
             break;
         if (opts.shouldBrk?.(lines[ix]))
@@ -35,6 +37,7 @@ const findListItemBodyEnd = (lines, begIx, lineParser, opts) => {
                 end = ix;
             else
                 break;
+            aftFence = false;
         }
         else if (jInd > ind) {
             end = ix;

@@ -70,7 +70,7 @@
 ### `list-items-end-with-semicolon-or-colon` — политика
 
 - **Parser:** `micromark` (`listItemPrefix` через `eachListItemPrefix`); контент, `folcod`/`folsub` и конец тела — `params.lines[]` + `findListItemBodyEnd`.
-- **Конец тела:** `findListItemBodyEnd` (`traverseFence: true`, `shouldBrk: isLstItem`) — как в [`line-list-walker.ts`](../../src/domain/line-list-walker.ts); последняя prose-строка тела — через `getLastProseIx` (пропуск blank и code fence блоков).
+- **Конец тела:** `findListItemBodyEnd` (`traverseFence: true`, `shouldBrk: isLstItem`) — как в [`line-list-walker.ts`](../../src/domain/line-list-walker.ts); последняя prose-строка тела — через `getLastProseIx` (пропуск blank и code fence блоков). Строка на отступе пункта **сразу** после закрывающей `` ``` `` (без пустой строки) считается продолжением тела **один раз**; пустая строка сбрасывает это продолжение — дальнейший текст в тело пункта не входит (граница нужна для `list-preceded-by-colon` / `codeblock-preceded-by-colon` перед следующим блоком).
 - **Проверка:** последняя prose-строка тела заканчивается `;`; если после неё в теле или сразу после тела — открывающая `` ``` `` или **прямой** дочерний пункт (больший отступ; sibling на том же indent — `;`), то `:`.
 - **folcod:** только **открывающая** `` ``` `` (pre-scan `eachOpeningCodeFenceLine` → `Set<number>` в [`ListItemsChecker`](../../src/domain/micromark-list-checkers.ts); в теле между последней prose-строкой и `bodyEnd` или сразу после `bodyEnd`; `isOpeningCodeFenceAt` — эквивалентная семантика, unit-тесты; closing fence не требует `:`).
 - **folsub:** первая непустая строка после `bodyEnd` — прямой дочерний пункт (`isChildLstItem`).
