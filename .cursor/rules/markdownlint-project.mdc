@@ -27,6 +27,8 @@ alwaysApply: true
 | [`schema/.markdownlint.jsonc`](../schema/.markdownlint.jsonc) | Snapshot official schema для тестов |
 | [`bin/`](../bin/) | `lint-markdown.cjs`; `.sh` / `.bat` / `.command` |
 | [`markdownlint-hlprs.js`](../markdownlint-hlprs.js) | **Артефакт tsc:** публичный API для `test-rules.cjs` (compat); правила — DI через `AppContext` |
+| [`src/notify.ts`](../src/notify.ts) → `notify.js` | **Артефакт tsc:** веб-хук CLI-уведомлений (`MDLINT_WEBHOOK_URL`/`MDLINT_WEBHOOK_TOK` из `.env`); только в [`bin/lint-markdown.cjs`](../bin/lint-markdown.cjs) |
+| [`.env.example`](../.env.example) | Шаблон конфигурации веб-хука; `.env` в git не коммитится |
 | Корневые `*.js`, `core/`, `domain/`, `composition/`, [`rules/`](../rules/) | **Артефакты tsc**; коммитить вместе с `src/` |
 | [`markdownlint-examples/`](../markdownlint-examples/) | Пары `_err.md` / `_suc.md` на каждое правило |
 | [`test-rules.cjs`](../test-rules.cjs) | Прогон примеров и inline-кейсов через markdownlint CLI |

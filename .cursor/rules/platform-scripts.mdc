@@ -30,7 +30,7 @@ alwaysApply: true
 | Проверка | Действие |
 |----------|----------|
 | нет `node_modules` | `npm ci` (lock) / `npm install` |
-| нет `markdownlint-rules.js` / `markdownlint-hlprs.js` или `src/**/*.ts` новее любого tsc-артефакта (`domain/`, `rules/`, `core/`, `composition/`, entry-points, `details.js`, `regex.js`, `types.js`) | `npm run build` |
+| нет `markdownlint-rules.js` / `markdownlint-hlprs.js` или `src/**/*.ts` новее любого tsc-артефакта (`domain/`, `rules/`, `core/`, `composition/`, entry-points, `details.js`, `regex.js`, `types.js`, `notify.js`) | `npm run build` |
 
 Оболочки (`.sh` / `.bat` / `.command`) — только `cd` + `node bin/lint-markdown.cjs`. `.sh` — `set -euo pipefail`; `.command` (Finder) — без strict-mode, без дублирования guard. **Без явного пути** (первый аргумент не path) — guard в [`lint-markdown.cjs`](../bin/lint-markdown.cjs): `usage()` и `exit 1` (не lint всего репо); флаги cli2 до path (`--fix ./docs`) — тоже `usage`.
 
@@ -62,6 +62,16 @@ Windows CMD: пути с пробелами передавать в кавычк
 - **Якорность (настоящее правило `.gitignore`):** `/` где-либо в паттерне, **кроме самого конца строки**, делает паттерн **якорным** — матчится только от каталога `.markdownlint-ignore` (корня репозитория). Один сегмент с `/` только в конце (`docs/`) — **неякорный**, матчится на любой глубине. Многосегментный путь (`docs/generated/`) — **якорный**, матчится только буквально от корня. Явно неякорная форма для многосегментных путей — префикс `**/` (`**/generated/**`).
 - **Lint-цель вне репозитория** (`bin/lint-markdown.cjs <внешний путь>` / `npm run lint:md -- <внешний путь>`): [`targetToGlobs`](../bin/lint-markdown.cjs) считает путь к файлу как `path.relative(repoRoot, target)`, то есть с `../` в начале (например `../../Workspace/Warehouse/...`). Якорный многосегментный паттерн (`Warehouse/Arduino/...`) в этом случае **никогда не совпадёт** — путь начинается не с него, а с `../`. Нужен явно неякорный паттерн: `**/Warehouse/Arduino/...` — он совпадёт независимо от `../` в начале пути.
 - Тесты — [`test-markdownlint-ignore.cjs`](../test-markdownlint-ignore.cjs): интеграционный прогон реального `markdownlint-cli2` с временным конфигом (относительные паттерны) и с целью вне «репозитория» (якорный/неякорный паттерн — регрессия на этот кейс).
+
+## Веб-хук уведомлений (`notify.js`)
+
+[`bin/lint-markdown.cjs`](../bin/lint-markdown.cjs) после неуспешного прогона (`res.status` ≠ 0) вызывает `sendWebhook` из [`src/notify.ts`](../src/notify.ts) (артефакт — `notify.js` в корне; см. [ts-dev.mdc](ts-dev.mdc)):
+
+- Конфигурация — из `.env` в корне репозитория (`MDLINT_WEBHOOK_URL` / `MDLINT_WEBHOOK_TOK`); шаблон — [`.env.example`](../.env.example); без `MDLINT_WEBHOOK_URL` — тихий no-op.
+- URL обязан быть `https://`; иначе токен не отправляется.
+- Тело — короткое сообщение об ошибке (`{"text": "markdownlint-custom: ошибка lint"}`), не список нарушений (детали — в выводе `markdownlint-cli2`).
+- Таймаут — `2000` мс (`AbortController`); fire-and-forget — ошибка/таймаут не влияет на код возврата CLI.
+- Только `bin/lint-markdown.cjs`; не подключать к другим точкам входа без явного запроса.
 
 ## Новые исполняемые артефакты
 

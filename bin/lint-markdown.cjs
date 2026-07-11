@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const { spawnSync } = require("child_process");
+const { sendWebhook } = require("../notify.js");
 
 const repoRoot = path.join(__dirname, "..");
 const nodeModules = path.join(repoRoot, "node_modules");
@@ -69,7 +70,8 @@ const rootArtifacts = [
     hlprsJs,
     path.join(repoRoot, "details.js"),
     path.join(repoRoot, "regex.js"),
-    path.join(repoRoot, "types.js")
+    path.join(repoRoot, "types.js"),
+    path.join(repoRoot, "notify.js")
 ];
 
 const oldestArtifactMtime = () => {
@@ -159,7 +161,7 @@ const targetToGlobs = (target) => {
     ];
 };
 
-const main = () => {
+const main = async () => {
     const { target, passthrough } = parseArgs(process.argv);
     if (!target) {
         usage();
@@ -183,6 +185,10 @@ const main = () => {
     if (res.error) {
         console.error(res.error.message);
         process.exit(1);
+    }
+    if (res.status) {
+        // Уведомление о нарушениях lint: fire-and-forget, ошибки/таймаут не влияют на код возврата.
+        await sendWebhook("markdownlint-custom: ошибка lint");
     }
     process.exit(res.status ?? 0);
 };

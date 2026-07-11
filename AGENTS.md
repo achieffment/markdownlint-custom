@@ -15,9 +15,10 @@
 | Правила | `src/rules/*.ts` (`extends BaseRule`), barrel `src/markdownlint-rules.ts`, `src/details.ts`, `src/regex.ts`, `src/types.ts`, `src/markdownlint-api.d.ts` |
 | Domain / core | `src/core/`, `src/domain/`, `src/composition/app-context.ts` |
 | Barrels | `src/markdownlint-rules.ts`, `src/markdownlint-hlprs.ts` |
-| Runtime | корневые `*.js`, `core/`, `domain/`, `composition/`, `rules/` (артефакты tsc; entry points: `markdownlint-rules.js`, `markdownlint-hlprs.js`) |
+| Runtime | корневые `*.js`, `core/`, `domain/`, `composition/`, `rules/` (артефакты tsc; entry points: `markdownlint-rules.js`, `markdownlint-hlprs.js`, `notify.js`) |
 | Конфиг lint | `.markdownlint-cli2.jsonc`, `.markdownlint-ignore`, `load-cli2-config.cjs`, `schema/`, `scripts/` (`sync-cli2-config.cjs`, `cli2-overrides.cjs`) |
 | CLI / bin | `bin/lint-markdown.cjs`, `bin/lint-markdown.{sh,bat,command}` |
+| Уведомления | `src/notify.ts` → `notify.js`; `.env.example` (`MDLINT_WEBHOOK_URL`/`_TOK`) |
 | Примеры | `markdownlint-examples/**/*.md` |
 | Тесты | `test-rules.cjs`, `test-cli2-config.cjs`, `test-markdownlint-ignore.cjs`, `check-function-order.cjs` |
 | Cursor rules | `.cursor/rules/*.mdc` |

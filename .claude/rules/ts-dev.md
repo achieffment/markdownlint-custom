@@ -18,6 +18,7 @@ SRP/DRY — те же принципы, что в [js-dev.md](js-dev.md) (для
 | `types.ts` | Типы колбэков |
 | `markdownlint-rules.ts` | Composition root: `new XxxRule(deps).toRule()` |
 | `markdownlint-hlprs.ts` | Wiring `module.exports` для test-rules |
+| `notify.ts` | Веб-хук CLI-уведомлений (`.env` → `MDLINT_WEBHOOK_URL`/`_TOK`, fire-and-forget, короткий таймаут); не lint-правило, используется только `bin/lint-markdown.cjs` |
 
 ## OOP
 

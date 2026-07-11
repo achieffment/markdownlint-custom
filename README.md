@@ -90,6 +90,7 @@ bin\lint-markdown.bat .\path\to\docs          # Windows CMD
 | [`package.json`](package.json), [`tsconfig.json`](tsconfig.json) | npm-скрипты, сборка tsc |
 | [`.markdownlint-cli2.jsonc`](.markdownlint-cli2.jsonc), [`.markdownlint-ignore`](.markdownlint-ignore), [`load-cli2-config.cjs`](load-cli2-config.cjs) | Единый конфиг lint, игнор-файл (папки вне lint); загрузчик для test |
 | [`bin/`](bin/) | CLI: `lint-markdown.cjs`, `.sh` / `.bat` / `.command` |
+| [`notify.js`](notify.js) (из [`src/notify.ts`](src/notify.ts)), [`.env.example`](.env.example) | Веб-хук уведомлений CLI об ошибке lint (`MDLINT_WEBHOOK_URL`/`_TOK` из `.env`); опционально |
 | [`schema/`](schema/) | Snapshot [official schema](https://github.com/DavidAnson/markdownlint/blob/main/schema/.markdownlint.jsonc) для `test-cli2-config.cjs` |
 | [`scripts/`](scripts/) | `sync-cli2-config.cjs`, `cli2-overrides.cjs` — регенерация cli2 из schema + overrides + custom keys |
 | [`.cursor/rules/`](.cursor/rules/) | Правила Cursor; каталог — [`AGENTS.md`](AGENTS.md) |
