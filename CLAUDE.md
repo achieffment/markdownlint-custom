@@ -12,6 +12,7 @@
 - [`.claude/rules/ts-dev.md`](.claude/rules/ts-dev.md) — проектирование TS-модулей (SRP/DRY, порядок функций);
 - [`.claude/rules/js-style.md`](.claude/rules/js-style.md) — оформление `test-rules.cjs`;
 - [`.claude/rules/js-dev.md`](.claude/rules/js-dev.md) — проектирование `test-rules.cjs`;
+- [`.claude/rules/comments-style.md`](.claude/rules/comments-style.md) — стиль комментариев в коде и выравнивание inline-комментариев в документации;
 - [`.claude/rules/docs-consistency.md`](.claude/rules/docs-consistency.md) — синхронизация кода и всех документов при изменениях;
 - [`.claude/rules/rules-sync.md`](.claude/rules/rules-sync.md) — двусторонняя синхронизация правил Cursor (`.mdc`) и Claude (`.md`);
 

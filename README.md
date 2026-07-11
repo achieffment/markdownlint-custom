@@ -35,9 +35,9 @@ npm test        # pretest → build, test-rules + test-cli2-config + check-funct
 
 ```bash
 npm run lint:md -- ./path/to/docs
-./bin/lint-markdown.sh ./path/to/docs   # Linux / WSL / macOS
-./bin/lint-markdown.command ./path/to/docs   # macOS Finder
-bin\lint-markdown.bat .\path\to\docs    # Windows CMD
+./bin/lint-markdown.sh ./path/to/docs         # Linux / WSL / macOS
+./bin/lint-markdown.command ./path/to/docs    # macOS Finder
+bin\lint-markdown.bat .\path\to\docs          # Windows CMD
 ```
 
 В IDE lint весь markdown workspace (кроме `node_modules`, `vendor`). Внешняя документация — `npm run lint:md -- <path>`; конфиг и custom rules — из корня этого репозитория. macOS Finder: drag-and-drop на `bin/lint-markdown.command`.

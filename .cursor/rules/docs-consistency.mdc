@@ -18,6 +18,7 @@ alwaysApply: true
 | **Архитектура TS (AI)** | [ts-dev.mdc](ts-dev.mdc) | SRP/DRY, модули `src/`, порядок функций |
 | **Стиль test (AI)** | [js-style.mdc](js-style.mdc) | Симметрия имён, конвейер в [`test-rules.cjs`](../test-rules.cjs) |
 | **Архитектура test (AI)** | [js-dev.mdc](js-dev.mdc) | SRP/DRY, inline-кейсы, порядок функций в test |
+| **Комментарии (AI)** | [comments-style.mdc](comments-style.mdc) | Стиль `//`-комментариев в коде, выравнивание inline-`#` в командных fenced-блоках docs |
 | **Синхронизация (AI)** | [docs-consistency.mdc](docs-consistency.mdc) | Этот файл — матрица и чеклист |
 | **Справочник AI** | [`AGENTS.md`](../AGENTS.md) | Scope, workflow, краткий каталог lint-правил, ссылки на все правила |
 | **Документация людей** | [`README.md`](../README.md) | Onboarding, структура, скрипты; таблица lint-правил — **кратко** |
@@ -38,6 +39,7 @@ alwaysApply: true
 | **Конвенции стиля TS** | `src/**/*.ts` | `ts-style.mdc` (в т.ч. контракт `onError` detail/context); перекрёстные ссылки в `ts-dev.mdc` при необходимости |
 | **Конвенции test-rules** | [`test-rules.cjs`](../test-rules.cjs) | `js-style.mdc`, `js-dev.mdc`; конвенции примеров в `markdownlint-project.mdc` при пересечении |
 | **Порядок функций / check-function-order** | `src/`, `test-rules.cjs`, [`check-function-order.cjs`](../check-function-order.cjs) | `ts-dev.mdc`, `js-dev.mdc` |
+| **Конвенции комментариев / inline-`#` в docs** | `src/**/*.ts`, `test-rules.cjs`, `*.cjs`, командные fenced-блоки во всех `*.md`/`*.mdc` | `comments-style.mdc` (в обоих каталогах) |
 | **Структура репозитория** | — | `markdownlint-project.mdc`, `AGENTS.md` scope; README «Структура» (кратко + ссылка на правила) |
 | **npm-скрипты** | [`package.json`](../package.json) | README «npm-скрипты»; «Верификация» в `AGENTS.md` |
 | **CLI / bin / конфиг lint** | [`.markdownlint-cli2.jsonc`](../.markdownlint-cli2.jsonc), [`load-cli2-config.cjs`](../load-cli2-config.cjs), [`test-cli2-config.cjs`](../test-cli2-config.cjs), [`bin/`](../bin/), `package.json` `lint:md` | `platform-scripts.mdc`, `markdownlint-project.mdc`, `AGENTS.md`, README; `globs`/overrides → examples + test-rules |

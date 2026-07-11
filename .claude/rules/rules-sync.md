@@ -14,6 +14,7 @@
 | `ts-dev.mdc` | `ts-dev.md` | Проектирование TS-модулей |
 | `js-style.mdc` | `js-style.md` | Оформление `test-rules.cjs` |
 | `js-dev.mdc` | `js-dev.md` | Проектирование `test-rules.cjs` |
+| `comments-style.mdc` | `comments-style.md` | Стиль комментариев в коде и выравнивание в docs |
 | `docs-consistency.mdc` | `docs-consistency.md` | Синхронизация docs/код |
 | `rules-sync.mdc` | `rules-sync.md` | Этот файл — синхронизация правил между редакторами |
 

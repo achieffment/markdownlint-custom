@@ -39,6 +39,7 @@
 | [ts-dev.mdc](.cursor/rules/ts-dev.mdc) | [ts-dev.md](.claude/rules/ts-dev.md) | **Проектирование TS:** SRP, DRY, модули |
 | [js-style.mdc](.cursor/rules/js-style.mdc) | [js-style.md](.claude/rules/js-style.md) | **Оформление:** `test-rules.cjs` |
 | [js-dev.mdc](.cursor/rules/js-dev.mdc) | [js-dev.md](.claude/rules/js-dev.md) | **Проектирование:** `test-rules.cjs` |
+| [comments-style.mdc](.cursor/rules/comments-style.mdc) | [comments-style.md](.claude/rules/comments-style.md) | **Комментарии:** стиль в коде, выравнивание inline-комментариев в командных fenced-блоках docs |
 | [docs-consistency.mdc](.cursor/rules/docs-consistency.mdc) | [docs-consistency.md](.claude/rules/docs-consistency.md) | **Синхронизация:** код ↔ все правила ↔ AGENTS ↔ README при изменении логики |
 | [rules-sync.mdc](.cursor/rules/rules-sync.mdc) | [rules-sync.md](.claude/rules/rules-sync.md) | **Синхронизация правил:** карта соответствия `.mdc` ↔ `.md`, допустимые механические различия, порядок зеркалирования правок |
 
