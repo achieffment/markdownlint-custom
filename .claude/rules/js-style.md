@@ -1,6 +1,6 @@
-# Стиль test-rules.cjs
+# Стиль tests/**/*.cjs
 
-> Claude-эквивалент [`.cursor/rules/js-style.mdc`](../../.cursor/rules/js-style.mdc). Применяется при работе с `test-rules.cjs`.
+> Claude-эквивалент [`.cursor/rules/js-style.mdc`](../../.cursor/rules/js-style.mdc). Применяется при работе с `tests/**/*.cjs`.
 
 Исходники TypeScript/OOP — [ts-style.md](ts-style.md). Симметрия имён, однострочные условия, конвейер. Проект — [markdownlint-project.md](markdownlint-project.md); проектирование — [js-dev.md](js-dev.md). При изменении конвенций — [docs-consistency.md](docs-consistency.md).
 

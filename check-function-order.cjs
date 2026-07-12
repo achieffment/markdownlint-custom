@@ -4,7 +4,7 @@ const ts = require("typescript");
 
 const rootDir = __dirname;
 const srcDir = path.join(rootDir, "src");
-const testFile = path.join(rootDir, "test-rules.cjs");
+const testsDir = path.join(rootDir, "tests");
 
 const collectTsFiles = (dir, out) => {
     fs.readdirSync(dir).forEach(name => {
@@ -17,9 +17,20 @@ const collectTsFiles = (dir, out) => {
     });
 };
 
+const collectCjsFiles = (dir, out) => {
+    fs.readdirSync(dir).forEach(name => {
+        const full = path.join(dir, name);
+        if (fs.statSync(full).isDirectory()) {
+            collectCjsFiles(full, out);
+            return;
+        }
+        if (name.endsWith(".cjs")) out.push(full);
+    });
+};
+
 const files = [];
 collectTsFiles(srcDir, files);
-files.push(testFile);
+collectCjsFiles(testsDir, files);
 
 const isFnInit = (node) => ts.isArrowFunction(node) || ts.isFunctionExpression(node);
 

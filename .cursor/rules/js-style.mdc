@@ -1,10 +1,10 @@
 ---
-description: Стиль test-rules.cjs (симметрия имён, конвейер, условия)
-globs: test-rules.cjs
+description: Стиль tests/**/*.cjs (симметрия имён, конвейер, условия)
+globs: tests/**/*.cjs
 alwaysApply: false
 ---
 
-# Стиль test-rules.cjs
+# Стиль tests/**/*.cjs
 
 Исходники TypeScript/OOP — [ts-style.mdc](ts-style.mdc). Симметрия имён, однострочные условия, конвейер. Проект — [markdownlint-project.mdc](markdownlint-project.mdc); проектирование — [js-dev.mdc](js-dev.mdc). При изменении конвенций — [docs-consistency.mdc](docs-consistency.mdc).
 

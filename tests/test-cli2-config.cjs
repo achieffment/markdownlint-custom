@@ -4,12 +4,12 @@ const path = require("path");
 const { spawnSync } = require("child_process");
 const { parse } = require("jsonc-parser");
 
-const repoRoot = __dirname;
+const repoRoot = path.join(__dirname, "..");
 const schemaPath = path.join(repoRoot, "schema", ".markdownlint.jsonc");
 const cli2Path = path.join(repoRoot, ".markdownlint-cli2.jsonc");
-const customRules = require("./markdownlint-rules.js");
+const customRules = require("../markdownlint-rules.js");
 
-const { ovrdRules } = require("./scripts/cli2-overrides.cjs");
+const { ovrdRules } = require("../scripts/cli2-overrides.cjs");
 
 const ruleNames = customRules.flatMap(rule => rule.names);
 

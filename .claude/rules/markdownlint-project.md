@@ -16,20 +16,20 @@
 | [`markdownlint-rules.js`](../../markdownlint-rules.js) | **Артефакт tsc:** массив правил (`module.exports = [...]`) |
 | [`.markdownlint-cli2.jsonc`](../../.markdownlint-cli2.jsonc) | **Единый конфиг:** built-in MD001–MD060 + custom rules + `customRules` + `gitignore`; IDE и CLI |
 | [`.markdownlint-ignore`](../../.markdownlint-ignore) | Игнор-файл (gitignore-синтаксис); подключён через top-level `gitignore` в `.markdownlint-cli2.jsonc` — см. [platform-scripts.md](platform-scripts.md) |
-| [`load-cli2-config.cjs`](../../load-cli2-config.cjs) | Загрузка `config` из cli2 для [`test-rules.cjs`](../../test-rules.cjs) |
-| [`test-cli2-config.cjs`](../../test-cli2-config.cjs) | Parity cli2 `config` ↔ [`schema/.markdownlint.jsonc`](../../schema/.markdownlint.jsonc); проверка `gitignore` |
-| [`test-markdownlint-ignore.cjs`](../../test-markdownlint-ignore.cjs) | Тест `.markdownlint-ignore`: интеграционный прогон реального cli2 с временным конфигом |
+| [`load-cli2-config.cjs`](../../load-cli2-config.cjs) | Загрузка `config` из cli2 для [`tests/`](../../tests/) |
+| [`tests/test-cli2-config.cjs`](../../tests/test-cli2-config.cjs) | Parity cli2 `config` ↔ [`schema/.markdownlint.jsonc`](../../schema/.markdownlint.jsonc); проверка `gitignore` |
+| [`tests/test-markdownlint-ignore.cjs`](../../tests/test-markdownlint-ignore.cjs) | Тест `.markdownlint-ignore`: интеграционный прогон реального cli2 с временным конфигом |
 | [`scripts/sync-cli2-config.cjs`](../../scripts/sync-cli2-config.cjs) | Регенерация `.markdownlint-cli2.jsonc` из schema + custom keys из `markdownlint-rules.js` + `gitignore` (`presync:cli2-config` → build) |
-| [`scripts/cli2-overrides.cjs`](../../scripts/cli2-overrides.cjs) | Единый список built-in overrides (`MD013`, `MD007`, `MD029`, `MD032`, `MD043`, `MD046`) для sync и `test-cli2-config.cjs` |
+| [`scripts/cli2-overrides.cjs`](../../scripts/cli2-overrides.cjs) | Единый список built-in overrides (`MD013`, `MD007`, `MD029`, `MD032`, `MD043`, `MD046`) для sync и `tests/test-cli2-config.cjs` |
 | [`schema/.markdownlint.jsonc`](../../schema/.markdownlint.jsonc) | Snapshot official schema для тестов |
 | [`bin/`](../../bin/) | `lint-markdown.cjs`; `.sh` / `.bat` / `.command` |
 | [`src/notify.ts`](../../src/notify.ts) → `notify.js` | **Артефакт tsc:** веб-хук CLI-уведомлений (`MDLINT_WEBHOOK_URL`/`MDLINT_WEBHOOK_TOK` из `.env`); только в [`bin/lint-markdown.cjs`](../../bin/lint-markdown.cjs) |
 | [`.env.example`](../../.env.example) | Шаблон конфигурации веб-хука; `.env` в git не коммитится |
-| [`markdownlint-hlprs.js`](../../markdownlint-hlprs.js) | **Артефакт tsc:** публичный API для `test-rules.cjs` (compat); правила — DI через `AppContext` |
+| [`markdownlint-hlprs.js`](../../markdownlint-hlprs.js) | **Артефакт tsc:** публичный API для `tests/rules/*.test.cjs` (compat); правила — DI через `AppContext` |
 | Корневые `*.js`, `core/`, `domain/`, `composition/`, [`rules/`](../../rules/) | **Артефакты tsc**; коммитить вместе с `src/` |
 | [`markdownlint-examples/`](../../markdownlint-examples/) | Пары `_err.md` / `_suc.md` на каждое правило |
-| [`test-rules.cjs`](../../test-rules.cjs) | Прогон примеров и inline-кейсов через markdownlint CLI |
-| [`check-function-order.cjs`](../../check-function-order.cjs) | Проверка порядка функций (callee перед caller) |
+| [`tests/`](../../tests/) | `helpers.cjs` (общая инфраструктура), `examples.test.cjs` (sync/exclusivity/pair-проверки), `hlprs.test.cjs` (unit-тесты hlprs API), `rules/<rule-name>.test.cjs` (1 файл на custom lint-правило), `run-all.cjs` (entry point `npm test`) |
+| [`check-function-order.cjs`](../../check-function-order.cjs) | Проверка порядка функций (callee перед caller); обходит `src/**/*.ts` и `tests/**/*.cjs` |
 | [`tsconfig.json`](../../tsconfig.json) | Сборка `src/` → CommonJS `.js` в корне |
 | `.gitignore`, `.gitattributes` | Git: ignore-паттерны; LF в index и working tree (Windows: `core.autocrlf=false`) |
 | `.editorconfig` | LF, отступ 4 пробела (EditorConfig) |
@@ -58,9 +58,9 @@
 - `_err.md` — нарушает **только** целевое custom-правило (`npm test` проверяет exclusivity при полном конфиге из `.markdownlint-cli2.jsonc`).
 - `_err.md` (кроме `minimum-h2-heading`) содержит `##`, чтобы не срабатывал `minimum-h2-heading`; прочий текст и списки оформлены под остальные правила.
 - `_suc.md` — проходит все custom rules.
-- **`_err.md` и `_suc.md` — один и тот же текст:** в `_suc` исправлены только нарушения целевого правила (и минимальные правки для exclusivity в `_err`, например `;` / `:` у пунктов списка). Не менять порядок блоков, не подменять сценарии «успешным» вариантом. Исключение: `list-blank-line-spacing` — непустые строки идентичны, отличаются только пустые строки (сама правка — blank lines). `test-rules.cjs`: `checkExamplePair`, допустимые отличия строк — `allowedLineDiff`: суффикс `;`/`:`/`.`/`!`/`?`; `.` или `;` → `:`; `trimStart` для `no-leading-spaces`; пустой bullet → `- текст;`; пустой numbered `1.  ` → `1. текст;`.
+- **`_err.md` и `_suc.md` — один и тот же текст:** в `_suc` исправлены только нарушения целевого правила (и минимальные правки для exclusivity в `_err`, например `;` / `:` у пунктов списка). Не менять порядок блоков, не подменять сценарии «успешным» вариантом. Исключение: `list-blank-line-spacing` — непустые строки идентичны, отличаются только пустые строки (сама правка — blank lines). `tests/helpers.cjs`: `checkExamplePair`, допустимые отличия строк — `allowedLineDiff`: суффикс `;`/`:`/`.`/`!`/`?`; `.` или `;` → `:`; `trimStart` для `no-leading-spaces`; пустой bullet → `- текст;`; пустой numbered `1.  ` → `1. текст;`.
 - **`minimum-h2-heading`:** в `_suc` добавляется строка `## …` **в конце** документа (не между блоками), чтобы строки 1…N совпадали с `_err`; `npm test` проверяет это (`checkExamplePair`).
-- **Code fence в примерах:** открывающая `` ``` `` с идентификатором языка (`js`, `pr`, …); голый `` ``` `` допустим только в inline-кейсах `test-rules.cjs`.
+- **Code fence в примерах:** открывающая `` ``` `` с идентификатором языка (`js`, `pr`, …); голый `` ``` `` допустим только в inline-кейсах `tests/rules/*.test.cjs`.
 - Вложенные нумерованные пункты: **3 пробела** на уровень, маркер **`1.`** (CommonMark); не использовать поднумерацию `1.1` в маркере.
 
 ### `minimum-h2-heading` — политика
@@ -131,7 +131,7 @@
 
 ### Публичный API хелперов (`markdownlint-hlprs.js`)
 
-Экспорт для `test-rules.cjs` (обратная совместимость):
+Экспорт для `tests/rules/*.test.cjs` (обратная совместимость):
 
 | Экспорт | Назначение |
 |---------|------------|
@@ -237,7 +237,7 @@
 
 1. `_err.md` / `_suc.md` в `markdownlint-examples/<rule-name>/`
 2. Класс в `src/rules/<rule-name>.ts`; ключи — [`details.ts`](../../src/details.ts), regex — [`regex.ts`](../../src/regex.ts); domain — при необходимости
-3. `new XxxRule(deps).toRule()` в [`src/markdownlint-rules.ts`](../../src/markdownlint-rules.ts); `npm run sync:cli2-config` для [`.markdownlint-cli2.jsonc`](../../.markdownlint-cli2.jsonc) (custom keys из `markdownlint-rules.js`); новый checker — [`AppContext`](../../src/composition/app-context.ts); inline-кейсы — [`test-rules.cjs`](../../test-rules.cjs)
+3. `new XxxRule(deps).toRule()` в [`src/markdownlint-rules.ts`](../../src/markdownlint-rules.ts); `npm run sync:cli2-config` для [`.markdownlint-cli2.jsonc`](../../.markdownlint-cli2.jsonc) (custom keys из `markdownlint-rules.js`); новый checker — [`AppContext`](../../src/composition/app-context.ts); inline-кейсы — [`tests/rules/*.test.cjs`](../../tests/rules/)
 4. При ≥3 повторах алгоритма — domain-класс (не barrel)
 
 ## Контракты

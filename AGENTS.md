@@ -20,7 +20,7 @@
 | CLI / bin | `bin/lint-markdown.cjs`, `bin/lint-markdown.{sh,bat,command}` |
 | Уведомления | `src/notify.ts` → `notify.js`; `.env.example` (`MDLINT_WEBHOOK_URL`/`_TOK`) |
 | Примеры | `markdownlint-examples/**/*.md` |
-| Тесты | `test-rules.cjs`, `test-cli2-config.cjs`, `test-markdownlint-ignore.cjs`, `check-function-order.cjs` |
+| Тесты | `tests/` (`run-all.cjs`, `helpers.cjs`, `examples.test.cjs`, `hlprs.test.cjs`, `rules/*.test.cjs`, `test-cli2-config.cjs`, `test-markdownlint-ignore.cjs`), `check-function-order.cjs` |
 | Cursor rules | `.cursor/rules/*.mdc` |
 | Claude rules | `.claude/rules/*.md`, `CLAUDE.md` |
 | Repo / tooling | `.gitignore`, `.gitattributes`, `.editorconfig`, `.nvmrc`, `.npmrc` |
@@ -38,8 +38,8 @@
 | [platform-scripts.mdc](.cursor/rules/platform-scripts.mdc) | [platform-scripts.md](.claude/rules/platform-scripts.md) | **Платформы:** bin-скрипты, bootstrap в `lint-markdown.cjs` |
 | [ts-style.mdc](.cursor/rules/ts-style.mdc) | [ts-style.md](.claude/rules/ts-style.md) | **Оформление TS/OOP:** BaseRule, классы, типы |
 | [ts-dev.mdc](.cursor/rules/ts-dev.mdc) | [ts-dev.md](.claude/rules/ts-dev.md) | **Проектирование TS:** SRP, DRY, модули |
-| [js-style.mdc](.cursor/rules/js-style.mdc) | [js-style.md](.claude/rules/js-style.md) | **Оформление:** `test-rules.cjs` |
-| [js-dev.mdc](.cursor/rules/js-dev.mdc) | [js-dev.md](.claude/rules/js-dev.md) | **Проектирование:** `test-rules.cjs` |
+| [js-style.mdc](.cursor/rules/js-style.mdc) | [js-style.md](.claude/rules/js-style.md) | **Оформление:** `tests/**/*.cjs` |
+| [js-dev.mdc](.cursor/rules/js-dev.mdc) | [js-dev.md](.claude/rules/js-dev.md) | **Проектирование:** `tests/**/*.cjs` |
 | [comments-style.mdc](.cursor/rules/comments-style.mdc) | [comments-style.md](.claude/rules/comments-style.md) | **Комментарии:** стиль в коде, выравнивание inline-комментариев в командных fenced-блоках docs |
 | [docs-consistency.mdc](.cursor/rules/docs-consistency.mdc) | [docs-consistency.md](.claude/rules/docs-consistency.md) | **Синхронизация:** код ↔ все правила ↔ AGENTS ↔ README при изменении логики |
 | [rules-sync.mdc](.cursor/rules/rules-sync.mdc) | [rules-sync.md](.claude/rules/rules-sync.md) | **Синхронизация правил:** карта соответствия `.mdc` ↔ `.md`, допустимые механические различия, порядок зеркалирования правок |
@@ -68,16 +68,16 @@
 4. **Match conventions** — `extends BaseRule`, `AppContext`, [`src/details.ts`](src/details.ts), стиль как в файле;
 5. **Preserve contracts** — `onError({ lineNumber, detail, context? })`, публичный API hlprs, runtime CommonJS;
 6. **Register** — `new XxxRule(deps).toRule()` в [`src/markdownlint-rules.ts`](src/markdownlint-rules.ts); обновить cli2: `npm run sync:cli2-config` (через `presync:cli2-config` → build; custom keys из `markdownlint-rules.js`); новый checker → [`src/composition/app-context.ts`](src/composition/app-context.ts);
-7. **Test** — `npm test` (pretest → build; test-rules + test-cli2-config + test-markdownlint-ignore + check-function-order);
+7. **Test** — `npm test` (pretest → build; tests/run-all + tests/test-cli2-config + tests/test-markdownlint-ignore + check-function-order);
 8. **Sync docs** — по [docs-consistency.mdc](.cursor/rules/docs-consistency.mdc) / [docs-consistency.md](.claude/rules/docs-consistency.md): правила (по матрице, оба каталога) → AGENTS → README;
 
 Локальная проверка **папки или файла**: `npm run lint:md -- <path>`, `./bin/lint-markdown.sh <path>` (см. [platform-scripts.mdc](.cursor/rules/platform-scripts.mdc) / [platform-scripts.md](.claude/rules/platform-scripts.md) для `.bat`/`.command`); **без пути** — `usage` и `exit 1`.
 
 ## Верификация
 
-См. шаг 7 workflow. Дополнительно — `npm run check` (`precheck` → build, без cli2 parity): `tsc --noEmit`, `node --check` на 10 `.js`/`.cjs` (см. [`package.json`](package.json) `scripts.check`), затем `check-function-order.cjs`; `npm run check:order` (только порядок функций; входит в `npm test` и `npm run check`); `npm run lint:md -- <path>`, `npm run sync:cli2-config` (через `presync:cli2-config` → build: schema + overrides + custom keys из `markdownlint-rules.js`, `globs`, `gitignore`). **Parity cli2 ↔ schema** — только `npm test` (`test-cli2-config.cjs`); **.markdownlint-ignore** — `test-markdownlint-ignore.cjs` (интеграционный прогон cli2).
+См. шаг 7 workflow. Дополнительно — `npm run check` (`precheck` → build, без cli2 parity): `tsc --noEmit`, `node --check` на 20 `.js`/`.cjs` (см. [`package.json`](package.json) `scripts.check`), затем `check-function-order.cjs`; `npm run check:order` (только порядок функций; входит в `npm test` и `npm run check`); `npm run lint:md -- <path>`, `npm run sync:cli2-config` (через `presync:cli2-config` → build: schema + overrides + custom keys из `markdownlint-rules.js`, `globs`, `gitignore`). **Parity cli2 ↔ schema** — только `npm test` (`test-cli2-config.cjs`); **.markdownlint-ignore** — `test-markdownlint-ignore.cjs` (интеграционный прогон cli2).
 
-После правки примеров — `_err` срабатывает **только** на целевое custom-правило (полный конфиг); inline-кейсы в `test-rules.cjs` обязаны проходить.
+После правки примеров — `_err` срабатывает **только** на целевое custom-правило (полный конфиг); inline-кейсы в `tests/rules/*.test.cjs` обязаны проходить.
 
 ## Критерии завершения аудита
 
@@ -86,7 +86,7 @@
 - `.cursor/rules/*.mdc` и `.claude/rules/*.md` **намеренно** вне lint globs (`**/*.{md,markdown}` в [`.markdownlint-cli2.jsonc`](.markdownlint-cli2.jsonc)); аудит правил — статическая сверка с кодом/docs, не lint-fix каталога;
 - Каталог 7 `names` идентичен в коде, cli2, AGENTS, README, обоих каталогах правил;
 - Каждый sub-detail в [`src/details.ts`](src/details.ts) семантически соответствует политике в `markdownlint-project.mdc` / `markdownlint-project.md`;
-- `test-rules.cjs` использует `regex.js` / `hlprs` вместо дублирующих inline-regex там, где есть канон; **test-only domain imports** (намеренно не в hlprs): `domain/micromark-parse.js` (`parseMicromarkTokens`), `domain/micromark-heading.js` (`hasMinimumH2`), `domain/outside-code-lines.js` (`isOpeningCodeFenceAt`, `eachOpeningCodeFenceLine`); `micromark-parse.js` также в runtime-пути hlprs `checkListBlankSpacing` (`ListSpacingChecker.checkLines`);
+- `tests/rules/*.test.cjs` использует `regex.js` / `hlprs` вместо дублирующих inline-regex там, где есть канон; **test-only domain imports** (намеренно не в hlprs): `domain/micromark-parse.js` (`parseMicromarkTokens`), `domain/micromark-heading.js` (`hasMinimumH2`), `domain/outside-code-lines.js` (`isOpeningCodeFenceAt`, `eachOpeningCodeFenceLine`); `micromark-parse.js` также в runtime-пути hlprs `checkListBlankSpacing` (`ListSpacingChecker.checkLines`);
 - Нет открытых расхождений между `.mdc`-примерами и фактическим кодом test/TS;
 
 ## Stop-condition аудита
@@ -101,7 +101,7 @@ npm test && npm run check && npm run lint:md -- README.md AGENTS.md
 ```
 
 3. Все gate зелёные и нет открытых расхождений docs ↔ код ↔ тесты;
-4. **Не коммитить** слайсовые «закрытие аудита» без связки: код + `test-rules.cjs` + examples + docs (см. [docs-consistency.mdc](.cursor/rules/docs-consistency.mdc) / [docs-consistency.md](.claude/rules/docs-consistency.md));
+4. **Не коммитить** слайсовые «закрытие аудита» без связки: код + `tests/rules/*.test.cjs` + examples + docs (см. [docs-consistency.mdc](.cursor/rules/docs-consistency.mdc) / [docs-consistency.md](.claude/rules/docs-consistency.md));
 
 ## Границы
 

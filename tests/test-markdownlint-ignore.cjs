@@ -3,7 +3,7 @@ const os = require("os");
 const path = require("path");
 const { spawnSync } = require("child_process");
 
-const repoRoot = __dirname;
+const repoRoot = path.join(__dirname, "..");
 
 let failed = 0;
 

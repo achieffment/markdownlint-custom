@@ -31,7 +31,7 @@ SRP/DRY — те же принципы, что в [js-dev.md](js-dev.md) (для
 
 ## Порядок функций
 
-В каждой области видимости (модуль, class body, блок с `const`-стрелками) **вызываемая идёт раньше вызывающей**: прямой вызов `foo()`, `this.foo()` между siblings. Проверка: `npm run check:order` (входит в `npm test` и `npm run check`). Scope: `src/**/*.ts`, `test-rules.cjs` (не `bin/`, `scripts/`). Эталон — [`line-list-walker.ts`](../../src/domain/line-list-walker.ts) (`LineListBlockWalker` class body).
+В каждой области видимости (модуль, class body, блок с `const`-стрелками) **вызываемая идёт раньше вызывающей**: прямой вызов `foo()`, `this.foo()` между siblings. Проверка: `npm run check:order` (входит в `npm test` и `npm run check`). Scope: `src/**/*.ts`, `tests/**/*.cjs` (не `bin/`, `scripts/`). Эталон — [`line-list-walker.ts`](../../src/domain/line-list-walker.ts) (`LineListBlockWalker` class body).
 
 ## Workflow
 
@@ -41,4 +41,4 @@ SRP/DRY — те же принципы, что в [js-dev.md](js-dev.md) (для
 
 - Не менять политики без `markdownlint-examples/`
 - Runtime — CommonJS `.js`
-- `test-rules.cjs` — [js-dev.md](js-dev.md)
+- `tests/**/*.cjs` — [js-dev.md](js-dev.md)
