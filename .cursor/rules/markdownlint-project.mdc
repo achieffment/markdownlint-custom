@@ -9,51 +9,52 @@ alwaysApply: true
 
 ## Структура репозитория
 
-| Файл / каталог | Назначение |
-|----------------|------------|
-| [`src/`](../src/) | Исходники TypeScript (правила, хелперы, типы) |
-| [`src/core/`](../src/core/) | `ICustomRule`, `abstract BaseRule` |
-| [`src/domain/`](../src/domain/) | `ListLineParser`, `list-item-body-end`, `outside-code-lines`, `line-list-walker`, `micromark-token-utils`, `micromark-lists`, `micromark-heading`, `micromark-list-checkers`, `no-leading-spaces-checker`, `micromark-parse`, `ListSpacingChecker`, `ColonChecker`, `sentences-end-mark-checker` |
-| [`src/composition/`](../src/composition/) | `AppContext` — wiring зависимостей |
-| [`src/rules/`](../src/rules/) | Класс `XxxRule extends BaseRule` |
-| [`markdownlint-rules.js`](../markdownlint-rules.js) | **Артефакт tsc:** массив правил (`module.exports = [...]`) |
-| [`.markdownlint-cli2.jsonc`](../.markdownlint-cli2.jsonc) | **Единый конфиг:** built-in MD001–MD060 + custom rules + `customRules` + `gitignore`; IDE и CLI |
-| [`.markdownlint-ignore`](../.markdownlint-ignore) | Игнор-файл (gitignore-синтаксис); подключён через top-level `gitignore` в `.markdownlint-cli2.jsonc` — см. [platform-scripts.mdc](platform-scripts.mdc) |
-| [`load-cli2-config.cjs`](../load-cli2-config.cjs) | Загрузка `config` из cli2 для [`tests/`](../tests/) |
-| [`tests/test-cli2-config.cjs`](../tests/test-cli2-config.cjs) | Parity cli2 `config` ↔ [`schema/.markdownlint.jsonc`](../schema/.markdownlint.jsonc); проверка `gitignore` |
-| [`tests/test-markdownlint-ignore.cjs`](../tests/test-markdownlint-ignore.cjs) | Тест `.markdownlint-ignore`: интеграционный прогон реального cli2 с временным конфигом |
-| [`scripts/sync-cli2-config.cjs`](../scripts/sync-cli2-config.cjs) | Регенерация `.markdownlint-cli2.jsonc` из schema + custom keys из `markdownlint-rules.js` + `gitignore` (`presync:cli2-config` → build) |
-| [`scripts/cli2-overrides.cjs`](../scripts/cli2-overrides.cjs) | Единый список built-in overrides (`MD013`, `MD007`, `MD029`, `MD032`, `MD043`, `MD046`) для sync и `tests/test-cli2-config.cjs` |
-| [`schema/.markdownlint.jsonc`](../schema/.markdownlint.jsonc) | Snapshot official schema для тестов |
-| [`bin/`](../bin/) | `lint-markdown.cjs`; `.sh` / `.bat` / `.command` |
-| [`markdownlint-hlprs.js`](../markdownlint-hlprs.js) | **Артефакт tsc:** публичный API для `tests/rules/*.test.cjs` (compat); правила — DI через `AppContext` |
-| [`src/notify.ts`](../src/notify.ts) → `notify.js` | **Артефакт tsc:** веб-хук CLI-уведомлений (`MDLINT_WEBHOOK_URL`/`MDLINT_WEBHOOK_TOK` из `.env`); только в [`bin/lint-markdown.cjs`](../bin/lint-markdown.cjs) |
-| [`.env.example`](../.env.example) | Шаблон конфигурации веб-хука; `.env` в git не коммитится |
-| Корневые `*.js`, `core/`, `domain/`, `composition/`, [`rules/`](../rules/) | **Артефакты tsc**; коммитить вместе с `src/` |
-| [`markdownlint-examples/`](../markdownlint-examples/) | Пары `_err.md` / `_suc.md` на каждое правило |
-| [`tests/`](../tests/) | `helpers.cjs` (общая инфраструктура), `examples.test.cjs` (sync/exclusivity/pair-проверки), `hlprs.test.cjs` (unit-тесты hlprs API), `rules/<rule-name>.test.cjs` (1 файл на custom lint-правило), `run-all.cjs` (entry point `npm test`) |
-| [`check-function-order.cjs`](../check-function-order.cjs) | Проверка порядка функций (callee перед caller); обходит `src/**/*.ts` и `tests/**/*.cjs` |
-| [`tsconfig.json`](../tsconfig.json) | Сборка `src/` → CommonJS `.js` в корне |
-| `.gitignore`, `.gitattributes` | Git: ignore-паттерны; LF в index и working tree (Windows: `core.autocrlf=false`) |
-| `.editorconfig` | LF, отступ 4 пробела (EditorConfig) |
-| `.nvmrc`, `.npmrc` | Node 22 (nvm), `engine-strict` для `engines` |
-| [`package.json`](../package.json) | npm-скрипты, `engines.node >= 22`, `type: commonjs` |
-| [`AGENTS.md`](../AGENTS.md) | Краткий справочник для AI-агента |
-| [`README.md`](../README.md) | Документация для людей (onboarding, правила проверки кратко) |
-| [`.cursor/rules/`](../.cursor/rules/) | Правила Cursor; каталог — [AGENTS.md](../AGENTS.md) |
-| [`.claude/rules/`](../.claude/rules/) | Правила Claude Code (эквивалент `.cursor/rules/`); каталог — [AGENTS.md](../AGENTS.md) |
+| Файл / каталог                                                                | Назначение                                                                                                                                                                                                                                                                                       |
+|-------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| [`src/`](../src/)                                                             | Исходники TypeScript (правила, хелперы, типы)                                                                                                                                                                                                                                                    |
+| [`src/core/`](../src/core/)                                                   | `ICustomRule`, `abstract BaseRule`                                                                                                                                                                                                                                                               |
+| [`src/domain/`](../src/domain/)                                               | `ListLineParser`, `list-item-body-end`, `outside-code-lines`, `line-list-walker`, `micromark-token-utils`, `micromark-lists`, `micromark-heading`, `micromark-list-checkers`, `no-leading-spaces-checker`, `micromark-parse`, `ListSpacingChecker`, `ColonChecker`, `sentences-end-mark-checker` |
+| [`src/composition/`](../src/composition/)                                     | `AppContext` — wiring зависимостей                                                                                                                                                                                                                                                               |
+| [`src/rules/`](../src/rules/)                                                 | Класс `XxxRule extends BaseRule`                                                                                                                                                                                                                                                                 |
+| [`markdownlint-rules.js`](../markdownlint-rules.js)                           | **Артефакт tsc:** массив правил (`module.exports = [...]`)                                                                                                                                                                                                                                       |
+| [`.markdownlint-cli2.jsonc`](../.markdownlint-cli2.jsonc)                     | **Единый конфиг:** built-in MD001–MD060 + custom rules + `customRules` + `gitignore`; IDE и CLI                                                                                                                                                                                                  |
+| [`.markdownlint-ignore`](../.markdownlint-ignore)                             | Игнор-файл (gitignore-синтаксис); подключён через top-level `gitignore` в `.markdownlint-cli2.jsonc` — см. [platform-scripts.mdc](platform-scripts.mdc)                                                                                                                                          |
+| [`load-cli2-config.cjs`](../load-cli2-config.cjs)                             | Загрузка `config` из cli2 для [`tests/`](../tests/)                                                                                                                                                                                                                                              |
+| [`tests/test-cli2-config.cjs`](../tests/test-cli2-config.cjs)                 | Parity cli2 `config` ↔ [`schema/.markdownlint.jsonc`](../schema/.markdownlint.jsonc); проверка `gitignore`                                                                                                                                                                                       |
+| [`tests/test-markdownlint-ignore.cjs`](../tests/test-markdownlint-ignore.cjs) | Тест `.markdownlint-ignore`: интеграционный прогон реального cli2 с временным конфигом                                                                                                                                                                                                           |
+| [`tests/test-markdown-tables.cjs`](../tests/test-markdown-tables.cjs)         | Тест выравнивания столбцов GFM-таблиц во всех `*.md`/`*.mdc` проекта — см. [comments-style.mdc](comments-style.mdc)                                                                                                                                                                              |
+| [`scripts/sync-cli2-config.cjs`](../scripts/sync-cli2-config.cjs)             | Регенерация `.markdownlint-cli2.jsonc` из schema + custom keys из `markdownlint-rules.js` + `gitignore` (`presync:cli2-config` → build)                                                                                                                                                          |
+| [`scripts/cli2-overrides.cjs`](../scripts/cli2-overrides.cjs)                 | Единый список built-in overrides (`MD013`, `MD007`, `MD029`, `MD032`, `MD043`, `MD046`) для sync и `tests/test-cli2-config.cjs`                                                                                                                                                                  |
+| [`schema/.markdownlint.jsonc`](../schema/.markdownlint.jsonc)                 | Snapshot official schema для тестов                                                                                                                                                                                                                                                              |
+| [`bin/`](../bin/)                                                             | `lint-markdown.cjs`; `.sh` / `.bat` / `.command`                                                                                                                                                                                                                                                 |
+| [`markdownlint-hlprs.js`](../markdownlint-hlprs.js)                           | **Артефакт tsc:** публичный API для `tests/rules/*.test.cjs` (compat); правила — DI через `AppContext`                                                                                                                                                                                           |
+| [`src/notify.ts`](../src/notify.ts) → `notify.js`                             | **Артефакт tsc:** веб-хук CLI-уведомлений (`MDLINT_WEBHOOK_URL`/`MDLINT_WEBHOOK_TOK` из `.env`); только в [`bin/lint-markdown.cjs`](../bin/lint-markdown.cjs)                                                                                                                                    |
+| [`.env.example`](../.env.example)                                             | Шаблон конфигурации веб-хука; `.env` в git не коммитится                                                                                                                                                                                                                                         |
+| Корневые `*.js`, `core/`, `domain/`, `composition/`, [`rules/`](../rules/)    | **Артефакты tsc**; коммитить вместе с `src/`                                                                                                                                                                                                                                                     |
+| [`markdownlint-examples/`](../markdownlint-examples/)                         | Пары `_err.md` / `_suc.md` на каждое правило                                                                                                                                                                                                                                                     |
+| [`tests/`](../tests/)                                                         | `helpers.cjs` (общая инфраструктура), `examples.test.cjs` (sync/exclusivity/pair-проверки), `hlprs.test.cjs` (unit-тесты hlprs API), `rules/<rule-name>.test.cjs` (1 файл на custom lint-правило), `run-all.cjs` (entry point `npm test`)                                                        |
+| [`check-function-order.cjs`](../check-function-order.cjs)                     | Проверка порядка функций (callee перед caller); обходит `src/**/*.ts` и `tests/**/*.cjs`                                                                                                                                                                                                         |
+| [`tsconfig.json`](../tsconfig.json)                                           | Сборка `src/` → CommonJS `.js` в корне                                                                                                                                                                                                                                                           |
+| `.gitignore`, `.gitattributes`                                                | Git: ignore-паттерны; LF в index и working tree (Windows: `core.autocrlf=false`)                                                                                                                                                                                                                 |
+| `.editorconfig`                                                               | LF, отступ 4 пробела (EditorConfig)                                                                                                                                                                                                                                                              |
+| `.nvmrc`, `.npmrc`                                                            | Node 22 (nvm), `engine-strict` для `engines`                                                                                                                                                                                                                                                     |
+| [`package.json`](../package.json)                                             | npm-скрипты, `engines.node >= 22`, `type: commonjs`                                                                                                                                                                                                                                              |
+| [`AGENTS.md`](../AGENTS.md)                                                   | Краткий справочник для AI-агента                                                                                                                                                                                                                                                                 |
+| [`README.md`](../README.md)                                                   | Документация для людей (onboarding, правила проверки кратко)                                                                                                                                                                                                                                     |
+| [`.cursor/rules/`](../.cursor/rules/)                                         | Правила Cursor; каталог — [AGENTS.md](../AGENTS.md)                                                                                                                                                                                                                                              |
+| [`.claude/rules/`](../.claude/rules/)                                         | Правила Claude Code (эквивалент `.cursor/rules/`); каталог — [AGENTS.md](../AGENTS.md)                                                                                                                                                                                                           |
 
 ## Каталог правил
 
-| `names` | Что проверяет | Примеры |
-|---------|---------------|---------|
-| `minimum-h2-heading` | Минимум один заголовок H2 (`##` или setext) вне code fence | `markdownlint-examples/minimum-h2-heading/` |
-| `list-items-end-with-semicolon-or-colon` | Пункт списка (num/bul, вложенные): `;`, перед открывающей `` ``` `` или **прямым дочерним** пунктом — `:`; конец тела через `findListItemBodyEnd` | `markdownlint-examples/list-items-end-with-semicolon-or-colon/` |
-| `list-blank-line-spacing` | Numbered: blank до/после (EOF skip, same-kind skip) и единообразно между соседними `listItemPrefix` в ordered subtree (вложенные bul/num); bulleted: blank до/после блока (между пунктами не проверяется); blank после `##` перед списком обязателен | `markdownlint-examples/list-blank-line-spacing/` |
-| `list-preceded-by-colon` | Обычный текст (не пункт списка) перед первым пунктом блока верхнего уровня (num/bul) заканчивается `:`; skip prev: заголовок, пункт списка, code fence, pipe-таблица; вложенные не проверяются | `markdownlint-examples/list-preceded-by-colon/` |
-| `codeblock-preceded-by-colon` | Открывающая `` ``` ``: строка перед ней заканчивается `:` (не пункт списка — те проверяет `list-items-*`); skip prev: заголовок, пункт списка, code fence, pipe-таблица | `markdownlint-examples/codeblock-preceded-by-colon/` |
-| `no-leading-spaces` | Нет отступа у обычного текста, пунктов списка верхнего уровня и обозначений блока кода (`` ``` ``); вложенные пункты — при `indent >=` предыдущего | `markdownlint-examples/no-leading-spaces/` |
-| `sentences-end-with-mark` | Обычный текст заканчивается `.`, `!`, `?`, `:` или `;`; skip: заголовки, blockquote и продолжения, HR, любые пункты списка (`isLstItem`), pipe-таблицы | `markdownlint-examples/sentences-end-with-mark/` |
+| `names`                                  | Что проверяет                                                                                                                                                                                                                                        | Примеры                                                         |
+|------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------|
+| `minimum-h2-heading`                     | Минимум один заголовок H2 (`##` или setext) вне code fence                                                                                                                                                                                           | `markdownlint-examples/minimum-h2-heading/`                     |
+| `list-items-end-with-semicolon-or-colon` | Пункт списка (num/bul, вложенные): `;`, перед открывающей `` ``` `` или **прямым дочерним** пунктом — `:`; конец тела через `findListItemBodyEnd`                                                                                                    | `markdownlint-examples/list-items-end-with-semicolon-or-colon/` |
+| `list-blank-line-spacing`                | Numbered: blank до/после (EOF skip, same-kind skip) и единообразно между соседними `listItemPrefix` в ordered subtree (вложенные bul/num); bulleted: blank до/после блока (между пунктами не проверяется); blank после `##` перед списком обязателен | `markdownlint-examples/list-blank-line-spacing/`                |
+| `list-preceded-by-colon`                 | Обычный текст (не пункт списка) перед первым пунктом блока верхнего уровня (num/bul) заканчивается `:`; skip prev: заголовок, пункт списка, code fence, pipe-таблица; вложенные не проверяются                                                       | `markdownlint-examples/list-preceded-by-colon/`                 |
+| `codeblock-preceded-by-colon`            | Открывающая `` ``` ``: строка перед ней заканчивается `:` (не пункт списка — те проверяет `list-items-*`); skip prev: заголовок, пункт списка, code fence, pipe-таблица                                                                              | `markdownlint-examples/codeblock-preceded-by-colon/`            |
+| `no-leading-spaces`                      | Нет отступа у обычного текста, пунктов списка верхнего уровня и обозначений блока кода (`` ``` ``); вложенные пункты — при `indent >=` предыдущего                                                                                                   | `markdownlint-examples/no-leading-spaces/`                      |
+| `sentences-end-with-mark`                | Обычный текст заканчивается `.`, `!`, `?`, `:` или `;`; skip: заголовки, blockquote и продолжения, HR, любые пункты списка (`isLstItem`), pipe-таблицы                                                                                               | `markdownlint-examples/sentences-end-with-mark/`                |
 
 ## Конвенция примеров
 
@@ -136,18 +137,18 @@ alwaysApply: true
 
 Экспорт для `tests/rules/*.test.cjs` (обратная совместимость):
 
-| Экспорт | Назначение |
-|---------|------------|
-| `lstItemRx` | Regex пункта списка (num/bul) на `trimStart` строки |
-| `isLstItem` | Пункт списка по строке |
-| `isChildLstItem` | Следующий пункт — прямой дочерний (больший indent) |
-| `getIndent` | Длина ведущих пробелов |
-| `skipBlankFwd` | Индекс следующей непустой строки |
-| `eachLineOutsideCode` | Колбэк по строкам вне code fence |
-| `findPrevListInd` | Отступ предыдущего пункта списка |
-| `checkPrecededByColon` | `:` у обычного текста перед строкой `ix`; 4-й аргумент `colDet` — `details.codeblockColon` или `details.listPrecededByColon` |
-| `checkListBlankSpacing` | Политика `list-blank-line-spacing` (третий аргумент — `blankDets`: `bef`/`aft`/`gap`) |
-| `checkListPrecededByColon` | Политика `list-preceded-by-colon` (третий аргумент — `colDet`) |
+| Экспорт                    | Назначение                                                                                                                   |
+|----------------------------|------------------------------------------------------------------------------------------------------------------------------|
+| `lstItemRx`                | Regex пункта списка (num/bul) на `trimStart` строки                                                                          |
+| `isLstItem`                | Пункт списка по строке                                                                                                       |
+| `isChildLstItem`           | Следующий пункт — прямой дочерний (больший indent)                                                                           |
+| `getIndent`                | Длина ведущих пробелов                                                                                                       |
+| `skipBlankFwd`             | Индекс следующей непустой строки                                                                                             |
+| `eachLineOutsideCode`      | Колбэк по строкам вне code fence                                                                                             |
+| `findPrevListInd`          | Отступ предыдущего пункта списка                                                                                             |
+| `checkPrecededByColon`     | `:` у обычного текста перед строкой `ix`; 4-й аргумент `colDet` — `details.codeblockColon` или `details.listPrecededByColon` |
+| `checkListBlankSpacing`    | Политика `list-blank-line-spacing` (третий аргумент — `blankDets`: `bef`/`aft`/`gap`)                                        |
+| `checkListPrecededByColon` | Политика `list-preceded-by-colon` (третий аргумент — `colDet`)                                                               |
 
 Внутренние (не экспортируются): `ListLineParser` (`trimStart`, `isNumItem`, `isBulItem`, `isNestedLstItem`, `skipBlankBck`), `list-item-body-end` (`findListItemBodyEnd` — shared конец тела пункта для spacing и colon), `line-list-walker` (`LineListBlockWalker`, `walkLineBasedListBlocks` — fence-in-list для `list-preceded-by-colon`), `ListSpacingChecker` (`hasBlankGap`, `boundBefIdx`, `boundAftIdx`), `outside-code-lines` (`walkOutsideCode`, `walkCodeFenceAware`, `eachOpeningCodeFenceLine`, `isOpeningCodeFenceAt`, `skipFenceBlockFwd`, `skipFenceBlockBck`; `eachLineOutsideCode` — публичный через hlprs), `micromark-token-utils` (`require("markdownlint/helpers")` + `path.join(helpersDir, "micromark-helpers.cjs")`: `filterByTypes`, `getParentOfType`, `isBlankLine`, …), `micromark-lists` (`eachTopLevelList`, `collectPrefixesInList`, `eachListItemPrefix`), `micromark-heading` (`hasMinimumH2`), `micromark-list-checkers` (`ListItemsChecker`), `no-leading-spaces-checker` (`NoLeadingSpacesChecker`), `sentences-end-mark-checker` (`SentencesEndMarkChecker`), `ColonChecker` (`checkPrecededByColon`, `checkOpeningCodeFences`, `checkListPrecededByColon`), `micromark-parse` (`parseMicromarkTokens` — `ListSpacingChecker.checkLines` для hlprs `checkListBlankSpacing`; exclusivity в test-rules; production rules получают tokens от markdownlint).
 
@@ -157,16 +158,16 @@ alwaysApply: true
 
 Единый канон для **vscode-markdownlint**, **markdownlint-cli2** и [`bin/lint-markdown.cjs`](../bin/lint-markdown.cjs). Расширение подхватывает файл в корне workspace автоматически.
 
-| Политика | Значение |
-|----------|----------|
-| `default` | `true` — все built-in включены |
-| `MD013` | `false` — как дефолт vscode-markdownlint |
-| `MD007` | `false` — пересекается с custom `no-leading-spaces` |
-| `MD029` | `false` — fenced code в examples разрывает списки; nested `1.` — style one |
-| `MD032` | `false` — заменено custom `list-blank-line-spacing` |
-| `MD043` | `false` — дефолт schema с пустым `headings` некорректен |
-| `MD046` | `false` — намеренно (fenced code в examples) |
-| 7 custom `names` | `true` |
+| Политика         | Значение                                                                   |
+|------------------|----------------------------------------------------------------------------|
+| `default`        | `true` — все built-in включены                                             |
+| `MD013`          | `false` — как дефолт vscode-markdownlint                                   |
+| `MD007`          | `false` — пересекается с custom `no-leading-spaces`                        |
+| `MD029`          | `false` — fenced code в examples разрывает списки; nested `1.` — style one |
+| `MD032`          | `false` — заменено custom `list-blank-line-spacing`                        |
+| `MD043`          | `false` — дефолт schema с пустым `headings` некорректен                    |
+| `MD046`          | `false` — намеренно (fenced code в examples)                               |
+| 7 custom `names` | `true`                                                                     |
 
 Полный список MD001–MD060 — в [`config`](../.markdownlint-cli2.jsonc) (на базе [official schema](https://github.com/DavidAnson/markdownlint/blob/main/schema/.markdownlint.jsonc)). Отключения MD029/MD046 документированы комментарием с закомментированным дефолтом.
 
@@ -188,11 +189,11 @@ alwaysApply: true
 
 Весь markdown workspace lintится всегда, кроме `node_modules` и `vendor`.
 
-| Контекст | Поведение |
-|----------|-----------|
-| IDE (workspace) | Все `*.md` / `*.markdown`, кроме `node_modules`, `vendor` |
+| Контекст                                 | Поведение                                                                                                               |
+|------------------------------------------|-------------------------------------------------------------------------------------------------------------------------|
+| IDE (workspace)                          | Все `*.md` / `*.markdown`, кроме `node_modules`, `vendor`                                                               |
 | Другой workspace + правила из этой папки | `"markdownlint.configFile": "<abs/path>/.markdownlint-cli2.jsonc"`; `customRules` резолвятся относительно файла конфига |
-| `npm run lint:md -- <path>` | Явный путь; globs из конфига не используются (`--no-globs`) |
+| `npm run lint:md -- <path>`              | Явный путь; globs из конфига не используются (`--no-globs`)                                                             |
 
 ## IDE и EditorConfig
 
@@ -208,13 +209,13 @@ alwaysApply: true
 }
 ```
 
-| Настройка | Стыковка с правилами |
-|-----------|----------------------|
-| `insertFinalNewline` | `MD047` |
-| `trimTrailingWhitespace: false` | `[*.md]` в EditorConfig; иначе срежутся 2 пробела hard break (`MD009`, `br_spaces: 2`) |
-| `tabSize: 4` | EditorConfig `indent_size = 4`; Tab вставляет 4 пробела |
-| Вложенные списки | В examples шаг **3** пробела на уровень, маркер **`1.`**; не полагаться на один Tab = один уровень |
-| `wordWrap` / `wrappingIndent` | Только UI; `MD013` отключён |
+| Настройка                       | Стыковка с правилами                                                                               |
+|---------------------------------|----------------------------------------------------------------------------------------------------|
+| `insertFinalNewline`            | `MD047`                                                                                            |
+| `trimTrailingWhitespace: false` | `[*.md]` в EditorConfig; иначе срежутся 2 пробела hard break (`MD009`, `br_spaces: 2`)             |
+| `tabSize: 4`                    | EditorConfig `indent_size = 4`; Tab вставляет 4 пробела                                            |
+| Вложенные списки                | В examples шаг **3** пробела на уровень, маркер **`1.`**; не полагаться на один Tab = один уровень |
+| `wordWrap` / `wrappingIndent`   | Только UI; `MD013` отключён                                                                        |
 
 ## Подключение в VS Code
 

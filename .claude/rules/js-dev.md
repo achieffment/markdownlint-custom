@@ -42,10 +42,10 @@
 
 `tests/hlprs.test.cjs` намеренно импортирует из `domain/` напрямую (не через `markdownlint-hlprs.js`), через `tests/helpers.cjs`:
 
-| Модуль | Экспорт | Назначение |
-|--------|---------|------------|
-| `domain/micromark-parse.js` | `parseMicromarkTokens` | exclusivity H2, inline spacing |
-| `domain/micromark-heading.js` | `hasMinimumH2` | exclusivity примеров, setext-кейсы |
+| Модуль                         | Экспорт                                            | Назначение                                 |
+|--------------------------------|----------------------------------------------------|--------------------------------------------|
+| `domain/micromark-parse.js`    | `parseMicromarkTokens`                             | exclusivity H2, inline spacing             |
+| `domain/micromark-heading.js`  | `hasMinimumH2`                                     | exclusivity примеров, setext-кейсы         |
 | `domain/outside-code-lines.js` | `isOpeningCodeFenceAt`, `eachOpeningCodeFenceLine` | folcod unit-тесты, `checkExampleFenceLang` |
 
 Не переносить в публичный API hlprs без явного запроса — раздувает контракт.

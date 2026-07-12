@@ -8,13 +8,13 @@
     "scripts": {
         "build": "tsc",
         "precheck": "npm run build",
-        "check": "tsc --noEmit && node --check markdownlint-rules.js && node --check markdownlint-hlprs.js && node --check load-cli2-config.cjs && node --check scripts/cli2-overrides.cjs && node --check scripts/sync-cli2-config.cjs && node --check bin/lint-markdown.cjs && node --check check-function-order.cjs && node --check tests/helpers.cjs && node --check tests/examples.test.cjs && node --check tests/hlprs.test.cjs && node --check tests/run-all.cjs && node --check tests/test-cli2-config.cjs && node --check tests/test-markdownlint-ignore.cjs && node --check tests/rules/minimum-h2-heading.test.cjs && node --check tests/rules/list-items-end-with-semicolon-or-colon.test.cjs && node --check tests/rules/list-blank-line-spacing.test.cjs && node --check tests/rules/list-preceded-by-colon.test.cjs && node --check tests/rules/codeblock-preceded-by-colon.test.cjs && node --check tests/rules/no-leading-spaces.test.cjs && node --check tests/rules/sentences-end-with-mark.test.cjs && node check-function-order.cjs",
+        "check": "tsc --noEmit && node --check markdownlint-rules.js && node --check markdownlint-hlprs.js && node --check load-cli2-config.cjs && node --check scripts/cli2-overrides.cjs && node --check scripts/sync-cli2-config.cjs && node --check bin/lint-markdown.cjs && node --check check-function-order.cjs && node --check tests/helpers.cjs && node --check tests/examples.test.cjs && node --check tests/hlprs.test.cjs && node --check tests/run-all.cjs && node --check tests/test-cli2-config.cjs && node --check tests/test-markdownlint-ignore.cjs && node --check tests/test-markdown-tables.cjs && node --check tests/rules/minimum-h2-heading.test.cjs && node --check tests/rules/list-items-end-with-semicolon-or-colon.test.cjs && node --check tests/rules/list-blank-line-spacing.test.cjs && node --check tests/rules/list-preceded-by-colon.test.cjs && node --check tests/rules/codeblock-preceded-by-colon.test.cjs && node --check tests/rules/no-leading-spaces.test.cjs && node --check tests/rules/sentences-end-with-mark.test.cjs && node check-function-order.cjs",
         "check:order": "node check-function-order.cjs",
         "lint:md": "node bin/lint-markdown.cjs",
         "presync:cli2-config": "npm run build",
         "sync:cli2-config": "node scripts/sync-cli2-config.cjs",
         "pretest": "npm run build",
-        "test": "node tests/run-all.cjs && node tests/test-cli2-config.cjs && node tests/test-markdownlint-ignore.cjs && node check-function-order.cjs"
+        "test": "node tests/run-all.cjs && node tests/test-cli2-config.cjs && node tests/test-markdownlint-ignore.cjs && node tests/test-markdown-tables.cjs && node check-function-order.cjs"
     },
     "devDependencies": {
         "@types/node": "^22.0.0",

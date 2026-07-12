@@ -6,13 +6,13 @@
 
 ## Поддерживаемые ОС и оболочки
 
-| ОС | Оболочка | Файл |
-|----|----------|------|
-| Linux / WSL | bash | [`bin/lint-markdown.sh`](../../bin/lint-markdown.sh) |
-| Windows | CMD | [`bin/lint-markdown.bat`](../../bin/lint-markdown.bat) |
-| macOS (терминал) | bash | [`bin/lint-markdown.sh`](../../bin/lint-markdown.sh) |
-| macOS (Finder) | bash | [`bin/lint-markdown.command`](../../bin/lint-markdown.command) |
-| Любая (npm) | — | `npm run lint:md` |
+| ОС               | Оболочка | Файл                                                           |
+|------------------|----------|----------------------------------------------------------------|
+| Linux / WSL      | bash     | [`bin/lint-markdown.sh`](../../bin/lint-markdown.sh)           |
+| Windows          | CMD      | [`bin/lint-markdown.bat`](../../bin/lint-markdown.bat)         |
+| macOS (терминал) | bash     | [`bin/lint-markdown.sh`](../../bin/lint-markdown.sh)           |
+| macOS (Finder)   | bash     | [`bin/lint-markdown.command`](../../bin/lint-markdown.command) |
+| Любая (npm)      | —        | `npm run lint:md`                                              |
 
 ## Архитектура
 
@@ -24,19 +24,19 @@
 
 Минимально в [`lint-markdown.cjs`](../../bin/lint-markdown.cjs):
 
-| Проверка | Действие |
-|----------|----------|
-| нет `node_modules` | `npm ci` (lock) / `npm install` |
-| нет `markdownlint-rules.js` / `markdownlint-hlprs.js` или `src/**/*.ts` новее любого tsc-артефакта (`domain/`, `rules/`, `core/`, `composition/`, entry-points, `details.js`, `regex.js`, `types.js`, `notify.js`) | `npm run build` |
+| Проверка                                                                                                                                                                                                           | Действие                        |
+|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------|
+| нет `node_modules`                                                                                                                                                                                                 | `npm ci` (lock) / `npm install` |
+| нет `markdownlint-rules.js` / `markdownlint-hlprs.js` или `src/**/*.ts` новее любого tsc-артефакта (`domain/`, `rules/`, `core/`, `composition/`, entry-points, `details.js`, `regex.js`, `types.js`, `notify.js`) | `npm run build`                 |
 
 Оболочки (`.sh` / `.bat` / `.command`) — только `cd` + `node bin/lint-markdown.cjs`. `.sh` — `set -euo pipefail`; `.command` (Finder) — без strict-mode, без дублирования guard. **Без явного пути** (первый аргумент не path) — guard в [`lint-markdown.cjs`](../../bin/lint-markdown.cjs): `usage()` и `exit 1` (не lint всего репо); флаги cli2 до path (`--fix ./docs`) — тоже `usage`.
 
 Windows CMD: пути с пробелами передавать в кавычках (`bin\lint-markdown.bat ".\my docs"`).
 
-| Точка входа | Bootstrap |
-|-------------|-----------|
+| Точка входа       | Bootstrap                                    |
+|-------------------|----------------------------------------------|
 | `npm run lint:md` | `ensureNodeModules` + `ensureBuild` в `.cjs` |
-| bin-оболочки | `ensureNodeModules` + `ensureBuild` в `.cjs` |
+| bin-оболочки      | `ensureNodeModules` + `ensureBuild` в `.cjs` |
 
 ## Lint-runner
 

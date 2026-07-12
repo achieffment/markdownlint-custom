@@ -8,17 +8,17 @@ SRP/DRY — те же принципы, что в [js-dev.md](js-dev.md) (для
 
 ## Модули `src/`
 
-| Каталог | SRP |
-|---------|-----|
-| [`core/`](../../src/core/) | `ICustomRule`, `abstract BaseRule` (Template Method `toRule()`) |
-| [`domain/`](../../src/domain/) | `ListLineParser`, `list-item-body-end`, `outside-code-lines` (`skipFenceBlockFwd`/`skipFenceBlockBck`, `isOpeningCodeFenceAt`), `line-list-walker`, `micromark-token-utils`, `micromark-lists`, `micromark-heading`, `micromark-parse`, `ListSpacingChecker`, `ColonChecker`, `micromark-list-checkers`, `no-leading-spaces-checker`, `sentences-end-mark-checker` |
-| [`composition/`](../../src/composition/) | `AppContext` — wiring singleton-ов |
-| [`rules/`](../../src/rules/) | Класс `XxxRule extends BaseRule` — одна политика |
-| `regex.ts`, `details.ts` | Константы (не классы) |
-| `types.ts` | Типы колбэков |
-| `markdownlint-rules.ts` | Composition root: `new XxxRule(deps).toRule()` |
-| `markdownlint-hlprs.ts` | Wiring `module.exports` для test-rules |
-| `notify.ts` | Веб-хук CLI-уведомлений (`.env` → `MDLINT_WEBHOOK_URL`/`_TOK`, fire-and-forget, короткий таймаут); не lint-правило, используется только `bin/lint-markdown.cjs` |
+| Каталог                                  | SRP                                                                                                                                                                                                                                                                                                                                                                |
+|------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| [`core/`](../../src/core/)               | `ICustomRule`, `abstract BaseRule` (Template Method `toRule()`)                                                                                                                                                                                                                                                                                                    |
+| [`domain/`](../../src/domain/)           | `ListLineParser`, `list-item-body-end`, `outside-code-lines` (`skipFenceBlockFwd`/`skipFenceBlockBck`, `isOpeningCodeFenceAt`), `line-list-walker`, `micromark-token-utils`, `micromark-lists`, `micromark-heading`, `micromark-parse`, `ListSpacingChecker`, `ColonChecker`, `micromark-list-checkers`, `no-leading-spaces-checker`, `sentences-end-mark-checker` |
+| [`composition/`](../../src/composition/) | `AppContext` — wiring singleton-ов                                                                                                                                                                                                                                                                                                                                 |
+| [`rules/`](../../src/rules/)             | Класс `XxxRule extends BaseRule` — одна политика                                                                                                                                                                                                                                                                                                                   |
+| `regex.ts`, `details.ts`                 | Константы (не классы)                                                                                                                                                                                                                                                                                                                                              |
+| `types.ts`                               | Типы колбэков                                                                                                                                                                                                                                                                                                                                                      |
+| `markdownlint-rules.ts`                  | Composition root: `new XxxRule(deps).toRule()`                                                                                                                                                                                                                                                                                                                     |
+| `markdownlint-hlprs.ts`                  | Wiring `module.exports` для test-rules                                                                                                                                                                                                                                                                                                                             |
+| `notify.ts`                              | Веб-хук CLI-уведомлений (`.env` → `MDLINT_WEBHOOK_URL`/`_TOK`, fire-and-forget, короткий таймаут); не lint-правило, используется только `bin/lint-markdown.cjs`                                                                                                                                                                                                    |
 
 ## OOP
 
