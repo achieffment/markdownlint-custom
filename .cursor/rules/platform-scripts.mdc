@@ -54,7 +54,7 @@ Windows CMD: пути с пробелами передавать в кавычк
 
 ## Кросс-запуск путей (Windows ↔ WSL)
 
-`targetToGlobs` в [`lint-markdown.cjs`](../bin/lint-markdown.cjs) принимает путь и в чужом для текущей платформы формате — аналогично `pick_directory()` / `_wslpath` в `fs-tools/shared/picker.py` (другой проект пользователя), но без диалога: только конвертация строки пути через `wslpath`.
+`targetToGlobs` в [`lint-markdown.cjs`](../bin/lint-markdown.cjs) принимает путь и в чужом для текущей платформы формате: без интерактивного диалога выбора — только конвертация строки пути через `wslpath`.
 
 - `abs = path.resolve(repoRoot, target)` не существует → пробуем `crossPlatformPath(target)`:
   - на `win32`, если `target` похож на WSL-путь (`/...`) — `wsl wslpath -w <target>` (через `wsl.exe`, вызывающий `wslpath` внутри дистрибутива); `~/...` не поддерживается — `wslpath` не разворачивает tilde без shell (проверено: возвращает путь как есть с кодом 0, ложноположительный результат);
