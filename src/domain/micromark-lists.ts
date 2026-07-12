@@ -19,7 +19,9 @@ export const eachListItemPrefix = (
 ): void => {
     for (const prefix of filterByTypes(tokens, ["listItemPrefix"])) {
         const list = getListContainerForPrefix(prefix);
-        if (list) fn(prefix, list);
+        if (list) {
+            fn(prefix, list);
+        }
     }
 };
 
@@ -41,8 +43,12 @@ export const eachTopLevelList = (
 export const collectPrefixesInList = (list: MicromarkToken): MicromarkToken[] => {
     const result: MicromarkToken[] = [];
     const walk = (node: MicromarkToken): void => {
-        if (node.type === "listItemPrefix") result.push(node);
-        for (const child of node.children) walk(child);
+        if (node.type === "listItemPrefix") {
+            result.push(node);
+        }
+        for (const child of node.children) {
+            walk(child);
+        }
     };
     walk(list);
     return result.sort((a, b) => {

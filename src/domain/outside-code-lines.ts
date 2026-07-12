@@ -92,7 +92,9 @@ export const isOpeningCodeFenceAt = (lines: readonly string[], ix: number): bool
 export const eachOpeningCodeFenceLine = (lines: readonly string[], fn: (ix: number) => void): void => {
     walkCodeFenceAware(lines, {
         onFence: (_line, ix, _trim, opening) => {
-            if (opening) fn(ix);
+            if (opening) {
+                fn(ix);
+            }
         },
         onOutside: () => {}
     });

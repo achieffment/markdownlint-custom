@@ -87,8 +87,9 @@ exports.isOpeningCodeFenceAt = isOpeningCodeFenceAt;
 const eachOpeningCodeFenceLine = (lines, fn) => {
     (0, exports.walkCodeFenceAware)(lines, {
         onFence: (_line, ix, _trim, opening) => {
-            if (opening)
+            if (opening) {
                 fn(ix);
+            }
         },
         onOutside: () => { }
     });

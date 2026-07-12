@@ -11,8 +11,9 @@ const getListContainerForPrefix = (prefix) => {
 const eachListItemPrefix = (tokens, fn) => {
     for (const prefix of (0, micromark_token_utils_1.filterByTypes)(tokens, ["listItemPrefix"])) {
         const list = getListContainerForPrefix(prefix);
-        if (list)
+        if (list) {
             fn(prefix, list);
+        }
     }
 };
 exports.eachListItemPrefix = eachListItemPrefix;
@@ -27,10 +28,12 @@ exports.eachTopLevelList = eachTopLevelList;
 const collectPrefixesInList = (list) => {
     const result = [];
     const walk = (node) => {
-        if (node.type === "listItemPrefix")
+        if (node.type === "listItemPrefix") {
             result.push(node);
-        for (const child of node.children)
+        }
+        for (const child of node.children) {
             walk(child);
+        }
     };
     walk(list);
     return result.sort((a, b) => {

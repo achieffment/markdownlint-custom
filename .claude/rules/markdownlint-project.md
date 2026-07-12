@@ -23,9 +23,9 @@
 | [`scripts/cli2-overrides.cjs`](../../scripts/cli2-overrides.cjs) | Единый список built-in overrides (`MD013`, `MD007`, `MD029`, `MD032`, `MD043`, `MD046`) для sync и `tests/test-cli2-config.cjs` |
 | [`schema/.markdownlint.jsonc`](../../schema/.markdownlint.jsonc) | Snapshot official schema для тестов |
 | [`bin/`](../../bin/) | `lint-markdown.cjs`; `.sh` / `.bat` / `.command` |
+| [`markdownlint-hlprs.js`](../../markdownlint-hlprs.js) | **Артефакт tsc:** публичный API для `tests/rules/*.test.cjs` (compat); правила — DI через `AppContext` |
 | [`src/notify.ts`](../../src/notify.ts) → `notify.js` | **Артефакт tsc:** веб-хук CLI-уведомлений (`MDLINT_WEBHOOK_URL`/`MDLINT_WEBHOOK_TOK` из `.env`); только в [`bin/lint-markdown.cjs`](../../bin/lint-markdown.cjs) |
 | [`.env.example`](../../.env.example) | Шаблон конфигурации веб-хука; `.env` в git не коммитится |
-| [`markdownlint-hlprs.js`](../../markdownlint-hlprs.js) | **Артефакт tsc:** публичный API для `tests/rules/*.test.cjs` (compat); правила — DI через `AppContext` |
 | Корневые `*.js`, `core/`, `domain/`, `composition/`, [`rules/`](../../rules/) | **Артефакты tsc**; коммитить вместе с `src/` |
 | [`markdownlint-examples/`](../../markdownlint-examples/) | Пары `_err.md` / `_suc.md` на каждое правило |
 | [`tests/`](../../tests/) | `helpers.cjs` (общая инфраструктура), `examples.test.cjs` (sync/exclusivity/pair-проверки), `hlprs.test.cjs` (unit-тесты hlprs API), `rules/<rule-name>.test.cjs` (1 файл на custom lint-правило), `run-all.cjs` (entry point `npm test`) |
