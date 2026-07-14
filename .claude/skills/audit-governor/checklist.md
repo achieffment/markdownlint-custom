@@ -69,8 +69,8 @@
 ## Обязательные команды
 
 ```bash
-npm test                              # tests/run-all + cli2/ignore/tables/rules-consistency + check-function-order
-npm run check                         # tsc --noEmit + node --check + check-function-order
+npm test                                  # tests/run-all + cli2/ignore/tables/rules-consistency + check-function-order
+npm run check                             # tsc --noEmit + node --check + check-function-order
 npm run lint:md -- README.md AGENTS.md    # 0 ошибок на изменённых docs
 ```
 
