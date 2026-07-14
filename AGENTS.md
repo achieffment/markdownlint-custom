@@ -101,7 +101,7 @@
 ## Аудит изменений и проекта
 
 - Для аудитов использовать project skill `audit-governor` с режимами `audit changed` и `audit full`;
-- Единый контракт аудита закреплён в skill `audit-governor` (Claude Code: `.claude/skills/audit-governor/`; Cursor: `.cursor/rules/audit-governor.mdc`); его требования обязательны при любом запросе аудита;
+- Единый контракт аудита закреплён в skill `audit-governor` (Cursor: `.cursor/skills/audit-governor/`; Claude Code: `.claude/skills/audit-governor/`); его требования обязательны при любом запросе аудита;
 - В режиме `audit changed` проверять весь набор правок: staged/unstaged/untracked, все коммиты ветки от base (`main`) и итоговый diff; не ограничиваться последним коммитом;
 - После правок по результатам аудита повторять полный цикл проверок до green: `npm test && npm run check && npm run lint:md -- README.md AGENTS.md`;
 - Аудит обязателен по всем пластам: код, тесты, примеры, docs, комментарии, правила и `AGENTS.md`;

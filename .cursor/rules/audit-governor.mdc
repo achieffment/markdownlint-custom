@@ -5,8 +5,8 @@ alwaysApply: true
 
 # Audit-governor: обязательный контракт аудита
 
-Практический запуск в Claude Code — skill `audit-governor`
-(`.claude/skills/audit-governor/SKILL.md`).
+Практический запуск в Cursor — skill `audit-governor`
+(`.cursor/skills/audit-governor/SKILL.md`).
 
 Для запросов аудита использовать единый подход:
 
