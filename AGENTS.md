@@ -53,6 +53,10 @@
 
 Перед правками — целевое правило, хелперы и примеры в `markdownlint-examples/`; повторяй локальные конвенции.
 
+## Синхронизация с Claude
+
+Проект поддерживает оба редактора: `.cursor/rules/*.mdc` (Cursor) и `.claude/rules/*.md` (Claude Code, точка входа — [`CLAUDE.md`](CLAUDE.md)) содержат один и тот же канон. Синхронизация двусторонняя: Cursor → Claude и Claude → Cursor — правка, начатая в любом из двух наборов, переносится в парный в этом же шаге, не «потом» (см. [`.claude/rules/rules-sync.md`](.claude/rules/rules-sync.md)).
+
 ## Каталог правил (кратко)
 
 | `names`                                  | Суть                                                                                                                                                                                                                                                                 |
